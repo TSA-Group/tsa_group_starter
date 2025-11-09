@@ -51,6 +51,9 @@
       font-weight: 400;
       font-style: normal;
    }
+   #map {
+      height: 100%;
+   }
 
   
     @media (max-width: 600px) {
