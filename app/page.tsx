@@ -9,8 +9,8 @@ export default function Home() {
           <Image
             src="/Screenshot-2025-11-09-103757.jpg" // Make sure this path is correct
             alt="Gatherly logo"
-            width={1000} // Adjust this as needed for full screen width
-            height={260} // Keep aspect ratio or adjust as needed
+            width={40} // Adjust this as needed for full screen width
+            height={40} // Keep aspect ratio or adjust as needed
             style={{ objectFit: "contain", width: "100%", height: "auto" }}
             priority={true}
           />
