@@ -11,7 +11,7 @@ export default function Home() {
             alt="Gatherly logo"
             width={40} // Adjust this as needed for full screen width
             height={40} // Keep aspect ratio or adjust as needed
-            style={{ objectFit: "contain", width: "100%", height: "auto" }}
+            style={{ objectFit: "contain", width: "50%", height: "50%" }}
             priority={true}
           />
         </div>
