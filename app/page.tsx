@@ -2,56 +2,73 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Welcome to Gatherly, your personal geolocation dataset assembler(Brendan's choice to change)
+    <div className="flex min-h-screen items-center justify-center bg-green-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-4xl flex-col items-center justify-between py-24 px-8 bg-white dark:bg-zinc-900 rounded-3xl shadow-lg sm:items-start">
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <Image
+            src="/gatherly-logo.svg" // Replace with your actual logo file
+            alt="Gatherly logo"
+            width={40}
+            height={40}
+          />
+          <h1 className="text-2xl font-bold tracking-tight text-green-700 dark:text-green-400">
+            Gatherly
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            For looking for nearby locations, go to {" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Maps
-            </a>{" "}
-          </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+
+        {/* Hero Section */}
+        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <h2 className="max-w-xl text-4xl font-semibold leading-tight tracking-tight text-green-900 dark:text-green-200">
+            Your Personal Geolocation Data Assembler
+          </h2>
+          <p className="max-w-md text-lg leading-8 text-zinc-700 dark:text-zinc-400">
+            Gatherly helps you find, organize, and visualize nearby locations
+            with precision. Explore local data, discover insights, and connect
+            your maps like never before.
+          </p>
+
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="/maps"
+            className="inline-block rounded-full bg-green-600 px-6 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
+          >
+            🌍 Launch Maps
+          </a>
+        </div>
+
+        {/* Call-to-Action Buttons */}
+        <div className="flex flex-col gap-4 pt-8 sm:flex-row">
+          <a
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-green-600 px-5 text-white font-medium shadow-md transition-colors hover:bg-green-700 md:w-[158px]"
+            href="https://vercel.com/new"
             target="_blank"
             rel="noopener noreferrer"
           >
             <Image
-              className="dark:invert"
               src="/vercel.svg"
-              alt="Vercel logomark"
+              alt="Vercel logo"
               width={16}
               height={16}
+              className="invert dark:invert-0"
             />
             Deploy Now
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            className="flex h-12 w-full items-center justify-center rounded-full border border-green-600 text-green-700 font-medium px-5 transition-colors hover:bg-green-100 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-950 md:w-[158px]"
+            href="https://nextjs.org/docs"
             target="_blank"
             rel="noopener noreferrer"
           >
             Documentation
           </a>
         </div>
+
+        {/* Footer */}
+        <footer className="pt-12 text-sm text-zinc-500 dark:text-zinc-400">
+          © {new Date().getFullYear()} Gatherly. All rights reserved.
+        </footer>
       </main>
     </div>
   );
 }
+
