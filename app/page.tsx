@@ -8,7 +8,7 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <Image
             src="C:\Users\12242\Downloads\Screenshot 2025-11-09 103757.png"
-            width={40}
+            width={100}
             height={40}
           />
           <h1 className="text-2xl font-bold tracking-tight text-green-700 dark:text-green-400">
