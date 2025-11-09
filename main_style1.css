@@ -46,6 +46,11 @@
       background: white;
       color: black;
     }
+   .momo-signature-regular {
+      font-family: "Momo Signature", cursive;
+      font-weight: 400;
+      font-style: normal;
+   }
 
   
     @media (max-width: 600px) {
