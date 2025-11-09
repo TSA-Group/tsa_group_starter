@@ -7,8 +7,7 @@ export default function Home() {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <Image
-            src="/gatherly-logo.svg" // Replace with your actual logo file
-            alt="Gatherly logo"
+            src="C:\Users\12242\Downloads\Screenshot 2025-11-09 103757.png"
             width={40}
             height={40}
           />
