@@ -4,16 +4,16 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-green-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-4xl flex-col items-center justify-between py-24 px-8 bg-white dark:bg-zinc-900 rounded-3xl shadow-lg sm:items-start">
-        {/* Logo */}
-        <div className="flex items-center gap-3">
+        {/* Logo - Full Width, No Text */}
+        <div className="w-full flex justify-center">
           <Image
-            src="C:\Users\12242\Downloads\Screenshot 2025-11-09 103757.png"
-            width={100}
-            height={40}
+            src="/Screenshot-2025-11-09-103757.jpg" // Make sure this path is correct
+            alt="Gatherly logo"
+            width={1000} // Adjust this as needed for full screen width
+            height={260} // Keep aspect ratio or adjust as needed
+            style={{ objectFit: "contain", width: "100%", height: "auto" }}
+            priority={true}
           />
-          <h1 className="text-2xl font-bold tracking-tight text-green-700 dark:text-green-400">
-            Gatherly
-          </h1>
         </div>
 
         {/* Hero Section */}
@@ -26,7 +26,6 @@ export default function Home() {
             with precision. Explore local data, discover insights, and connect
             your maps like never before.
           </p>
-
           <a
             href="/maps"
             className="inline-block rounded-full bg-green-600 px-6 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
