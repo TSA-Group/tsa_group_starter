@@ -9,11 +9,11 @@ export default function Home() {
           rel="stylesheet"
         />
       </Head>
-      <div className="min-h-screen min-w-screen flex flex-col bg-white font-sans">
+      <div className="min-h-screen min-w-screen flex flex-col bg-black font-sans">
         {/* Header with Gatherly */}
-        <header className="w-full flex items-start p-8 bg-green-50">
+        <header className="w-full flex items-start p-8 bg-black">
           <h1
-            className="text-green-800 text-4xl md:text-5xl font-bold tracking-tight"
+            className="text-green-400 text-4xl md:text-5xl font-bold tracking-tight"
             style={{
               fontFamily: "'Tan Buster', sans-serif",
             }}
@@ -22,19 +22,19 @@ export default function Home() {
           </h1>
         </header>
 
-        {/* Main fills remainder with padding and green text */}
-        <main className="flex-grow w-full p-8 text-green-900 flex flex-col items-start">
-          <h2 className="text-5xl font-semibold leading-snug tracking-tight mb-6">
+        {/* Main content fills all available space */}
+        <main className="flex-grow w-full p-8 text-green-200 flex flex-col items-start">
+          <h2 className="text-5xl font-semibold leading-snug tracking-tight mb-6 text-green-400">
             Your Personal Geolocation Data Assembler
           </h2>
-          <p className="text-lg leading-relaxed max-w-4xl mb-8">
+          <p className="text-lg leading-relaxed max-w-4xl mb-8 text-green-200">
             Gatherly helps you find, organize, and visualize nearby locations
             with precision. Explore local data, discover insights, and connect
             your maps like never before.
           </p>
 
           <a
-            href="/map"
+            href="/maps"
             className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700 mb-6"
           >
             🌍 Launch Maps
@@ -53,7 +53,7 @@ export default function Home() {
               href="https://nextjs.org/docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-green-600 px-6 py-3 font-medium text-green-700 transition-colors hover:bg-green-100"
+              className="rounded-full border border-green-600 px-6 py-3 font-medium text-green-400 transition-colors hover:bg-green-900"
             >
               Documentation
             </a>
@@ -61,7 +61,7 @@ export default function Home() {
         </main>
 
         {/* Footer aligned bottom with muted text */}
-        <footer className="w-full p-4 text-center text-sm text-green-800 bg-green-50">
+        <footer className="w-full p-4 text-center text-sm text-green-800 bg-black">
           © {new Date().getFullYear()} Gatherly. All rights reserved.
         </footer>
       </div>
