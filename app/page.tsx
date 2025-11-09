@@ -7,7 +7,7 @@ export default function Home() {
         {/* Logo - Full Width, No Text */}
         <div className="w-full flex justify-center">
           <Image
-            src="/logo.png"
+            src="/Gatherly.svg"
             alt="Gatherly logo"
             width={40} // Adjust this as needed for full screen width
             height={40} // Keep aspect ratio or adjust as needed
