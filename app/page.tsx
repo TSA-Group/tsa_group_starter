@@ -8,6 +8,7 @@ export default function Home() {
         <div className="w-full flex justify-center">
           <Image
             src="/image.png"
+            alt="Gatherly logo"
             width={40} // Adjust this as needed for full screen width
             height={40} // Keep aspect ratio or adjust as needed
             style={{ objectFit: "contain", width: "100%", height: "auto" }}
