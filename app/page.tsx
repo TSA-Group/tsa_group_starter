@@ -8,6 +8,10 @@ export default function Home() {
           href="https://fonts.cdnfonts.com/css/tan-buster"
           rel="stylesheet"
         />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap" 
+          rel="stylesheet"
+        />
       </Head>
       <div className="min-h-screen min-w-screen flex flex-col bg-black font-sans">
         {/* Header with Gatherly */}
@@ -34,9 +38,7 @@ export default function Home() {
           </p>
 
           <a
-            href="https://www.google.com/maps"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/map"
             className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700 mb-6"
           >
             🌍 Launch Maps
@@ -51,5 +53,4 @@ export default function Home() {
     </>
   );
 }
-
 
