@@ -39,25 +39,6 @@ export default function Home() {
           >
             🌍 Launch Maps
           </a>
-
-          <div className="flex gap-4">
-            <a
-              href="https://vercel.com/new"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full bg-green-600 px-6 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
-            >
-              Deploy Now
-            </a>
-            <a
-              href="https://nextjs.org/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-green-600 px-6 py-3 font-medium text-green-400 transition-colors hover:bg-green-900"
-            >
-              Documentation
-            </a>
-          </div>
         </main>
 
         {/* Footer aligned bottom with muted text */}
