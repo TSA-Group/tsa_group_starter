@@ -34,7 +34,9 @@ export default function Home() {
           </p>
 
           <a
-            href="/map"
+            href="https://www.google.com/maps"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700 mb-6"
           >
             🌍 Launch Maps
@@ -49,4 +51,5 @@ export default function Home() {
     </>
   );
 }
+
 
