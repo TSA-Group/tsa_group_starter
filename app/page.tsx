@@ -7,7 +7,7 @@ export default function Home() {
         {/* Logo - Full Width, No Text */}
         <div className="w-full flex justify-center">
           <Image
-            src="C:\Users\12242\Downloads\Screenshot 2025-11-09 103757.png"
+            src="/image.png"
             width={40} // Adjust this as needed for full screen width
             height={40} // Keep aspect ratio or adjust as needed
             style={{ objectFit: "contain", width: "100%", height: "auto" }}
