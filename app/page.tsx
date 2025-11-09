@@ -9,7 +9,7 @@ export default function Home() {
           <Image
             src="/Gatherly.svg"
             alt="Gatherly logo"
-            width={40} // Adjust this as needed for full screen width
+            width={100} // Adjust this as needed for full screen width
             height={40} // Keep aspect ratio or adjust as needed
             style={{ objectFit: "contain", width: "25%", height: "25%" }}
             priority={true}
