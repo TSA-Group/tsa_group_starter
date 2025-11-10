@@ -24,6 +24,28 @@ export default function Home() {
           >
             Gatherly
           </h1>
+          <script>
+  // Replace YOUR_API_KEY with your valid API key
+  fetch('https://maps.googleapis.com/maps/api/geocode/json?address=Houston&key=AIzaSyCvg7nk61C3TUhEQlPjbAqpyfJA9OVjC08')
+    .then(response => response.json())
+    .then(data => {
+      const resultDiv = document.getElementById('result');
+
+      if(data.status === "OK" && data.results.length > 0) {
+        // Extract formatted address from first result
+        const address = data.results[0].formatted_address;
+
+        // Display the address
+        resultDiv.textContent = 'Formatted Address: ' + address;
+      } else {
+        // Handle errors or no data
+        resultDiv.textContent = 'No results found or API key invalid.';
+      }
+    })
+    .catch(error => {
+      document.getElementById('result').textContent = 'Error fetching data: ' + error;
+    });
+</script>
         </header>
 
         {/* Main content fills all available space */}
@@ -43,7 +65,7 @@ export default function Home() {
           >
             Launch Maps
           </a>
-            <a href="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvg7nk61C3TUhEQlPjbAqpyfJA9OVjC08&libraries=maps">Visit Example</a>
+           <div id="result"></div>
         </main>
 
         {/* Footer aligned bottom with muted text */}
