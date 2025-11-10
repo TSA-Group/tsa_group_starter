@@ -43,6 +43,7 @@ export default function Home() {
           >
             Launch Maps
           </a>
+            <a href="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvg7nk61C3TUhEQlPjbAqpyfJA9OVjC08&libraries=maps">Visit Example</a>
         </main>
 
         {/* Footer aligned bottom with muted text */}
