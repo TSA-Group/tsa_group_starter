@@ -30,7 +30,7 @@ export default function Page() {
   };
 
   return (
-    <APIProvider apiKey={"AIzaSyCvg7nk61C3TUhEQlPjbAqpyfJA9OVjC08"}>
+    <APIProvider apiKey={"AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc"}>
       <div style={wrapperStyle}>
         <div style={mapContainerStyle}>
           <Map zoom={9} center={position} style={{ height: "100%", width: "100%" }} />
