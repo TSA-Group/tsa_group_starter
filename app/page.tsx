@@ -44,37 +44,7 @@ export default function Home() {
           >
             Launch Maps
           </a>
-               import React, { useEffect, useRef } from "react";
-
-const GoogleMap: React.FC = () => {
-  const mapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!window.google) {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => initMap();
-      document.head.appendChild(script);
-    } else {
-      initMap();
-    }
-
-    function initMap() {
-      if (mapRef.current) {
-        new google.maps.Map(mapRef.current, {
-          center: { lat: 37.7749, lng: -122.4194 },
-          zoom: 12,
-        });
-      }
-    }
-  }, []);
-
-  return <div ref={mapRef} style={{ width: "100%", height: "400px" }} />;
-};
-
-export default GoogleMap;
+              
 
 
         </main>
