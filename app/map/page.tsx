@@ -16,7 +16,7 @@ export default function Page() {
     height: "400px",
     width: "100%",
     borderRadius: "20px",
-    boxShadow: "0 0 20px rgba(0, 255, 255, 0.6)", // glowing effect
+    boxShadow: "0 0 20px rgba(0, 255, 0, 0.6)", // glowing effect
     overflow: "hidden",
   };
 
