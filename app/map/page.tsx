@@ -5,44 +5,42 @@ import {
   APIProvider,
   Map,
   AdvancedMarker,
-  Pin,
-  InfoWindow,
 } from "@vis.gl/react-google-maps";
 
 export default function Page() {
   const [position, setPosition] = useState({ lat: 53.54, lng: 10 });
-  const inputRef = useRef(null);
-  const autocompleteRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (!window.google || !window.google.maps.places) return;
+    if (
+      initializedRef.current ||
+      !window.google?.maps?.places ||
+      !inputRef.current
+    )
+      return;
+
+    initializedRef.current = true;
 
     autocompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
       {
-        types: ["establishment"], // or use ["geocode"] for addresses
+        types: ["establishment"], // or ["geocode"]
         fields: ["geometry"],
       }
     );
 
     autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current.getPlace();
-      if (place.geometry && place.geometry.location) {
+      const place = autocompleteRef.current?.getPlace();
+      if (place?.geometry?.location) {
         const loc = place.geometry.location;
         setPosition({ lat: loc.lat(), lng: loc.lng() });
       }
     });
   }, []);
 
-  const mapContainerStyle = {
-    height: "400px",
-    width: "100%",
-    borderRadius: "20px",
-    boxShadow: "0 0 20px rgba(0, 255, 255, 0.6)",
-    overflow: "hidden",
-  };
-
-  const wrapperStyle = {
+  const wrapperStyle: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -52,21 +50,41 @@ export default function Page() {
     gap: "1rem",
   };
 
-  const inputStyle = {
+  const mapContainerStyle: React.CSSProperties = {
+    height: "400px",
     width: "100%",
-    maxWidth: "600px",
+    maxWidth: "800px",
+    borderRadius: "20px",
+    boxShadow: "0 0 20px rgba(0, 255, 255, 0.6)",
+    overflow: "hidden",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    maxWidth: "800px",
     padding: "0.75rem",
     borderRadius: "10px",
     border: "none",
     fontSize: "1rem",
     boxShadow: "0 0 10px rgba(0, 255, 255, 0.4)",
+    backgroundColor: "#222",
+    color: "#0ff",
   };
 
   return (
-    <APIProvider apiKey={"AIzaSyCvg7nk61C3TUhEQlPjbAqpyfJA9OVjC08"}>
+    <APIProvider
+      apiKey="AIzaSyCvg7nk61C3TUhEQlPjbAqpyfJA9OVjC08"
+      libraries={["places"]}
+    >
       <div style={wrapperStyle}>
         <div style={mapContainerStyle}>
-          <Map zoom={12} center={position} style={{ height: "100%", width: "100%" }} />
+          <Map
+            zoom={12}
+            center={position}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <AdvancedMarker position={position} />
+          </Map>
         </div>
         <input
           ref={inputRef}
