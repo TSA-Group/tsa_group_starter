@@ -70,7 +70,7 @@ export default function MapWithSearch() {
     fontSize: "1rem",
     boxShadow: "0 0 10px rgba(0, 255, 0, 0.4)",
     backgroundColor: "#222",
-    color: "#0ff",
+    color: "rgba(0, 255, 0, 0.6)",
   };
 
   return (
