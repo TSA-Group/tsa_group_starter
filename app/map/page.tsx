@@ -5,42 +5,50 @@ import {
   APIProvider,
   Map,
   AdvancedMarker,
+  InfoWindow,
 } from "@vis.gl/react-google-maps";
 
-export default function MapWithSearch() {
+export default function MapWithAutocomplete() {
   const [position, setPosition] = useState({ lat: 53.54, lng: 10 });
+  const [placeName, setPlaceName] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (
-      initializedRef.current ||
-      !window.google?.maps?.places ||
-      !inputRef.current
-    )
-      return;
+    const timer = setTimeout(() => {
+      if (
+        initializedRef.current ||
+        !window.google?.maps?.places ||
+        !inputRef.current
+      )
+        return;
 
-    initializedRef.current = true;
+      initializedRef.current = true;
 
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["establishment"],
-        fields: ["geometry"],
-      }
-    );
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
+        inputRef.current,
+        {
+          types: ["establishment"],
+          fields: ["geometry", "name"],
+        }
+      );
 
-    autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current?.getPlace();
-      if (place?.geometry?.location) {
-        const loc = place.geometry.location;
-        setPosition({ lat: loc.lat(), lng: loc.lng() });
-      }
-    });
+      autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (place?.geometry?.location) {
+          const loc = place.geometry.location;
+          setPosition({ lat: loc.lat(), lng: loc.lng() });
+          setPlaceName(place.name || "");
+        }
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const MAP_ID = "8859a83a13a834f62d11ad10"; // Replace with your actual Map ID
+  const API_KEY = "AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc"; // Replace with your actual API key
 
   const wrapperStyle: React.CSSProperties = {
     display: "flex",
@@ -57,8 +65,7 @@ export default function MapWithSearch() {
     width: "100%",
     maxWidth: "800px",
     borderRadius: "20px",
-    boxShadow: "0 0 20px rgba(0, 255, 0, 0.6)",
-    overflow: "hidden",
+    boxShadow: "0 0 20px rgba(0, 255, 255, 0.6)",
   };
 
   const inputStyle: React.CSSProperties = {
@@ -68,17 +75,22 @@ export default function MapWithSearch() {
     borderRadius: "10px",
     border: "none",
     fontSize: "1rem",
-    boxShadow: "0 0 10px rgba(0, 255, 0, 0.4)",
+    boxShadow: "0 0 10px rgba(0, 255, 255, 0.4)",
     backgroundColor: "#222",
-    color: "rgba(0, 255, 0, 0.6)",
+    color: "#0ff",
+    zIndex: 1000,
+    position: "relative",
   };
 
   return (
-    <APIProvider
-      apiKey="AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc" // Replace with your actual API key
-      libraries={["places"]}
-    >
+    <APIProvider apiKey={API_KEY} libraries={["places"]}>
       <div style={wrapperStyle}>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search for a place..."
+          style={inputStyle}
+        />
         <div style={mapContainerStyle}>
           <Map
             zoom={12}
@@ -86,15 +98,17 @@ export default function MapWithSearch() {
             mapId={MAP_ID}
             style={{ height: "100%", width: "100%" }}
           >
-            <AdvancedMarker position={position} />
+            <AdvancedMarker position={position}>
+              {placeName && (
+                <InfoWindow position={position}>
+                  <div style={{ color: "#000", fontWeight: "bold" }}>
+                    {placeName}
+                  </div>
+                </InfoWindow>
+              )}
+            </AdvancedMarker>
           </Map>
         </div>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search for a place..."
-          style={inputStyle}
-        />
       </div>
     </APIProvider>
   );
