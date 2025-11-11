@@ -8,7 +8,7 @@ import {
   InfoWindow,
 } from "@vis.gl/react-google-maps";
 
-export default function MapWithAutocompleteDropdown() {
+export default function MapWithSearchBelow() {
   const [position, setPosition] = useState({ lat: 53.54, lng: 10 });
   const [placeName, setPlaceName] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -28,7 +28,7 @@ export default function MapWithAutocompleteDropdown() {
     autocompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
       {
-        types: ["geocode"], // Use "geocode" for address suggestions
+        types: ["geocode"],
         fields: ["geometry", "name"],
       }
     );
@@ -62,6 +62,9 @@ export default function MapWithAutocompleteDropdown() {
     maxWidth: "800px",
     borderRadius: "20px",
     boxShadow: "0 0 20px rgba(0, 255, 0, 0.6)",
+    overflow: "visible", // allow dropdown to render
+    position: "relative",
+    zIndex: 0,
   };
 
   const inputStyle: React.CSSProperties = {
@@ -81,12 +84,6 @@ export default function MapWithAutocompleteDropdown() {
   return (
     <APIProvider apiKey={API_KEY} libraries={["places"]}>
       <div style={wrapperStyle}>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search for an address..."
-          style={inputStyle}
-        />
         <div style={mapContainerStyle}>
           <Map
             zoom={12}
@@ -105,6 +102,12 @@ export default function MapWithAutocompleteDropdown() {
             </AdvancedMarker>
           </Map>
         </div>
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search for an address..."
+          style={inputStyle}
+        />
       </div>
     </APIProvider>
   );
