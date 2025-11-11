@@ -73,7 +73,7 @@ export default function Page() {
 
   return (
     <APIProvider
-      apiKey="AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc"
+      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
       libraries={["places"]}
     >
       <div style={wrapperStyle}>
