@@ -20,6 +20,14 @@ export default function Home() {
           <nav>
         <ul className="flex space-x-10 text-lg font-medium">
           <li>
+          <h1
+            className="text-green-400 text-4xl md:text-5xl font-bold tracking-tight"
+            style={{
+              fontFamily: "'Tan Buster', sans-serif",
+            }}
+          >
+            Gatherly
+          </h1>
             <Link
               href="/"
               className="hover:text-green-300 transition-colors duration-200"
@@ -53,15 +61,6 @@ export default function Home() {
           </li>
         </ul>
       </nav>
-          <h1
-            className="text-green-400 text-4xl md:text-5xl font-bold tracking-tight"
-            style={{
-              fontFamily: "'Tan Buster', sans-serif",
-            }}
-          >
-            Gatherly
-          </h1>
-        
         </header>
 
         {/* Main content fills all available space */}
