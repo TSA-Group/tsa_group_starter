@@ -1,5 +1,6 @@
 import Head from "next/head";
 import React from 'react';
+import Link from "next/link";
 export default function Home() {
   return (
     <>
@@ -56,5 +57,59 @@ export default function Home() {
       </div>
     </>
   );
+
+  
+export default function Header() {
+  return (
+    <header className="w-full flex items-center justify-between px-10 py-6 bg-black text-green-400">
+      {/* Logo */}
+      <h1
+        className="text-4xl font-bold tracking-tight"
+        style={{ fontFamily: "'Momo Signature', cursive" }}
+      >
+        Gatherly
+      </h1>
+
+      {/* Navigation Menu */}
+      <nav>
+        <ul className="flex space-x-10 text-lg font-medium">
+          <li>
+            <Link
+              href="/"
+              className="hover:text-green-300 transition-colors duration-200"
+            >
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/resources"
+              className="hover:text-green-300 transition-colors duration-200"
+            >
+              Resources
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/events"
+              className="hover:text-green-300 transition-colors duration-200"
+            >
+              Events
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/contact"
+              className="hover:text-green-300 transition-colors duration-200"
+            >
+              Contact
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
+  );
+}
+
 }
 
