@@ -8,7 +8,7 @@ import {
   InfoWindow,
 } from "@vis.gl/react-google-maps";
 
-export default function MapWithSearchBelow() {
+export default function MapWithSearch() {
   const [position, setPosition] = useState({ lat: 53.54, lng: 10 });
   const [placeName, setPlaceName] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
