@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { GoChevronDown } from 'react-icons/go';
-import useOutsideClick from '/useOutsideClick';
+import useOutsideClick from './useOutsideClick';
 
-interface DropdownItem {
+export interface DropdownItem {
   id: string;
   name: string;
   imageUrl?: string;
 }
 
-interface DropdownProps {
+export interface DropdownProps {
   id: string;
   title?: string;
   data: DropdownItem[];
@@ -30,21 +30,21 @@ const Dropdown = ({
   selectedId,
   onSelect,
 }: DropdownProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<DropdownItem | undefined>(
-    selectedId ? data?.find((item) => item.id === selectedId) : undefined
+    selectedId ? data.find((item) => item.id === selectedId) : undefined
   );
 
   const handleChange = (item: DropdownItem) => {
     setSelectedItem(item);
-    onSelect && onSelect(item.id);
+    onSelect?.(item.id);
     setIsOpen(false);
   };
 
   useEffect(() => {
     if (selectedId && data) {
       const newSelectedItem = data.find((item) => item.id === selectedId);
-      newSelectedItem && setSelectedItem(newSelectedItem);
+      setSelectedItem(newSelectedItem);
     } else {
       setSelectedItem(undefined);
     }
@@ -88,7 +88,7 @@ const Dropdown = ({
           })}
         />
       </button>
-      {/* Open */}
+
       {isOpen && (
         <div aria-label='Dropdown menu' className={dropdownClass}>
           <ul
@@ -97,7 +97,7 @@ const Dropdown = ({
             aria-orientation='vertical'
             className='leading-10'
           >
-            {data?.map((item) => (
+            {data.map((item) => (
               <li
                 key={item.id}
                 onClick={() => handleChange(item)}
