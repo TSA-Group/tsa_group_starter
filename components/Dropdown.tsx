@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { GoChevronDown } from 'react-icons/go';
-import useOutsideClick from '../hooks/useOutsideClick';
+import useOutsideClick from '/useOutsideClick';
 
 interface DropdownItem {
   id: string;
