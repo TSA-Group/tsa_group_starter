@@ -1,114 +1,119 @@
-"use client";
-
-import { useState, useRef, useEffect } from "react";
+/*
+ * Copyright 2024 Google LLC. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import React, { useState, useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
 import {
   APIProvider,
-  Map,
+  ControlPosition,
+  MapControl,
   AdvancedMarker,
-  InfoWindow,
-} from "@vis.gl/react-google-maps";
+  Map,
+  useMap,
+  useMapsLibrary,
+  useAdvancedMarkerRef,
+  AdvancedMarkerRef
+} from '@vis.gl/react-google-maps';
 
-export default function MapWithSearch() {
-  const [position, setPosition] = useState({ lat: 53.54, lng: 10 });
-  const [placeName, setPlaceName] = useState("");
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const initializedRef = useRef(false);
+const API_KEY =
+  globalThis.GOOGLE_MAPS_API_KEY ?? ("AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc");
 
-  useEffect(() => {
-    if (
-      initializedRef.current ||
-      !window.google?.maps?.places ||
-      !inputRef.current
-    )
-      return;
-
-    initializedRef.current = true;
-
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["geocode"],
-        fields: ["geometry", "name"],
-      }
-    );
-
-    autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current?.getPlace();
-      if (place?.geometry?.location) {
-        const loc = place.geometry.location;
-        setPosition({ lat: loc.lat(), lng: loc.lng() });
-        setPlaceName(place.name || inputRef.current?.value || "");
-      }
-    });
-  }, []);
-
-  const MAP_ID = "8859a83a13a834f62d11ad10"; // Replace with your actual Map ID
-  const API_KEY = "AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc"; // Replace with your actual API key
-
-  const wrapperStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#111",
-    padding: "2rem",
-    gap: "1rem",
-  };
-
-  const mapContainerStyle: React.CSSProperties = {
-    height: "400px",
-    width: "100%",
-    maxWidth: "800px",
-    borderRadius: "20px",
-    boxShadow: "0 0 20px rgba(0, 255, 0, 0.6)",
-    overflow: "visible", // allow dropdown to render
-    position: "relative",
-    zIndex: 0,
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: "800px",
-    padding: "0.75rem",
-    borderRadius: "10px",
-    border: "none",
-    fontSize: "1rem",
-    boxShadow: "0 0 10px rgba(0, 255, 0, 0.4)",
-    backgroundColor: "#222",
-    color: "rgba(0, 255, 0, 0.6)",
-    zIndex: 1000,
-    position: "relative",
-  };
+const App = () => {
+  const [selectedPlace, setSelectedPlace] =
+    useState<google.maps.places.PlaceResult | null>(null);
+  const [markerRef, marker] = useAdvancedMarkerRef();
 
   return (
-    <APIProvider apiKey={API_KEY} libraries={["places"]}>
-      <div style={wrapperStyle}>
-        <div style={mapContainerStyle}>
-          <Map
-            zoom={12}
-            center={position}
-            mapId={MAP_ID}
-            style={{ height: "100%", width: "100%" }}
-          >
-            <AdvancedMarker position={position}>
-              {placeName && (
-                <InfoWindow position={position}>
-                  <div style={{ color: "#000", fontWeight: "bold" }}>
-                    {placeName}
-                  </div>
-                </InfoWindow>
-              )}
-            </AdvancedMarker>
-          </Map>
+    <APIProvider
+      apiKey={API_KEY}
+      solutionChannel='GMP_devsite_samples_v3_rgmautocomplete'>
+      <Map
+        mapId={'bf51a910020fa25a'}
+        defaultZoom={3}
+        defaultCenter={{ lat: 22.54992, lng: 0 }}
+        gestureHandling={'greedy'}
+        disableDefaultUI={true}
+      >
+        <AdvancedMarker ref={markerRef} position={null} />
+      </Map>
+      <MapControl position={ControlPosition.TOP}>
+        <div className="autocomplete-control">
+          <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
         </div>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search for an address..."
-          style={inputStyle}
-        />
-      </div>
+      </MapControl>
+      <MapHandler place={selectedPlace} marker={marker} />
     </APIProvider>
   );
+};
+
+interface MapHandlerProps {
+  place: google.maps.places.PlaceResult | null;
+  marker: google.maps.marker.AdvancedMarkerElement | null;
 }
+
+const MapHandler = ({ place, marker }: MapHandlerProps) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !place || !marker) return;
+
+    if (place.geometry?.viewport) {
+      map.fitBounds(place.geometry?.viewport);
+    }
+    marker.position = place.geometry?.location;
+  }, [map, place, marker]);
+
+  return null;
+};
+
+interface PlaceAutocompleteProps {
+  onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void;
+}
+
+const PlaceAutocomplete = ({ onPlaceSelect }: PlaceAutocompleteProps) => {
+  const [placeAutocomplete, setPlaceAutocomplete] =
+    useState<google.maps.places.Autocomplete | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const places = useMapsLibrary('places');
+
+  useEffect(() => {
+    if (!places || !inputRef.current) return;
+
+    const options = {
+      fields: ['geometry', 'name', 'formatted_address']
+    };
+
+    setPlaceAutocomplete(new places.Autocomplete(inputRef.current, options));
+  }, [places]);
+
+  useEffect(() => {
+    if (!placeAutocomplete) return;
+
+    placeAutocomplete.addListener('place_changed', () => {
+      onPlaceSelect(placeAutocomplete.getPlace());
+    });
+  }, [onPlaceSelect, placeAutocomplete]);
+
+  return (
+    <div className="autocomplete-container">
+      <input ref={inputRef} />
+    </div>
+  );
+};
+
+const root = createRoot(document.getElementById('app')!);
+root.render(<App />);
+
+export default App;
