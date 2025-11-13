@@ -1,6 +1,7 @@
 import Head from "next/head";
 import React from 'react';
 import Link from "next/link";
+import Header from "./components/Header";
 export default function Home() {
   return (
     <>
@@ -19,46 +20,10 @@ export default function Home() {
         <header className="w-full flex items-start p-8 bg-black">
           <nav>
         <ul className="flex space-x-10 text-lg font-medium">
-        <h1
-            className="text-green-400 text-4xl md:text-5xl font-bold tracking-tight"
-            style={{
-              fontFamily: "'Tan Buster', sans-serif",
-            }}
-          >
-            Gatherly
-          </h1>
-          <li>
-            <Link
-              href="/"
-              className="hover:text-green-300 transition-colors duration-200"
-            >
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/resources"
-              className="hover:text-green-300 transition-colors duration-200"
-            >
-              Resources
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/events"
-              className="hover:text-green-300 transition-colors duration-200"
-            >
-              Events
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/contact"
-              className="hover:text-green-300 transition-colors duration-200"
-            >
-              Contact
-            </Link>
-          </li>
+        <>
+      <Header />
+    </>
+
         </ul>
       </nav>
           
