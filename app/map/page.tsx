@@ -25,6 +25,7 @@ export default function MapWithAutocompleteDropdown() {
 
     initializedRef.current = true;
 
+    // Create autocomplete instance for the input
     autocompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
       {
@@ -33,12 +34,16 @@ export default function MapWithAutocompleteDropdown() {
       }
     );
 
+    // Listener for place selection (add this block)
     autocompleteRef.current.addListener("place_changed", () => {
       const place = autocompleteRef.current?.getPlace();
+      console.log(place); // Optional: for debugging
       if (place?.geometry?.location) {
         const loc = place.geometry.location;
         setPosition({ lat: loc.lat(), lng: loc.lng() });
         setPlaceName(place.name || inputRef.current?.value || "");
+      } else {
+        alert("Selected place does not have a valid location. Try again.");
       }
     });
   }, []);
