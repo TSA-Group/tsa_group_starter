@@ -8,14 +8,16 @@ export default function Header() {
     padding: "1rem 2rem",
     backgroundColor: "#000",
     borderBottom: "1px solid rgba(0,255,0,0.2)",
+    position: "relative",
+    zIndex: 100,
   };
 
   const logoStyle: React.CSSProperties = {
     fontSize: "2.5rem",
     fontWeight: "bold",
-    color: "rgba(0, 255, 0, 0.8)",
+    color: "rgba(0, 255, 0, 1)", // stays green
     textDecoration: "none",
-    transition: "transform 0.3s ease, color 0.3s ease",
+    transition: "transform 0.3s ease",
   };
 
   const navStyle: React.CSSProperties = {
@@ -30,10 +32,13 @@ export default function Header() {
     transition: "transform 0.3s ease, color 0.3s ease",
   };
 
-  // Helper to apply hover effects
-  const handleHover = (e: React.MouseEvent<HTMLAnchorElement>, enter: boolean) => {
+  const handleZoom = (e: React.MouseEvent<HTMLAnchorElement>, enter: boolean) => {
     e.currentTarget.style.transform = enter ? "scale(1.1)" : "scale(1)";
     e.currentTarget.style.color = enter ? "rgba(0, 255, 0, 0.9)" : "#fff";
+  };
+
+  const handleLogoZoom = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.currentTarget.style.transform = "scale(1.1)";
   };
 
   return (
@@ -41,8 +46,7 @@ export default function Header() {
       <a
         href="/"
         style={logoStyle}
-        onMouseEnter={(e) => handleHover(e, true)}
-        onMouseLeave={(e) => handleHover(e, false)}
+        onMouseEnter={handleLogoZoom}
       >
         Gatherly
       </a>
@@ -52,8 +56,8 @@ export default function Header() {
             key={label}
             href={`/${label.toLowerCase()}`}
             style={linkBaseStyle}
-            onMouseEnter={(e) => handleHover(e, true)}
-            onMouseLeave={(e) => handleHover(e, false)}
+            onMouseEnter={(e) => handleZoom(e, true)}
+            onMouseLeave={(e) => handleZoom(e, false)}
           >
             {label}
           </a>
