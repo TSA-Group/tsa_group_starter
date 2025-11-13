@@ -28,7 +28,7 @@ export default function MapWithAutocompleteDropdown() {
     autocompleteRef.current = new window.google.maps.places.Autocomplete(
       inputRef.current,
       {
-        types: ["geocode"], // Use "geocode" for address suggestions
+        types: ["geocode"],
         fields: ["geometry", "name"],
       }
     );
@@ -62,6 +62,8 @@ export default function MapWithAutocompleteDropdown() {
     maxWidth: "800px",
     borderRadius: "20px",
     boxShadow: "0 0 20px rgba(0, 255, 0, 0.6)",
+    position: "relative", // Ensure the map stacks below the input
+    zIndex: 1,
   };
 
   const inputStyle: React.CSSProperties = {
@@ -74,7 +76,7 @@ export default function MapWithAutocompleteDropdown() {
     boxShadow: "0 0 10px rgba(0, 255, 0, 0.4)",
     backgroundColor: "#222",
     color: "rgba(0, 255, 0, 0.6)",
-    zIndex: 1000,
+    zIndex: 2, // Ensure it's above map controls
     position: "relative",
   };
 
