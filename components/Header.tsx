@@ -23,11 +23,17 @@ export default function Header() {
     gap: "2rem",
   };
 
-  const linkStyle: React.CSSProperties = {
+  const linkBaseStyle: React.CSSProperties = {
     color: "#fff",
     textDecoration: "none",
     fontSize: "1rem",
-    transition: "color 0.3s ease",
+    transition: "transform 0.3s ease, color 0.3s ease",
+  };
+
+  // Helper to apply hover effects
+  const handleHover = (e: React.MouseEvent<HTMLAnchorElement>, enter: boolean) => {
+    e.currentTarget.style.transform = enter ? "scale(1.1)" : "scale(1)";
+    e.currentTarget.style.color = enter ? "rgba(0, 255, 0, 0.9)" : "#fff";
   };
 
   return (
@@ -35,21 +41,23 @@ export default function Header() {
       <a
         href="/"
         style={logoStyle}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "scale(1.1)";
-          e.currentTarget.style.color = "rgba(0, 255, 0, 1)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.color = "rgba(0, 255, 0, 0.8)";
-        }}
+        onMouseEnter={(e) => handleHover(e, true)}
+        onMouseLeave={(e) => handleHover(e, false)}
       >
         Gatherly
       </a>
       <nav style={navStyle}>
-        <a href="/resources" style={linkStyle}>Resources</a>
-        <a href="/events" style={linkStyle}>Events</a>
-        <a href="/contact" style={linkStyle}>Contact</a>
+        {["Home", "Resources", "Events", "Contact"].map((label) => (
+          <a
+            key={label}
+            href={`/${label.toLowerCase()}`}
+            style={linkBaseStyle}
+            onMouseEnter={(e) => handleHover(e, true)}
+            onMouseLeave={(e) => handleHover(e, false)}
+          >
+            {label}
+          </a>
+        ))}
       </nav>
     </header>
   );
