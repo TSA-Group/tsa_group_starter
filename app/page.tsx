@@ -13,10 +13,10 @@ export default function Home() {
         <link href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap" rel="stylesheet" />
       </Head>
 
-      {/* Keep ONLY the original nav/header component here */}
+      {/* Only the main nav/header */}
       <Header />
 
-      {/* Center everything */}
+      {/* Page content centered */}
       <div className="min-h-screen flex flex-col justify-center items-center bg-black font-sans">
         <main className="flex flex-col items-center justify-center text-center">
           <h2
@@ -39,6 +39,8 @@ export default function Home() {
           © {year} Gatherly. All rights reserved.
         </footer>
       </div>
+      {/* Glowing green line at bottom */}
+      <div className="w-full h-[4px] bg-green-500 shadow-lg shadow-green-500" />
     </>
   );
 }
