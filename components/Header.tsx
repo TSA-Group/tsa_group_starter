@@ -1,80 +1,37 @@
-"use client";
+import { motion } from 'framer-motion';
+import React from 'react';
 
-export default function Header() {
-  const headerStyle: React.CSSProperties = {
-    backgroundColor: "#000",
-    borderBottom: "1px solid rgba(0,255,0,0.2)",
-    width: "100%",
-    boxSizing: "border-box",
-  };
+const navItems = ['Home', 'Resources', 'Events', 'Contact'];
 
-  const containerStyle: React.CSSProperties = {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "1rem 2rem",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  };
-
-  const logoStyle: React.CSSProperties = {
-    fontSize: "2.5rem",
-    fontWeight: "bold",
-    color: "rgba(0, 255, 0, 1)",
-    textDecoration: "none",
-    transition: "transform 0.3s ease",
-  };
-
-  const navStyle: React.CSSProperties = {
-    display: "flex",
-    gap: "2rem",
-  };
-
-  const linkStyle: React.CSSProperties = {
-    color: "#fff",
-    textDecoration: "none",
-    fontSize: "1rem",
-    transition: "transform 0.3s ease, color 0.3s ease",
-  };
-
+export const Header: React.FC = () => {
   return (
-    <header style={headerStyle}>
-      <div style={containerStyle}>
-        {/* Gatherly Logo */}
-        <a
-          href="/"
-          style={logoStyle}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "scale(1.1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "scale(1)";
-          }}
+    <motion.header
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      className="bg-black text-green-400 shadow-md"
+    >
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <motion.h1
+          whileHover={{ scale: 1.05, textShadow: '0px 0px 8px #22c55e' }}
+          className="text-2xl font-bold tracking-wide"
         >
           Gatherly
-        </a>
-
-        {/* Navigation Links */}
-        <nav style={navStyle}>
-          {["Home", "Resources", "Events", "Contact"].map((label) => (
-            <a
-              key={label}
-              href={`/${label.toLowerCase()}`}
-              style={linkStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.1)";
-                e.currentTarget.style.color = "rgba(0, 255, 0, 0.9)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.color = "#fff";
-              }}
+        </motion.h1>
+        <nav className="flex gap-6 text-sm font-medium">
+          {navItems.map((item) => (
+            <motion.a
+              key={item}
+              whileHover={{ scale: 1.1, color: '#ffffff' }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              className="hover:text-white transition-colors duration-200"
+              href={`#${item.toLowerCase()}`}
             >
-              {label}
-            </a>
+              {item}
+            </motion.a>
           ))}
         </nav>
       </div>
-    </header>
+    </motion.header>
   );
-}
+};
