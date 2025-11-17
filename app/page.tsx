@@ -10,14 +10,19 @@ export default function Home() {
     <>
       <Head>
         <link href="https://fonts.cdnfonts.com/css/tan-buster" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap"
+          rel="stylesheet"
+        />
       </Head>
 
-      {/* Keep ONLY the original nav/header component here */}
-      <Header />
+      {/* Sticky header */}
+      <div className="fixed top-0 left-0 w-full z-50 bg-black">
+        <Header />
+      </div>
 
-      {/* Center everything */}
-      <div className="min-h-screen flex flex-col justify-center items-center bg-black font-sans">
+      {/* Add padding-top so content doesn't hide under the fixed header */}
+      <div className="pt-20 min-h-screen flex flex-col justify-center items-center bg-black font-sans">
         <main className="flex flex-col items-center justify-center text-center">
           <h2
             className="text-5xl font-bold leading-snug tracking-tight mb-6 text-green-400"
@@ -25,9 +30,12 @@ export default function Home() {
           >
             Your Personal Geolocation Data Assembler
           </h2>
+
           <p className="text-lg leading-relaxed max-w-3xl mb-8 text-green-200">
-            Gatherly helps you find, organize, and visualize nearby locations with precision. Explore local data, discover insights, and connect your maps like never before.
+            Gatherly helps you find, organize, and visualize nearby locations with precision.
+            Explore local data, discover insights, and connect your maps like never before.
           </p>
+
           <Link
             href="/map"
             className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
@@ -35,6 +43,7 @@ export default function Home() {
             Launch Maps
           </Link>
         </main>
+
         <footer className="w-full p-4 text-center text-sm text-green-800 bg-black border-t border-green-900 mt-10">
           © {year} Gatherly. All rights reserved.
         </footer>
