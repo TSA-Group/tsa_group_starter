@@ -44,13 +44,15 @@ export default function Home() {
           </Link>
         </main>
 
-        <footer className="w-full p-4 text-center text-sm text-green-800 bg-black border-t border-green-900 mt-10">
-          © {year} Gatherly. All rights reserved.
-          <p style ="color:green;">
-            <a href="mailto:Gatherly@gmail.com">Gatherly@gmail.com</a> 
-          </p>
+        <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
+  © {year} Gatherly. All rights reserved.
+  <p style={{ color: "green" }}>
+    <a href="mailto:Gatherly@gmail.com" className="underline hover:text-green-300">
+      Gatherly@gmail.com
+    </a>
+  </p>
+</footer>
 
-        </footer>
       </div>
     </>
   );
