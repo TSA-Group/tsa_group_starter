@@ -45,9 +45,11 @@ export default function Home() {
           </Link>
         </main>
 
-        <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-10">
+        <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
           © {year} Gatherly. All rights reserved.
-          <p>
+        </footer>
+        <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-10">
+                    <p>
             <a
               href="mailto:Gatherly@gmail.com"
               className="underline hover:text-green-300"
