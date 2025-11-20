@@ -2,11 +2,11 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Header } from "../components/Header";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const year = new Date().getFullYear();
 
-  
   return (
     <>
       <Head>
@@ -17,12 +17,21 @@ export default function Home() {
         />
       </Head>
 
-      {/* Sticky header */}
-      <div className="fixed top-0 left-0 w-full z-50 bg-black">
+      {/* Animated Sticky Header */}
+      <motion.div
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{
+          duration: 0.8,
+          type: "spring",
+          stiffness: 120,
+        }}
+        className="fixed top-0 left-0 w-full z-50 bg-black"
+      >
         <Header />
-      </div>
+      </motion.div>
 
-      {/* Add padding-top so content doesn't hide under the fixed header */}
+      {/* Page Content */}
       <div className="pt-20 min-h-screen flex flex-col justify-center items-center bg-black font-sans">
         <main className="flex flex-col items-center justify-center text-center">
           <h2
@@ -48,12 +57,13 @@ export default function Home() {
         <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
           © {year} Gatherly. All rights reserved.
         </footer>
+
         <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-10">
-                    <p>
+          <p>
             <a
               href="mailto:Gatherly@gmail.com"
               className="underline hover:text-green-300"
-              style= {{ color: "rgb(0,255,0)" }}
+              style={{ color: "rgb(0,255,0)" }}
             >
               Gatherly@gmail.com
             </a>
