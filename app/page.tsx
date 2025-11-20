@@ -46,7 +46,7 @@ export default function Home() {
 
         <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
   © {year} Gatherly. All rights reserved.
-  <p style={{ color:green; text-align:left; }}>
+  <p style= color:green; text-align:left; >
     <a href="mailto:Gatherly@gmail.com" className="underline hover:text-green-300">
       Gatherly@gmail.com
     </a>
