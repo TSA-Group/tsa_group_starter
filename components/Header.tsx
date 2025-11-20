@@ -18,6 +18,7 @@ export const Header: React.FC = () => {
         >
           Gatherly
         </motion.h1>
+
         <nav className="flex gap-6 text-sm font-medium">
           {navItems.map((item) => (
             <motion.a
