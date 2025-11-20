@@ -63,7 +63,7 @@ export default function Home() {
             <a
               href="mailto:Gatherly@gmail.com"
               className="underline hover:text-green-400"
-              style={{ color: "rgb(57,255,90)" }}
+              style={{ color: "rgb(5,223,114)" }}
             >
               Gatherly@gmail.com
             </a>
