@@ -116,7 +116,7 @@ export default function Home() {
           <div style={{ fontSize: "10px" }}>
             <a
               href="[enter info]"
-              style={{ color: "rgb(5,223,114)", marginRight: "8px", fontSize: "142px" }}
+              style={{ color: "rgb(5,223,114)", marginRight: "142px", fontSize: "10px" }}
             >
               [enter info]
             </a>
