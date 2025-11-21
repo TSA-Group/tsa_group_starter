@@ -9,7 +9,7 @@ export const Header: React.FC = () => {
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
       className="bg-black text-green-400 shadow-md"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
             <motion.a
               key={item}
               whileHover={{ scale: 1.1, color: "#ffffff" }}
-              transition={{ type: "spring", stiffness: 300 }}
+              transition={{ type: "spring", stiffness: 300, delay:0.25 }}
               className="hover:text-white transition-colors duration-200"
               href={`#${item.toLowerCase()}`}
             >
