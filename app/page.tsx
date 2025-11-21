@@ -98,7 +98,7 @@ export default function Home() {
           <div style={{ fontSize: "10px" }}>
             <a
               href="mailto:Gatherly@gmail.com"
-              style={{ color: "rgb(5,223,114)", marginRight: "8px" }}
+              style={{ color: "rgb(5,223,114)", marginRight: "14px" }}
             >
               Gatherly@gmail.com
             </a>
