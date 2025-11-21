@@ -107,7 +107,7 @@ export default function Home() {
           <div style={{ fontSize: "10px" }}>
             <a
               href="tel:012-345-6789"
-              style={{ color: "rgb(5,223,114)", marginRight: "94px" }}
+              style={{ color: "rgb(5,223,114)", marginRight: "80px" }}
             >
               012-345-6789
             </a>
