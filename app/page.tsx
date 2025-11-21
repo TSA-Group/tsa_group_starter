@@ -104,10 +104,14 @@ export default function Home() {
             </a>
               <span style={{ color: "gray" }}>[enter info]</span>
           </div>
-          <div>
-            <a href="mailto:012-345-6789                 [enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              012-345-6789                 [enter info]
+          <div style={{ fontSize: "10px" }}>
+            <a
+              href="tel:012-345-6789"
+              style={{ color: "rgb(5,223,114)", marginRight: "94px" }}
+            >
+              012-345-6789
             </a>
+              <span style={{ color: "gray" }}>[enter info]</span>
           </div>
           <div>
             <a href="mailto:[enter info]                 [enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
