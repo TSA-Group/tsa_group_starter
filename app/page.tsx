@@ -90,12 +90,17 @@ export default function Home() {
         </footer>
 
         <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-4">
-          <a href="mailto:Contact Our Wonderful Community Staff At: " className="underline hover:text-green-400" style={{ color: "rgb(5,223,114)", fontSize: "20px"}}>
+          <a href="mailto:Contact Our Wonderful Community Staff At: " className="underline hover:text-green-400" style={{ color: "rgb(5,223,114)", fontSize: "18px"}}>
             Contact Our Wonderful Community Staff At:
           </a>
           <div>
-            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)" }}>
+            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
               Gatherly@gmail.com
+            </a>
+          </div>
+          <div>
+            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+              012-345-6789
             </a>
           </div>
         </footer>
