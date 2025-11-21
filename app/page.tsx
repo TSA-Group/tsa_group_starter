@@ -94,38 +94,38 @@ export default function Home() {
             Contact Our Wonderful Community Staff At:
           </p>
           <div>
-            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
+            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
               Gatherly@gmail.com
             </a>
           </div>
           <p
             className="underline hover:text-green-400"
-            style={{ color: "rgb(5,223,114)", fontSize: "8px" }}
+            style={{ color: "rgb(5,223,114)", fontSize: "9px" }}
           >
             Reach Our Front Office at:
           </p>
           <div>
-            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
+            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
               012-345-6789
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
               [enter info]
             </a>
           </div>
