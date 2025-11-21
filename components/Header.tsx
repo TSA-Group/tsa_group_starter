@@ -12,7 +12,7 @@ export const Header: React.FC = () => {
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
       className="bg-black text-green-400 shadow-md"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-left">
         
         
         <motion.h1
