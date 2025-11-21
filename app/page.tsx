@@ -85,53 +85,53 @@ export default function Home() {
         </div>
 
         {/* Footers */}
-        <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
-          © {year} Gatherly. All rights reserved.
-        </footer>
 
         <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-4">
           <p
             className="underline hover:text-green-400"
-            style={{ color: "rgb(5,223,114)", fontSize: "18px" }}
+            style={{ color: "rgb(5,223,114)", fontSize: "12px" }}
           >
             Contact Our Wonderful Community Staff At:
           </p>
           <div>
-            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
               Gatherly@gmail.com
             </a>
           </div>
           <p
             className="underline hover:text-green-400"
-            style={{ color: "rgb(5,223,114)", fontSize: "14px" }}
+            style={{ color: "rgb(5,223,114)", fontSize: "8px" }}
           >
             Reach Our Front Office at:
           </p>
           <div>
-            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
               012-345-6789
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "8px" }}>
               [enter info]
             </a>
           </div>
+          <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
+          © {year} Gatherly. All rights reserved.
+        </footer>
         </footer>
       </div>
     </>
