@@ -107,16 +107,20 @@ export default function Home() {
           <div style={{ fontSize: "10px" }}>
             <a
               href="tel:012-345-6789"
-              style={{ color: "rgb(5,223,114)", marginRight: "106px" }}
+              style={{ color: "rgb(5,223,114)", marginRight: "128px" }}
             >
               012-345-6789
             </a>
               <span style={{ color: "gray" }}>[enter info]</span>
           </div>
-          <div>
-            <a href="mailto:[enter info]                 [enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              [enter info]                 [enter info]
+          <div style={{ fontSize: "10px" }}>
+            <a
+              href="mailto:example@example.com"
+              style={{ color: "rgb(5,223,114)", marginRight: "128px" }}
+            >
+              example@example.com
             </a>
+              <span style={{ color: "gray" }}>[enter info] [enter info]</span>
           </div>
           <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
           © {year} Gatherly. All rights reserved.
