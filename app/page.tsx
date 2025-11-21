@@ -95,6 +95,7 @@ export default function Home() {
             style={{ color: "rgb(5,223,114)", fontSize: "18px" }}
           >
             Contact Our Wonderful Community Staff At:
+            <p> Our mission</p>
           </p>
           <div>
             <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
