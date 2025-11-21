@@ -79,9 +79,6 @@ export default function Home() {
 
         {/* Add some content below so page is scrollable and the left-move is visible */}
         <div className="w-full max-w-4xl px-6 py-12 text-green-200 space-y-6">
-          <p>
-            Scroll down to see the hero box move to the left. This area is placeholder content so you can test the animation.
-          </p>
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
