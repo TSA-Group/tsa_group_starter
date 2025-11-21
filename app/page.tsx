@@ -118,7 +118,7 @@ export default function Home() {
               href="mailto:[enter info]"
               style={{ color: "rgb(5,223,114)", marginRight: "128px" }}
             >
-              example@example.com
+              [enter info]
             </a>
               <span style={{ color: "gray" }}> [enter info]</span>
           </div>
