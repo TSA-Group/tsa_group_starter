@@ -115,12 +115,12 @@ export default function Home() {
           </div>
           <div style={{ fontSize: "10px" }}>
             <a
-              href="mailto:[enter info]"
-              style={{ color: "rgb(5,223,114)", marginRight: "128px" }}
+              href="[enter info]"
+              style={{ color: "rgb(5,223,114)", marginRight: "8px", fontSize: "142px" }}
             >
               [enter info]
             </a>
-              <span style={{ color: "gray" }}> [enter info]</span>
+              <span style={{ color: "gray", fontSize: "10px" }}> [enter info]</span>
           </div>
           <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
           © {year} Gatherly. All rights reserved.
