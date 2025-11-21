@@ -97,32 +97,17 @@ export default function Home() {
           </p>
           <div>
             <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              Gatherly@gmail.com
+              Gatherly@gmail.com           [enter info]
             </a>
           </div>
           <div>
             <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              012-345-6789
+              012-345-6789                 [enter info]
             </a>
           </div>
           <div>
             <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              [enter info]
-            </a>
-          </div>
-          <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              [enter info]
-            </a>
-          </div>
-          <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              [enter info]
-            </a>
-          </div>
-          <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
-              [enter info]
+              [enter info]                 [enter info]
             </a>
           </div>
           <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
