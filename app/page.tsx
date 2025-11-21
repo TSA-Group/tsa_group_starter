@@ -90,7 +90,10 @@ export default function Home() {
         </footer>
 
         <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-4">
-          <p href="Contact Our Wonderful Community Staff At: " className="underline hover:text-green-400" style={{ color: "rgb(5,223,114)", fontSize: "18px"}}>
+          <p
+            className="underline hover:text-green-400"
+            style={{ color: "rgb(5,223,114)", fontSize: "18px" }}
+          >
             Contact Our Wonderful Community Staff At:
           </p>
           <div>
