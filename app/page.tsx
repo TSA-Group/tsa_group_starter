@@ -95,14 +95,14 @@ export default function Home() {
             <b>Contact Our Wonderful Community Staff At:</b>
             
           </p>
-          <div style={{ fontSize: "10px", color: "rgb(5,223,114)" }}>
-            <span>[enter info] </span>
-              <a
-                href="mailto:Gatherly@gmail.com"
-                style={{ color: "rgb(5,223,114)" marginRight: "8px"}}
-              >
-                Gatherly@gmail.com
-              </a>
+          <div style={{ fontSize: "10px" }}>
+            <a
+              href="mailto:Gatherly@gmail.com"
+              style={{ color: "rgb(5,223,114)", marginRight: "8px" }}
+            >
+              Gatherly@gmail.com
+            </a>
+              <span style={{ color: "gray" }}>[enter info]</span>
           </div>
           <div>
             <a href="mailto:012-345-6789                 [enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
