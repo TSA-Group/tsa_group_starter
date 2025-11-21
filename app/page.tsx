@@ -101,6 +101,12 @@ export default function Home() {
               Gatherly@gmail.com
             </a>
           </div>
+          <p
+            className="underline hover:text-green-400"
+            style={{ color: "rgb(5,223,114)", fontSize: "14px" }}
+          >
+            Reach Our Front Office at:
+          </p>
           <div>
             <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
               012-345-6789
