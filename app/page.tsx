@@ -1,4 +1,4 @@
-// pages/index.jsx  OR  app/page.jsx
+
 "use client";
 
 import React, { useRef } from "react";
