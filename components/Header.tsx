@@ -15,8 +15,8 @@ export const Header: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <motion.h1
-          whileHover={{ scale: 1.05, textShadow: "0px 0px 8px #22c55e" }}
-          className="text-2xl font-bold tracking-wide"
+          whileHover={{ scale: 1.1, textShadow: "0px 0px 8px #22c55e" }}
+          className="text-4xl font-bold tracking-wide"
         >
           Gatherly
         </motion.h1>
