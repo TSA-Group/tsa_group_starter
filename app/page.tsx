@@ -34,25 +34,37 @@ export default function Home() {
       {/* Page Content */}
       <div className="pt-20 min-h-screen flex flex-col justify-center items-center bg-black font-sans">
         <main className="flex flex-col items-center justify-center text-center">
-          <h2
-            className="text-5xl font-bold leading-snug tracking-tight mb-6 text-green-400"
-            style={{ fontFamily: "Momo Signature, sans-serif" }}
-          >
-            Your Personal Geolocation Data Assembler
-          </h2>
+  <motion.div
+    initial={{ x: -80, opacity: 0 }}
+    whileInView={{ x: 0, opacity: 1 }}
+    transition={{
+      duration: 0.8,
+      ease: "easeOut"
+    }}
+    viewport={{ once: true }}
+    className="border-l-4 border-green-500 pl-6 py-8 rounded-lg bg-black/40 shadow-lg max-w-3xl"
+  >
+    <h2
+      className="text-5xl font-bold leading-snug tracking-tight mb-6 text-green-400"
+      style={{ fontFamily: "Momo Signature, sans-serif" }}
+    >
+      Your Personal Geolocation Data Assembler
+    </h2>
 
-          <p className="text-lg leading-relaxed max-w-3xl mb-8 text-green-200">
-            Gatherly helps you find, organize, and visualize nearby locations with precision.
-            Explore local data, discover insights, and connect your maps like never before.
-          </p>
+    <p className="text-lg leading-relaxed text-green-200 mb-8">
+      Gatherly helps you find, organize, and visualize nearby locations with precision.
+      Explore local data, discover insights, and connect your maps like never before.
+    </p>
 
-          <Link
-            href="/map"
-            className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
-          >
-            Launch Maps
-          </Link>
-        </main>
+    <Link
+      href="/map"
+      className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
+    >
+      Launch Maps
+    </Link>
+  </motion.div>
+</main>
+
 
         <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
           © {year} Gatherly. All rights reserved.
