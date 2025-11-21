@@ -88,44 +88,46 @@ export default function Home() {
 
         <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-4">
           <p
+            <b>
             className="underline hover:text-green-400"
-            style={{ color: "rgb(5,223,114)", fontSize: "12px" }}
+            style={{ color: "rgb(5,223,114)", fontSize: "14px" }}
           >
             Contact Our Wonderful Community Staff At:
+            </b>
           </p>
           <div>
-            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
+            <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
               Gatherly@gmail.com
             </a>
           </div>
           <p
             className="underline hover:text-green-400"
-            style={{ color: "rgb(5,223,114)", fontSize: "9px" }}
+            style={{ color: "rgb(5,223,114)", fontSize: "10px" }}
           >
             Reach Our Front Office at:
           </p>
           <div>
-            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
+            <a href="mailto:012-345-6789"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
               012-345-6789
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
               [enter info]
             </a>
           </div>
           <div>
-            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "9px" }}>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
               [enter info]
             </a>
           </div>
