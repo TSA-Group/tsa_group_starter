@@ -88,12 +88,12 @@ export default function Home() {
 
         <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-4">
           <p
-            <b>
+            
             className="underline hover:text-green-400"
             style={{ color: "rgb(5,223,114)", fontSize: "14px" }}
           >
-            Contact Our Wonderful Community Staff At:
-            </b>
+            <b>Contact Our Wonderful Community Staff At:</b>
+            
           </p>
           <div>
             <a href="mailto:Gatherly@gmail.com"  style={{ color: "rgb(5,223,114)", fontSize: "10px" }}>
