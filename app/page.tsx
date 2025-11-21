@@ -33,37 +33,75 @@ export default function Home() {
 
       {/* Page Content */}
       <div className="pt-20 min-h-screen flex flex-col justify-center items-center bg-black font-sans">
-        <main className="flex flex-col items-center justify-center text-center">
-  <motion.div
-    initial={{ x: -80, opacity: 0 }}
-    whileInView={{ x: 0, opacity: 1 }}
-    transition={{
-      duration: 0.8,
-      ease: "easeOut"
-    }}
-    viewport={{ once: true }}
-    className="border-l-4 border-green-500 pl-6 py-8 rounded-lg bg-black/40 shadow-lg max-w-3xl"
-  >
-    <h2
-      className="text-5xl font-bold leading-snug tracking-tight mb-6 text-green-400"
-      style={{ fontFamily: "Momo Signature, sans-serif" }}
-    >
-      Your Personal Geolocation Data Assembler
-    </h2>
+        import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
-    <p className="text-lg leading-relaxed text-green-200 mb-8">
-      Gatherly helps you find, organize, and visualize nearby locations with precision.
-      Explore local data, discover insights, and connect your maps like never before.
-    </p>
+export default function Home() {
+  const year = new Date().getFullYear();
+  const boxRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: boxRef,
+    offset: ["0 1", "1 0"], 
+  });
 
-    <Link
-      href="/map"
-      className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
-    >
-      Launch Maps
-    </Link>
-  </motion.div>
-</main>
+  // Move left as you scroll
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]); 
+
+  return (
+    <>
+      {/* ...your header stays the same... */}
+
+      <div className="pt-20 min-h-screen flex flex-col items-center bg-black font-sans">
+
+        {/* ──────────────────────────────── */}
+        {/*            LEFT BOX             */}
+        {/* ──────────────────────────────── */}
+        <motion.div
+          ref={boxRef}
+          style={{ x }}
+          className="border-l-4 border-green-500 bg-black p-10 rounded-xl shadow-xl max-w-xl text-left"
+        >
+          <h2
+            className="text-5xl font-bold leading-snug tracking-tight mb-6 text-green-400"
+            style={{ fontFamily: "Momo Signature, sans-serif" }}
+          >
+            Your Personal Geolocation Data Assembler
+          </h2>
+
+          <p className="text-lg leading-relaxed mb-8 text-green-200">
+            Gatherly helps you find, organize, and visualize nearby locations 
+            with precision. Explore local data, discover insights, and connect 
+            your maps like never before.
+          </p>
+
+          <Link
+            href="/map"
+            className="inline-block rounded-full bg-green-600 px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-green-700"
+          >
+            Launch Maps
+          </Link>
+        </motion.div>
+        {/* ──────────────────────────────── */}
+
+        {/* FOOTERS... keep as is */}
+        <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
+          © {year} Gatherly. All rights reserved.
+        </footer>
+
+        <footer className="w-full p-4 text-left text-sm text-green-400 bg-black border-t border-green-900 mt-10">
+          <a
+            href="mailto:Gatherly@gmail.com"
+            className="underline hover:text-green-400"
+            style={{ color: "rgb(5,223,114)" }}
+          >
+            Gatherly@gmail.com
+          </a>
+        </footer>
+      </div>
+    </>
+  );
+}
+
 
 
         <footer className="w-full p-4 text-center text-sm text-green-400 bg-black border-t border-green-900 mt-10">
