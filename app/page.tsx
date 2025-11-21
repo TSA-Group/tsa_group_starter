@@ -112,6 +112,26 @@ export default function Home() {
               012-345-6789
             </a>
           </div>
+          <div>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+              [enter info]
+            </a>
+          </div>
+          <div>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+              [enter info]
+            </a>
+          </div>
+          <div>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+              [enter info]
+            </a>
+          </div>
+          <div>
+            <a href="[enter info]"  style={{ color: "rgb(5,223,114)", fontSize: "14px" }}>
+              [enter info]
+            </a>
+          </div>
         </footer>
       </div>
     </>
