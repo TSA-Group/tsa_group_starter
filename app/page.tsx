@@ -93,9 +93,11 @@ export default function Home() {
           <a href="mailto:Contact Our Wonderful Community Staff At: " className="underline hover:text-green-400" style={{ color: "rgb(5,223,114)" }}>
             Contact Our Wonderful Community Staff At:
           </a>
-          <a href="mailto:Gatherly@gmail.com" className="underline hover:text-green-400" style={{ color: "rgb(5,223,114)" }}>
-            Gatherly@gmail.com
-          </a>
+          <div>
+            <a href="mailto:Gatherly@gmail.com" className="underline hover:text-green-400" style={{ color: "rgb(5,223,114)" }}>
+              Gatherly@gmail.com
+            </a>
+          </div>
         </footer>
       </div>
     </>
