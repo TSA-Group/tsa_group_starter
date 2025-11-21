@@ -99,7 +99,7 @@ export default function Home() {
             <span>[enter info] </span>
               <a
                 href="mailto:Gatherly@gmail.com"
-                style={{ color: "rgb(5,223,114)" }}
+                style={{ color: "rgb(5,223,114)" marginRight: "8px"}}
               >
                 Gatherly@gmail.com
               </a>
