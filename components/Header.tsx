@@ -25,7 +25,7 @@ export const Header: React.FC = () => {
             <motion.a
               key={item}
               whileHover={{ scale: 1.1, color: "#ffffff" }}
-              transition={{ type: "spring", stiffness: 300 }}
+              transition={{ type: "spring", delay: 0.25, stiffness: 300 }}
               className="hover:text-white transition-colors duration-200"
               href={`#${item.toLowerCase()}`}
             >
