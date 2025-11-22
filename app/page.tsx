@@ -81,7 +81,10 @@ export default function Home() {
         <div className="w-full max-w-4xl px-6 py-12 text-green-200 space-y-6">
           <div 
             className="h-96 bg-black/40 rounded-lg border border-green-900" 
-            style={{height: "500px"}}
+            style={{
+              height: "500px"
+              margin-left: "100px"
+            }}
           />
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
