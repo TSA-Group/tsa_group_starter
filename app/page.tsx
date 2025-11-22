@@ -28,7 +28,7 @@ export default function Home() {
       const docHeight = document.body.scrollHeight - window.innerHeight;
       const scrollPercent = docHeight > 0 ? scrollTop / docHeight : 0; // defensive
       const hue = scrollPercent * 360;
-      document.body.style.backgroundColor = `hsl(${hue}, 80%)`; // dark lightness to match your theme
+      document.body.style.backgroundColor = `hsl(${hue}, 0%, 80%)`; // dark lightness to match your theme
     }
 
     // Add listener
