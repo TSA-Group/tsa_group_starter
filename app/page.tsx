@@ -92,43 +92,37 @@ export default function Home() {
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
         </div>
         
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Scroll Color HSL</title>
-          <style>
-            body {
-              height: "4000px", 
-              margin: "0",
-              transition: background-color 0.2s;
-            }
-            h1 {
-              position: "fixed",
-              top: "20px"
-              left: "20px"
-              color: "white"
-              font-family: "sans-serif"
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Scroll Down</h1>
-          <script>
-            function updateBackground() {
-              let scrollTop = window.scrollY;
-              let docHeight = document.body.scrollHeight - window.innerHeight;
-              let scrollPercent = scrollTop / docHeight; // 0 at top, 1 at bottom
-              // Map scrollPercent (0-1) to hue (0-360)
-              let hue = scrollPercent * 360;
-              // Apply HSL background
-              document.body.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
-            }
-            // Update on scroll
-            window.addEventListener('scroll', updateBackground);
-            // Update immediately on page load
-            updateBackground();
-          </script>
-        </body>
+        "use client";
+
+import { useEffect } from "react";
+
+export default function Home() {
+  useEffect(() => {
+    function updateBackground() {
+      const scrollTop = window.scrollY;
+      const docHeight =
+        document.body.scrollHeight - window.innerHeight;
+      const scrollPercent = scrollTop / docHeight;
+      const hue = scrollPercent * 360;
+
+      document.body.style.backgroundColor = `hsl(${hue}, 70%, 50%)`;
+    }
+
+    window.addEventListener("scroll", updateBackground);
+    updateBackground(); // run on page load
+
+    return () => window.removeEventListener("scroll", updateBackground);
+  }, []);
+
+  return (
+    <main className="min-h-[4000px] p-10">
+      <h1 className="fixed top-5 left-5 text-white text-3xl font-bold">
+        Scroll Down
+      </h1>
+    </main>
+  );
+}
+
 
         {/* Footers */}
 
