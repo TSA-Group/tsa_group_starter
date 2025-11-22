@@ -55,7 +55,7 @@ export default function Home() {
         <motion.div
           ref={heroRef}
           initial={{ x: "0%" }}
-          animate={{ x: "-70%" }}
+          animate={{ x: "-60%" }}
           transition={{ duration: 1.4, delay: 0.25, ease: "easeOut" }}
           className="mx-auto w-full max-w-2xl border-l-4 border-green-500 bg-black p-10 rounded-xl shadow-xl mb-20"
         >
