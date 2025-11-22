@@ -85,7 +85,7 @@ export default function Home() {
               height: "500px",
               width: "400px",
               marginLeft: "300px",
-              marginDown: "400px",
+              marginBottom: "400px",
             }}
           />
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
