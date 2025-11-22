@@ -16,7 +16,7 @@ export const Header: React.FC = () => {
         
         {/* Logo aligned to left */}
         <motion.h1
-          whileHover={{ scale: 1.05, textShadow: "0px 0px 8px #22c55e" }}
+          whileHover={{ scale: 1.1, textShadow: "0px 0px 8px #22c55e" }}
           className="text-4xl font-bold tracking-wide"
         >
           Gatherly
@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
             <motion.a
               key={item}
               whileHover={{ scale: 1.1, color: "#ffffff" }}
-              transition={{ type: "spring", stiffness: 300, delay: 0.25 }}
+              transition={{ type: "spring", stiffness: 300 }}
               className="hover:text-white transition-colors duration-200"
               href={`#${item.toLowerCase()}`}
             >
