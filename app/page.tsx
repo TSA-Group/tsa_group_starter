@@ -98,16 +98,16 @@ export default function Home() {
           <title>Scroll Color HSL</title>
           <style>
             body {
-              height: 4000px; /* Long page for scrolling */
-              margin: 0;
-              transition: background-color 0.2s; /* Smooth transition */
+              height: "4000px", 
+              margin: "0",
+              transition: background-color 0.2s;
             }
             h1 {
-              position: fixed;
-              top: 20px;
-              left: 20px;
-              color: white;
-              font-family: sans-serif;
+              position: "fixed",
+              top: "20px"
+              left: "20px"
+              color: "white"
+              font-family: "sans-serif"
             }
           </style>
         </head>
