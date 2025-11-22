@@ -133,6 +133,40 @@ export default function Home() {
         </footer>
         </footer>
       </div>
+      window.addEventListener('scroll', () => {
+    let scrollTop = window.scrollY;
+    let docHeight = document.body.scrollHeight - window.innerHeight;
+    let scrollPercent = scrollTop / docHeight; // 0 at top, 1 at bottom
+
+    // Define color stops (you can add more)
+    const colors = [
+        { stop: 0, color: [255, 0, 0] },    // Red at top
+        { stop: 0.25, color: [255, 165, 0] }, // Orange
+        { stop: 0.5, color: [255, 255, 0] },  // Yellow
+        { stop: 0.75, color: [0, 128, 0] },   // Green
+        { stop: 1, color: [0, 0, 255] }       // Blue at bottom
+    ];
+
+    // Find which two colors to interpolate between
+    let startColor, endColor, t;
+    for (let i = 0; i < colors.length - 1; i++) {
+        if (scrollPercent >= colors[i].stop && scrollPercent <= colors[i + 1].stop) {
+            startColor = colors[i].color;
+            endColor = colors[i + 1].color;
+            // Normalize scrollPercent between start and end stop
+            t = (scrollPercent - colors[i].stop) / (colors[i + 1].stop - colors[i].stop);
+            break;
+        }
+    }
+
+    // Linear interpolation between colors
+    let r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * t);
+    let g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * t);
+    let b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * t);
+
+    // Set background color
+    document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+});
     </>
   );
 }
