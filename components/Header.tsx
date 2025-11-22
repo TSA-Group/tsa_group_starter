@@ -12,9 +12,9 @@ export const Header: React.FC = () => {
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
       className="bg-black text-green-400 shadow-md"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-left">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         
-        
+        {/* Logo aligned to left */}
         <motion.h1
           whileHover={{ scale: 1.05, textShadow: "0px 0px 8px #22c55e" }}
           className="text-4xl font-bold tracking-wide"
@@ -22,13 +22,13 @@ export const Header: React.FC = () => {
           Gatherly
         </motion.h1>
 
-        
-        <nav className="flex gap-10 text-lg font-medium">
+        {/* Navigation aligned to right */}
+        <nav className="flex gap-10 text-lg font-medium ml-auto">
           {navItems.map((item) => (
             <motion.a
               key={item}
               whileHover={{ scale: 1.1, color: "#ffffff" }}
-              transition={{ type: "spring", stiffness: 300, delay:0.25 }}
+              transition={{ type: "spring", stiffness: 300, delay: 0.25 }}
               className="hover:text-white transition-colors duration-200"
               href={`#${item.toLowerCase()}`}
             >
