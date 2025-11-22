@@ -9,19 +9,16 @@ import { motion, useScroll, useTransform } from "framer-motion";
 export default function Home() {
   const year = new Date().getFullYear();
 
-  // Ref for the hero section
   const heroRef = useRef(null);
-
-  // Ref for the first content box
   const boxRef = useRef(null);
 
-  // Scroll progress for first box
+  // Scroll progress for first content box
   const { scrollYProgress } = useScroll({
     target: boxRef,
     offset: ["start end", "end start"],
   });
 
-  // Box moves up as user scrolls
+  // Box moves up as you scroll
   const yBox = useTransform(scrollYProgress, [0, 1], [300, 0]); // starts 300px lower
 
   return (
@@ -87,9 +84,9 @@ export default function Home() {
         <div className="w-full max-w-4xl px-6 py-12 text-green-200 space-y-6">
           <motion.div
             ref={boxRef}
-            style={{ y: yBox }}
             className="h-96 bg-black/40 rounded-lg border border-green-900"
             style={{
+              y: yBox, // motion scroll transform
               height: "500px",
               width: "400px",
               marginLeft: "600px",
