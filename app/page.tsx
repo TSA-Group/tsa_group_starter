@@ -84,8 +84,8 @@ export default function Home() {
             style={{
               height: "500px",
               width: "400px",
-              marginLeft: "300px",
-              marginBottom: "400px",
+              marginLeft: "400px",
+              marginBottom: "600px",
             }}
           />
           <div className="h-96 bg-black/40 rounded-lg border border-green-900" />
