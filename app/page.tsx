@@ -17,26 +17,22 @@ export default function Home() {
     offset: ["start end", "end start"],
   });
 
-  const yBox = useTransform(scrollYProgress, [0, 1], [300, 0]);
+  const yBox = useTransform(scrollYProgress, [0, 1], [150, 0]); // smaller movement for smoothness
 
   return (
     <>
+      <Head>
+        <title>Gatherly — Home</title>
+        <meta name="description" content="Gatherly — Community Resource Hub" />
+        <link href="https://fonts.cdnfonts.com/css/tan-buster" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap"
+          rel="stylesheet"
+        />
+      </Head>
 
-
-      {/* Animated Sticky Header */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{
-          duration: 0.8,
-          delay: 0.25,
-          type: "spring",
-          stiffness: 120,
-        }}
-        className="fixed top-0 left-0 w-full z-50 bg-[#CFD8DC]/30 backdrop-blur-xl shadow-md"
-      >
-        <Header />
-      </motion.div>
+      {/* Header */}
+      <Header />
 
       {/* Page Content */}
       <div className="pt-24 min-h-screen flex flex-col items-center bg-[#F4F6F7] font-sans text-[#37474F]">
@@ -47,9 +43,9 @@ export default function Home() {
           {/* Left: Hero */}
           <motion.div
             ref={heroRef}
-            initial={{ x: "0%" }}
-            animate={{ x: "-60%" }}
-            transition={{ duration: 1.4, delay: 0.25, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
             className="w-full lg:w-1/2 border-l-4 border-[#26A69A] bg-white p-10 rounded-xl shadow-xl"
           >
             <h2
@@ -76,14 +72,14 @@ export default function Home() {
           <motion.div
             ref={boxRef}
             className="w-full lg:w-1/2 h-[450px] rounded-lg border border-[#90A4AE] bg-white/70 shadow"
-            initial={{ opacity: 0, scale: 0.98, y: 40 }}
+            initial={{ opacity: 0, scale: 0.98, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.25, ease: "easeOut" }}
             style={{ y: yBox as unknown as number }}
           />
         </div>
 
-        {/* Other content blocks */}
+        {/* Additional content blocks */}
         <div className="w-full max-w-4xl px-6 py-12 text-[#37474F] space-y-6">
           <div className="h-96 bg-white/70 rounded-lg border border-[#90A4AE] shadow" />
           <div className="h-96 bg-white/70 rounded-lg border border-[#90A4AE] shadow" />
