@@ -15,6 +15,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Gatherly",
   description: "Location Datasets",
+  icons: {
+    icon: [
+      {
+        media: '(prefers-color-scheme: light)',
+        url: '/apple-icon.png',
+        href: '/apple-icon.png',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
