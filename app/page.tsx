@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Header } from "../components/Header";
+
 import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
       </Head>
 
       {/* Header */}
-      <Header />
+    
 
       {/* Page Content */}
       <div className="pt-24 min-h-screen flex flex-col items-center bg-[#F4F6F7] font-sans text-[#37474F]">
