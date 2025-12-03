@@ -85,7 +85,7 @@ export default function Home() {
               height: "500px",
               width: "400px",
               marginLeft: "800px",
-              marginBottom: "50px",
+              marginBottom: "1500px",
             }}
           />
 
