@@ -76,7 +76,7 @@ export default function MapWithSearch() {
 
   return (
     <APIProvider
-      apiKey="AIzaSyA1o7Vio2dHZqCPqC4suZ1cJMPg79G2XFc" // Replace with your actual API key
+      apiKey="AIzaSyDzK6PTB7zsDG9ITehC9-F98UZlzgg2AEw" // Replace with your actual API key
       libraries={["places"]}
     >
       <div style={wrapperStyle}>
