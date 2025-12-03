@@ -70,7 +70,7 @@ export default function Home() {
             href="/map"
             className="inline-block rounded-full bg-[#26A69A] px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-[#1F8D81]"
           >
-            View Resources
+            Launch Maps
           </Link>
         </motion.div>
 
