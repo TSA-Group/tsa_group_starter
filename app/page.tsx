@@ -84,8 +84,8 @@ export default function Home() {
               y: yBox,
               height: "500px",
               width: "400px",
-              marginLeft: "600px",
-              marginBottom: "1000px",
+              marginLeft: "800px",
+              marginBottom: "650px",
             }}
           />
 
