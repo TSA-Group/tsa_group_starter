@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
-      className="backdrop-blur-md bg-[#CFD8DC]/95 text-[#37474F] shadow-md fixed top-0 left-0 w-full z-50"
+      className="fixed top-0 left-0 w-full z-50 bg-[#CFD8DC]/30 backdrop-blur-xl text-[#37474F] shadow-md"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
