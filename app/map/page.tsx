@@ -48,7 +48,7 @@ export default function MapWithSearch() {
     alignItems: "center",
     height: "100vh",
     backgroundColor: "#FFFFFF",
-    padding: "2rem",
+    padding: "3rem 2rem 6rem",
     gap: "1rem",
   };
 
