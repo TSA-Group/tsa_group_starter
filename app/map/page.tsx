@@ -57,7 +57,7 @@ export default function MapWithSearch() {
     width: "100%",
     maxWidth: "800px",
     borderRadius: "20px",
-    boxShadow: "0 0 20px rgba(0, 255, 0, 0.6)",
+    boxShadow: "0 0 20px rgba(173, 216, 230, 0.6)",
     overflow: "hidden",
   };
 
@@ -69,8 +69,8 @@ export default function MapWithSearch() {
     border: "none",
     fontSize: "1rem",
     boxShadow: "0 0 10px rgba(0, 255, 0, 0.4)",
-    backgroundColor: "#808080",
-    color: "rgba(0, 255, 0, 0.6)",
+    backgroundColor: "#D3D3D3",
+    color: "rgba(173, 216, 230, 0.6)",
   };
 
   return (
