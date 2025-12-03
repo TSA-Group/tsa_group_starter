@@ -47,7 +47,7 @@ export default function MapWithSearch() {
     flexDirection: "column",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#111",
+    backgroundColor: "#FFFFFF",
     padding: "2rem",
     gap: "1rem",
   };
@@ -69,7 +69,7 @@ export default function MapWithSearch() {
     border: "none",
     fontSize: "1rem",
     boxShadow: "0 0 10px rgba(0, 255, 0, 0.4)",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#000000",
     color: "rgba(0, 255, 0, 0.6)",
   };
 
