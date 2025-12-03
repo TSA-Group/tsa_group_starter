@@ -108,17 +108,16 @@ export default function Home() {
           </div>
 
           <div style={{ fontSize: "12px" }}>
-            <a href="tel:012-345-6789" className="text-[#26A69A] mr-12">
+            <a href="tel:012-345-6789" className="text-[black] mr-12">
               012-345-6789
             </a>
-            <span className="text-gray-500">[enter info]</span>
           </div>
 
           <div style={{ fontSize: "12px" }}>
             <a href="#" className="text-[black] mr-12">
               [enter info]
             </a>
-            <span className="text-gray-500">[enter info]</span>
+            <span className="text-black-500">[enter info]</span>
           </div>
         </footer>
 
