@@ -104,7 +104,6 @@ export default function Home() {
             <a href="mailto:Gatherly@gmail.com" className="text-[#26A69A] mr-10">
               Gatherly@gmail.com
             </a>
-            <span className="text-gray-500">[enter info]</span>
           </div>
 
           <div style={{ fontSize: "12px" }}>
@@ -117,7 +116,6 @@ export default function Home() {
             <a href="#" className="text-[black] mr-12">
               [enter info]
             </a>
-            <span className="text-black-500">[enter info]</span>
           </div>
         </footer>
 
