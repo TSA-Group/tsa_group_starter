@@ -57,6 +57,7 @@ export default function MapWithSearch() {
     width: "100%",
     maxWidth: "800px",
     borderRadius: "20px",
+    border: "2px solid #ADD8E6",
     boxShadow: "0 0 20px rgba(173, 216, 230, 0.6)",
     overflow: "hidden",
   };
