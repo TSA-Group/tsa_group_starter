@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import {
   APIProvider,
@@ -80,7 +81,12 @@ export default function MapWithSearch() {
       apiKey="AIzaSyDzK6PTB7zsDG9ITehC9-F98UZlzgg2AEw" // Replace with your actual API key
       libraries={["places"]}
     >
-      <div style={wrapperStyle}>
+      <motion.div
+        style={mapContainerStyle}
+        initial={{ opacity: 0, y: -80 }}   // starts above
+        animate={{ opacity: 1, y: 0 }}     // drops into place
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
         <div style={mapContainerStyle}>
           <Map
             zoom={12}
@@ -90,7 +96,7 @@ export default function MapWithSearch() {
           >
             <AdvancedMarker position={position} />
           </Map>
-        </div>
+        </motion.div>
         <input
           ref={inputRef}
           type="text"
