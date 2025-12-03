@@ -21,15 +21,7 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>Gatherly — Home</title>
-        <meta name="description" content="Gatherly — Community Resource Hub" />
-        <link href="https://fonts.cdnfonts.com/css/tan-buster" rel="stylesheet" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
+
 
       {/* Animated Sticky Header */}
       <motion.div
