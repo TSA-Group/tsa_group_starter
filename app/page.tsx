@@ -101,7 +101,7 @@ export default function Home() {
           </p>
 
           <div style={{ fontSize: "12px" }}>
-            <a href="mailto:Gatherly@gmail.com" className="text-[#26A69A] mr-10">
+            <a href="mailto:Gatherly@gmail.com" className="text-[black] mr-10">
               Gatherly@gmail.com
             </a>
           </div>
