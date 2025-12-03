@@ -83,20 +83,19 @@ export default function MapWithSearch() {
     >
       <motion.div
         style={mapContainerStyle}
-        initial={{ opacity: 0, y: -80 }}   // starts above
-        animate={{ opacity: 1, y: 0 }}     // drops into place
+        initial={{ opacity: 0, y: -80 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <div style={mapContainerStyle}>
-          <Map
-            zoom={12}
-            center={position}
-            mapId={MAP_ID}
-            style={{ height: "100%", width: "100%" }}
-          >
-            <AdvancedMarker position={position} />
-          </Map>
-        </motion.div>
+        <Map
+          zoom={12}
+          center={position}
+          mapId={MAP_ID}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <AdvancedMarker position={position} />
+        </Map>
+      </motion.div>
         <input
           ref={inputRef}
           type="text"
