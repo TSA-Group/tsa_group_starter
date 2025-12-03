@@ -66,9 +66,9 @@ export default function MapWithSearch() {
     maxWidth: "800px",
     padding: "0.75rem",
     borderRadius: "10px",
-    border: "none",
+    border: "2px solid #ADD8E6",
     fontSize: "1rem",
-    boxShadow: "0 0 10px rgba(173, 216, 230, 0.4)",
+    boxShadow: "0 0 15px rgba(173, 216, 230, 0.4)",
     backgroundColor: "#D3D3D3",
     color: "rgba(0,0,0,0.6)",
   };
