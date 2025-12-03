@@ -115,7 +115,7 @@ export default function Home() {
           </div>
 
           <div style={{ fontSize: "12px" }}>
-            <a href="#" className="text-[#26A69A] mr-12">
+            <a href="#" className="text-[black] mr-12">
               [enter info]
             </a>
             <span className="text-gray-500">[enter info]</span>
