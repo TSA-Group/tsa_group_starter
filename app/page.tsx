@@ -64,18 +64,50 @@ export default function Home() {
         </motion.div>
 
         {/* Scrollable content box */}
-        <div className="w-full max-w-4xl px-6 py-12 text-[#37474F] space-y-6">
-          <motion.div
-            ref={boxRef}
-            className="rounded-lg border border-[#90A4AE] bg-white/70 shadow"
-            style={{
-              y: yBox,
-              height: "500px",
-              width: "400px",
-              marginLeft: "600px",
-              marginBottom: "1000px",
-            }}
-          />
+        {/* Hero + Animated Box Row */}
+    <div className="w-full max-w-6xl px-6 mt-10 flex flex-col lg:flex-row justify-between items-start gap-10">
+
+  {/* Hero Section */}
+  <motion.div
+    ref={heroRef}
+    initial={{ x: 0, opacity: 0 }}
+    animate={{ x: -20, opacity: 1 }}
+    transition={{ duration: 1.2, ease: "easeOut" }}
+    className="w-full lg:w-1/2 border-l-4 border-[#26A69A] bg-white p-10 rounded-xl shadow-xl"
+  >
+    <h2
+      className="text-5xl font-bold leading-snug tracking-tight mb-6 text-[#37474F]"
+      style={{ fontFamily: "Momo Signature, sans-serif" }}
+    >
+      Community Resource Hub
+    </h2>
+
+    <p className="text-lg leading-relaxed mb-8 text-[#546E7A]">
+      Explore local nonprofits, events, support services, and helpful community programs—
+      all organized in one central place.
+    </p>
+
+    <Link
+      href="/map"
+      className="inline-block rounded-full bg-[#26A69A] px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-[#1F8D81]"
+    >
+      Launch Maps
+    </Link>
+  </motion.div>
+
+  {/* Animated Box (to the right of hero) */}
+  <motion.div
+    ref={boxRef}
+    className="w-full lg:w-1/2 h-[450px] rounded-lg border border-[#90A4AE] bg-white/70 shadow"
+    initial={{ opacity: 0, scale: 0.9, y: 40 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    transition={{ duration: 1, delay: 0.25, ease: "easeOut" }}
+    style={{
+      y: yBox, // scroll-based vertical parallax
+    }}
+  />
+    </div>
+
 
           <div className="h-96 bg-white/70 rounded-lg border border-[#90A4AE] shadow" />
           <div className="h-96 bg-white/70 rounded-lg border border-[#90A4AE] shadow" />
