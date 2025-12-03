@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import React from "react";
 
-const navItems = ["Resources", "Events", "Contact"];
+const navItems = ["Home", "Resources", "Events", "Contact"];
 
 export const Header: React.FC = () => {
   return (
@@ -10,10 +10,10 @@ export const Header: React.FC = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.25 }}
-      className="bg-[#CFD8DC]/90 text-[#37474F] shadow-md backdrop-blur-md"
+      className="bg-[#CFD8DC]/95 text-[#37474F] shadow-md backdrop-blur-md"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        
+
         {/* Logo */}
         <motion.h1
           whileHover={{
@@ -27,17 +27,24 @@ export const Header: React.FC = () => {
 
         {/* Navigation */}
         <nav className="flex gap-10 text-lg font-medium ml-auto">
-          {navItems.map((item) => (
-            <motion.a
-              key={item}
-              whileHover={{ scale: 1.1, color: "#26A69A" }} // teal hover
-              transition={{ type: "spring", stiffness: 260 }}
-              className="hover:text-[#26A69A] transition-colors duration-200 text-[#37474F]"
-              href={`/${item.toLowerCase()}`}
-            >
-              {item}
-            </motion.a>
-          ))}
+          {navItems.map((item) => {
+            const isHome = item === "Home";
+
+            return (
+              <motion.a
+                key={item}
+                whileHover={{
+                  scale: 1.1,
+                  color: "#26A69A", // teal hover highlight
+                }}
+                transition={{ type: "spring", stiffness: 260 }}
+                className="hover:text-[#26A69A] text-[#37474F] transition-colors duration-200"
+                href={isHome ? "/" : `/${item.toLowerCase()}`}
+              >
+                {item}
+              </motion.a>
+            );
+          })}
         </nav>
 
       </div>
