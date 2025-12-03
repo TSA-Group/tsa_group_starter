@@ -81,21 +81,22 @@ export default function MapWithSearch() {
       apiKey="AIzaSyDzK6PTB7zsDG9ITehC9-F98UZlzgg2AEw" // Replace with your actual API key
       libraries={["places"]}
     >
-      <motion.div
-        style={mapContainerStyle}
-        initial={{ opacity: 0, y: -80 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <Map
-          zoom={12}
-          center={position}
-          mapId={MAP_ID}
-          style={{ height: "100%", width: "100%" }}
+      <div style={wrapperStyle}>
+        <motion.div
+          style={mapContainerStyle}
+          initial={{ opacity: 0, y: -80 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <AdvancedMarker position={position} />
-        </Map>
-      </motion.div>
+          <Map
+            zoom={12}
+            center={position}
+            mapId={MAP_ID}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <AdvancedMarker position={position} />
+          </Map>
+        </motion.div>
         <input
           ref={inputRef}
           type="text"
