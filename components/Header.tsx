@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import React from "react";
 
-const navItems = ["Home", "Resources", "Events", "Contact"];
+const navItems = ["Resources", "Events", "Contact"];
 
 export const Header: React.FC = () => {
   return (
