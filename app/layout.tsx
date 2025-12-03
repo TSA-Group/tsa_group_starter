@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Header } from "../components/Header"; // 👈 import your Header component
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +19,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        media: '(prefers-color-scheme: light)',
-        url: '/apple-icon.png',
-        href: '/apple-icon.png',
+        media: "(prefers-color-scheme: light)",
+        url: "/apple-icon.png",
+        href: "/apple-icon.png",
       },
     ],
   },
@@ -32,11 +33,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* 👇 Header always visible at the top */}
+        <Header />
+
+        {/* Page content */}
+        <main className="min-h-screen">{children}</main>
       </body>
     </html>
   );

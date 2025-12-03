@@ -3,7 +3,6 @@
 import React, { useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { Header } from "../components/Header";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Home() {
@@ -24,28 +23,18 @@ export default function Home() {
       <Head>
         <title>Gatherly — Home</title>
         <meta name="description" content="Gatherly — Community Resource Hub" />
-        <link href="https://fonts.cdnfonts.com/css/tan-buster" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.cdnfonts.com/css/tan-buster"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap"
+          rel="stylesheet"
+        />
       </Head>
-
-      {/* Animated Sticky Header */}
-      <motion.div
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{
-          duration: 0.8,
-          delay: 0.25,
-          type: "spring",
-          stiffness: 120
-        }}
-        className="fixed top-0 left-0 w-full z-50 bg-[#FFFFFF]/90 backdrop-blur-md shadow-md"
-      >
-        <Header />
-      </motion.div>
 
       {/* Page Content */}
       <div className="pt-24 min-h-screen flex flex-col items-center bg-[#F4F6F7] font-sans text-[#37474F]">
-
         {/* Hero Section */}
         <motion.div
           ref={heroRef}
@@ -62,8 +51,8 @@ export default function Home() {
           </h2>
 
           <p className="text-lg leading-relaxed mb-8 text-[#546E7A]">
-            Explore local nonprofits, events, support services, and helpful community programs—
-            all organized in one central place.
+            Explore local nonprofits, events, support services, and helpful
+            community programs— all organized in one central place.
           </p>
 
           <Link
@@ -76,7 +65,6 @@ export default function Home() {
 
         {/* Scrollable content box */}
         <div className="w-full max-w-4xl px-6 py-12 text-[#37474F] space-y-6">
-
           <motion.div
             ref={boxRef}
             className="rounded-lg border border-[#90A4AE] bg-white/70 shadow"
@@ -91,7 +79,6 @@ export default function Home() {
 
           <div className="h-96 bg-white/70 rounded-lg border border-[#90A4AE] shadow" />
           <div className="h-96 bg-white/70 rounded-lg border border-[#90A4AE] shadow" />
-
         </div>
 
         {/* Footer */}
@@ -101,7 +88,10 @@ export default function Home() {
           </p>
 
           <div style={{ fontSize: "12px" }}>
-            <a href="mailto:Gatherly@gmail.com" className="text-[#26A69A] mr-10">
+            <a
+              href="mailto:Gatherly@gmail.com"
+              className="text-[#26A69A] mr-10"
+            >
               Gatherly@gmail.com
             </a>
             <span className="text-gray-500">[enter info]</span>
@@ -125,7 +115,6 @@ export default function Home() {
         <footer className="w-full p-4 text-center text-sm text-[#607D8B] bg-white border-t border-[#B0BEC5] mt-10">
           © {year} Gatherly. All rights reserved.
         </footer>
-
       </div>
     </>
   );

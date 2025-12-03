@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import React from "react";
+import ThemeToggle from "./ThemeToggle";
 
 const navItems = ["Resources", "Events", "Contact"];
 
@@ -22,21 +23,25 @@ export const Header: React.FC = () => {
           Gatherly
         </motion.h1>
 
-        {/* Navigation aligned to right */}
-        <nav className="flex gap-10 text-lg font-medium ml-auto">
-          {navItems.map((item) => (
-            <motion.a
-              key={item}
-              whileHover={{ scale: 1.1, color: "#ffffff" }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="hover:text-white transition-colors duration-200"
-              href={`${item.toLowerCase()}`}
-            >
-              {item}
-            </motion.a>
-          ))}
-        </nav>
+        {/* Navigation + Theme Toggle aligned to right */}
+        <div className="flex items-center gap-6 ml-auto">
+          <nav className="flex gap-10 text-lg font-medium">
+            {navItems.map((item) => (
+              <motion.a
+                key={item}
+                whileHover={{ scale: 1.1, color: "#ffffff" }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="hover:text-white transition-colors duration-200"
+                href={`/${item.toLowerCase()}`}
+              >
+                {item}
+              </motion.a>
+            ))}
+          </nav>
 
+          {/* Theme toggle button */}
+          <ThemeToggle />
+        </div>
       </div>
     </motion.header>
   );
