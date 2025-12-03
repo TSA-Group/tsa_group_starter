@@ -49,7 +49,7 @@ export default function MapWithSearch() {
     height: "100vh",
     backgroundColor: "#FFFFFF",
     padding: "3rem 2rem 6rem",
-    paddingTop: "80rem",
+    paddingTop: "8rem",
     gap: "1rem",
   };
 
