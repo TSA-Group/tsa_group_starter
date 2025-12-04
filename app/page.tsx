@@ -47,7 +47,7 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               className="mt-4 px-5 py-2 bg-[#26A69A] text-white rounded-lg shadow-md hover:bg-[#1F8D81]"
             >
-              Calendar Dept
+              Launch Maps
             </motion.button>
           </motion.div>
         </motion.div>
