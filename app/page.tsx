@@ -2,9 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { motion, Variants } from "framer-motion";
-
-
+import { motion, Variants, easeInOut } from "framer-motion";
 
 const container: Variants = {
   hidden: {},
@@ -35,13 +33,6 @@ const cardPop: Variants = {
   },
 };
 
-const float = {
-  animate: {
-    y: [0, -6, 0],
-    transition: { duration: 4.5, ease: "easeInOut", repeat: Infinity },
-  },
-};
-
 export default function Home() {
   const year = new Date().getFullYear();
 
@@ -53,7 +44,7 @@ export default function Home() {
       viewport={{ once: true, amount: 0.12 }}
       variants={container}
     >
-      {/* Move content down so a separate header doesn't overlap */}
+      {/* Main content */}
       <main className="w-full max-w-7xl mx-auto px-6 py-12 mt-28 grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* LEFT COLUMN */}
         <motion.section
@@ -70,12 +61,10 @@ export default function Home() {
             transition={{ type: "spring", stiffness: 220, damping: 18 }}
           >
             <h2 className="text-xl font-semibold mb-2">Your Personal Geolocation Data Assembler</h2>
-
             <p className="text-sm text-[#546E7A]">
               Automatically gathers and organizes nearby community resources — neighborhood centers, food
               pantries, and local support events.
             </p>
-
             <div className="mt-4">
               <Link href="/map" legacyBehavior>
                 <a
@@ -94,7 +83,9 @@ export default function Home() {
             whileHover={{ y: -4, boxShadow: "0 18px 30px rgba(38,166,154,0.08)" }}
           >
             <h3 className="text-lg font-semibold mb-1">Quick Actions</h3>
-            <p className="text-sm text-[#607D8B]">Add a resource, suggest an event, or report an update to your community board.</p>
+            <p className="text-sm text-[#607D8B]">
+              Add a resource, suggest an event, or report an update to your community board.
+            </p>
           </motion.div>
         </motion.section>
 
@@ -113,7 +104,10 @@ export default function Home() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.2 }}
-            {...float}
+            animate={{
+              y: [0, -6, 0],
+              transition: { duration: 4.5, ease: easeInOut, repeat: Infinity },
+            }}
           >
             GATHERLY
           </motion.h1>
@@ -128,11 +122,9 @@ export default function Home() {
             <div className="absolute right-0 -bottom-12 w-56 h-56 rounded-full bg-[#f1fbfa] opacity-60 blur-lg pointer-events-none" />
             <h3 className="text-lg font-semibold">Bulletin Board</h3>
             <p className="text-sm text-[#607D8B] mt-2">
-              Community posts, neighborhood updates, and shared resources. Pin important notices to the
-              top so everyone sees them.
+              Community posts, neighborhood updates, and shared resources. Pin important notices to the top so everyone sees them.
             </p>
 
-            {/* Example pinned items (staggered) */}
             <motion.ul
               className="mt-6 grid gap-3"
               variants={{ show: { transition: { staggerChildren: 0.06 } } }}
