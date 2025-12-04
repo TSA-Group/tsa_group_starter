@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 w-full z-50 bg-lightgray/30 backdrop-blur-xl text-darkgray shadow-md"
+      className="fixed top-0 left-0 w-full z-50 bg-lightgray/60 backdrop-blur-xl shadow-md"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <motion.h1
@@ -25,13 +25,13 @@ export const Header: React.FC = () => {
         </motion.h1>
 
         <div className="flex items-center gap-6 ml-auto">
-          <nav className="flex gap-10 text-lg font-medium">
+          <nav className="flex gap-10 text-lg font-semibold tracking-wide">
             {navItems.map((item) => (
               <motion.a
                 key={item}
-                whileHover={{ scale: 1.05, color: "#26A69A" }} // Framer Motion still uses hex
+                whileHover={{ scale: 1.05, color: "#26A69A" }}
                 transition={{ type: "spring", stiffness: 300 }}
-                className="hover:text-teal text-darkgray transition-colors duration-200"
+                className="text-darkgray hover:text-teal transition-colors duration-200"
                 href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
               >
                 {item}
