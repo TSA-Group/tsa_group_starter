@@ -1,27 +1,19 @@
-// components/ThemeToggle.js
-import React, { useEffect } from "react";
+"use client";
+import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
-  // Load saved theme on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
+  const [theme, setTheme] = useState("light");
 
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    const isDark = html.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  };
+  useEffect(() => {
+    document.querySelector("html")?.setAttribute("data-theme", theme);
+  }, [theme]);
 
   return (
     <button
-      onClick={toggleTheme}
-      className="px-3 py-2 rounded-md bg-[#26A69A] text-white hover:bg-[#1F8D81] transition"
+      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+      className="inline-block rounded-full bg-[#26A69A] px-5 py-2 text-white font-medium shadow-md transition-colors hover:bg-[#1F8D81]"
     >
-      Toggle Theme
+      {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
     </button>
   );
 }
