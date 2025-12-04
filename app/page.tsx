@@ -84,7 +84,7 @@ export default function Home() {
           >
             <h3 className="text-lg font-semibold mb-1">Quick Actions</h3>
             <p className="text-sm text-[#607D8B]">
-              Add a resource, suggest an event, or report an update to your community board.
+              Brendan add something here.
             </p>
           </motion.div>
         </motion.section>
