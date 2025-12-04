@@ -25,37 +25,7 @@ export default function Home() {
       animate="show"
       variants={fade}
     >
-      {/* HEADER */}
-      <motion.header
-        variants={fadeUp}
-        initial="hidden"
-        animate="show"
-        className="w-full flex justify-between items-center px-8 py-4 bg-white shadow-md sticky top-0 z-20"
-      >
-        <h1
-          className="text-3xl font-bold tracking-tight"
-          style={{ fontFamily: "Momo Signature" }}
-        >
-          Gatherly
-        </h1>
-
-        <nav className="hidden md:flex gap-10 text-lg font-medium">
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Link href="/">Home</Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Link href="/resources">Resources</Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Link href="/events">Events</Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <Link href="/contact">Contact</Link>
-          </motion.div>
-        </nav>
-
-        <div className="md:hidden text-3xl">☰</div>
-      </motion.header>
+      
 
       {/* MAIN GRID */}
       <main className="w-full max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
