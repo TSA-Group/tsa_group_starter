@@ -1,116 +1,155 @@
 "use client";
 
-import React, { useRef } from "react";
-import Head from "next/head";
+import React from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import ThemeToggle from "../components/ThemeToggle"; 
+import { motion } from "framer-motion";
 
 export default function Home() {
   const year = new Date().getFullYear();
 
-  const heroRef = useRef<HTMLDivElement | null>(null);
-  const boxRef = useRef<HTMLDivElement | null>(null);
+  const fadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+  };
 
-  const { scrollYProgress } = useScroll({
-    target: boxRef,
-    offset: ["start end", "end start"],
-  });
-
-  const yBox = useTransform(scrollYProgress, [0, 1], [150, 0]);
+  const fade = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { duration: 0.6 } },
+  };
 
   return (
-    <>
-      <Head>
-        <title>Gatherly — Home</title>
-        <meta name="description" content="Gatherly — Community Resource Hub" />
-        <link href="https://fonts.cdnfonts.com/css/tan-buster" rel="stylesheet" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Momo+Signature&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
-
-      
-      
-      <header className="fixed top-0 left-0 w-full z-50 bg-white/70 dark:bg-[#121212] backdrop-blur-xl shadow-md p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-[#37474F] dark:text-[#ECEFF1]">
+    <motion.div
+      className="min-h-screen bg-[#F4F6F7] text-[#37474F]"
+      initial="hidden"
+      animate="show"
+      variants={fade}
+    >
+      {/* HEADER */}
+      <motion.header
+        variants={fadeUp}
+        className="w-full flex justify-between items-center px-8 py-4 bg-white shadow-md sticky top-0 z-20"
+      >
+        <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "Momo Signature" }}>
           Gatherly
         </h1>
-        <ThemeToggle /> 
-      </header>
 
-      
-      <div className="pt-24 min-h-screen flex flex-col items-center bg-[#F4F6F7] dark:bg-[#121212] font-sans text-[#37474F] dark:text-[#ECEFF1]">
-        
-        
-        <div className="w-full max-w-6xl px-6 mt-6 flex flex-col lg:flex-row gap-10 items-start">
-          
-          
+        <nav className="hidden md:flex gap-10 text-lg font-medium">
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Link href="/">Home</Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Link href="/resources">Resources</Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Link href="/events">Events</Link>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }}>
+            <Link href="/contact">Contact</Link>
+          </motion.div>
+        </nav>
+
+        <div className="md:hidden text-3xl">☰</div>
+      </motion.header>
+
+      {/* MAIN GRID */}
+      <main className="w-full max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
+
+        {/* LEFT COLUMN */}
+        <motion.div
+          variants={fadeUp}
+          className="space-y-8"
+        >
+          {/* GEOLOCATION BOX */}
           <motion.div
-            ref={heroRef}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            className="w-full lg:w-1/2 border-l-4 border-[#26A69A] bg-white dark:bg-[#1E1E1E] p-10 rounded-xl shadow-xl"
+            whileHover={{ scale: 1.02 }}
+            className="p-6 bg-white border-l-4 border-[#26A69A] rounded-2xl shadow-lg"
           >
-            <h2
-              className="text-5xl font-bold leading-snug tracking-tight mb-6 text-[#37474F] dark:text-[#ECEFF1]"
-              style={{ fontFamily: "Momo Signature, sans-serif" }}
-            >
-              Community Resource Hub
+            <h2 className="text-xl font-semibold mb-2">
+              Your Personal Geolocation Data Assembler
             </h2>
 
-            <p className="text-lg leading-relaxed mb-8 text-[#546E7A] dark:text-[#B0BEC5]">
-              Explore local nonprofits, events, support services, and helpful community programs—
-              all organized in one central place.
+            <p className="text-sm text-[#546E7A]">
+              Automatically gathers and organizes nearby community resources.
             </p>
 
-            <Link
-              href="/map"
-              className="inline-block rounded-full bg-[#26A69A] px-8 py-3 text-white font-medium shadow-md transition-colors hover:bg-[#1F8D81]"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              className="mt-4 px-5 py-2 bg-[#26A69A] text-white rounded-lg shadow-md hover:bg-[#1F8D81]"
             >
-              Launch Maps
-            </Link>
+              Calendar Dept
+            </motion.button>
+          </motion.div>
+        </motion.div>
+
+        {/* CENTER COLUMN */}
+        <motion.div
+          variants={fadeUp}
+          className="flex flex-col items-center space-y-8"
+        >
+          {/* GIANT TITLE */}
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            className="text-7xl font-bold tracking-wide"
+            style={{ fontFamily: "TAN Buster, sans-serif" }}
+          >
+            GATHERLY
+          </motion.h1>
+
+          {/* BULLETIN BOARD */}
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            className="w-full h-[350px] bg-white rounded-2xl border border-[#90A4AE] shadow-lg p-6"
+          >
+            <h3 className="text-lg font-semibold">Bulletin Board</h3>
+            <p className="text-sm text-[#607D8B] mt-2">
+              Posts, updates, and shared community info will appear here.
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* RIGHT COLUMN */}
+        <motion.div variants={fadeUp} className="space-y-8">
+
+          {/* Upcoming Events header */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-4 bg-white border-l-4 border-[#26A69A] rounded-2xl shadow-lg"
+          >
+            <h2 className="text-xl font-semibold">Upcoming Events</h2>
           </motion.div>
 
-          
-          <motion.div
-            ref={boxRef}
-            className="w-full lg:w-1/2 h-[450px] rounded-lg border border-[#90A4AE] bg-white/70 dark:bg-[#1E1E1E] shadow"
-            initial={{ opacity: 0, scale: 0.98, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.25, ease: "easeOut" }}
-            style={{ y: yBox as unknown as number }}
-          />
-        </div>
+          {/* Event cards */}
+          <div className="space-y-5">
+            {[1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                whileHover={{ scale: 1.03 }}
+                className="h-28 bg-white rounded-xl border border-[#B0BEC5] shadow-md flex items-center justify-center text-[#607D8B] text-lg"
+              >
+                Image
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-        
-        <footer className="w-full p-4 text-left text-sm text-[#37474F] dark:text-[#ECEFF1] bg-white dark:bg-[#1E1E1E] border-t border-[#B0BEC5] dark:border-[#37474F] mt-4">
-          <p className="underline hover:text-[#26A69A]">
-            <b>Contact Our Community Staff:</b>
-          </p>
-          <div style={{ fontSize: "12px" }}>
-            <a href="mailto:Gatherly@gmail.com" className="text-black dark:text-[#ECEFF1] mr-10">
-              Gatherly@gmail.com
-            </a>
-          </div>
-          <div style={{ fontSize: "12px" }}>
-            <a href="tel:012-345-6789" className="text-black dark:text-[#ECEFF1] mr-12">
-              012-345-6789
-            </a>
-          </div>
-          <div style={{ fontSize: "12px" }}>
-            <a href="#" className="text-black dark:text-[#ECEFF1] mr-12">
-              [enter info]
-            </a>
-          </div>
-        </footer>
+      </main>
 
-        <footer className="w-full p-4 text-center text-sm text-[#607D8B] dark:text-[#B0BEC5] bg-white dark:bg-[#1E1E1E] border-t border-[#B0BEC5] dark:border-[#37474F] mt-10">
-          © {year} Gatherly. All rights reserved.
-        </footer>
-      </div>
-    </>
+      {/* FOOTER CONTACT */}
+      <motion.footer
+        variants={fadeUp}
+        className="w-full p-6 bg-white border-t border-[#CFD8DC]"
+      >
+        <p className="font-semibold underline mb-2">Contact Our Community Staff:</p>
+        <p>Gatherly@gmail.com</p>
+        <p>012-345-6789</p>
+      </motion.footer>
+
+      {/* COPYRIGHT FOOTER */}
+      <footer className="w-full p-4 text-center text-sm text-[#607D8B] bg-white border-t">
+        © {year} Gatherly. All rights reserved.
+      </footer>
+    </motion.div>
   );
 }
