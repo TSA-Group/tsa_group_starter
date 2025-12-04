@@ -22,6 +22,7 @@ export default function MapWithSearch() {
     )
       return;
 
+    
     initializedRef.current = true;
 
     autocompleteRef.current = new window.google.maps.places.Autocomplete(
