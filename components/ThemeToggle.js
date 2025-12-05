@@ -1,4 +1,3 @@
-// components/ThemeToggle.jsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -35,10 +34,11 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       className="relative w-14 h-14 rounded-full flex items-center justify-center bg-transparent"
     >
+      {/* Planet */}
       <motion.div
         animate={{ rotate: theme === "light" ? 360 : -360 }}
         transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
-        className="w-10 h-10 rounded-full planet"
+        className="w-10 h-10 rounded-full planet relative"
         style={{
           background:
             theme === "light"
@@ -69,10 +69,6 @@ export default function ThemeToggle() {
           }}
         />
       </motion.div>
-
-      <span className="absolute -bottom-6 text-xs font-medium text-neutral">
-        {theme === "light" ? "Day" : "Night"}
-      </span>
     </motion.button>
   );
 }
