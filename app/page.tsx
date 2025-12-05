@@ -43,7 +43,7 @@ export default function Home() {
       {/* Theme Toggle */}
 
       {/* Main content */}
-      <main className="w-full max-w-7xl mx-auto px-6 pt-10 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <main className="w-full max-w-7xl mx-auto px-16 pt-10 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* LEFT COLUMN */}
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
