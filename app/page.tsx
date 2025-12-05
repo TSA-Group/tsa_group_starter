@@ -98,46 +98,37 @@ export default function Home() {
 
           <motion.div
             variants={cardPop}
-            className="w-full md:w-[88%] h-[350px] bg-info rounded-2xl border border-error shadow-lg p-6 relative overflow-hidden transition-colors duration-300"
+            className="w-full md:w-[88%] h-[350px] bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-2xl border border-gray-400 dark:border-gray-600 shadow-2xl p-4 relative overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transition-colors duration-300"
             whileHover={{ scale: 1.01 }}
           >
-            <h3 className="text-lg font-semibold">Bulletin Board</h3>
-            <p className="text-sm text-secondary/70 mt-2">
-              Community posts, neighborhood updates, and shared resources.
-            </p>
-
-            <motion.ul className="mt-6 grid gap-3">
+            <h3 className="text-lg font-semibold text-black dark:text-white mb-2">Bulletin Board</h3>
+            <div className="h-full overflow-y-auto">
               {[
-                {
-                  title: "Free community dinner — Sat 6pm",
-                  meta: "Downtown Church",
-                },
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
-                {
-                  title: "Volunteer literacy tutors needed",
-                  meta: "Library Annex",
-                },
+                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
+                { title: "Brendan make something up", meta: "Brendan make something up, place" },
+                { title: "Brendan make something up", meta: "Brendan make something up, place" },
+                { title: "Brendan make something up", meta: "Brendan make something up, place" },
               ].map((item, i) => (
-                <motion.li
+                <motion.div
                   key={i}
                   variants={cardPop}
-                  className="bg-primary border border-primary-content rounded-lg p-3 shadow-sm hover:shadow-md transition-colors duration-300"
-                  whileHover={{ y: -4 }}
+                  className="bg-gray-100/60 dark:bg-gray-900/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-lg p-3 mb-2 shadow-lg hover:shadow-xl transition"
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="text-sm font-semibold">{item.title}</div>
-                      <div className="text-xs text-accent-content/60">
-                        {item.meta}
-                      </div>
+                      <div className="text-sm font-semibold text-black dark:text-white">{item.title}</div>
+                      <div className="text-xs text-gray-700 dark:text-gray-300">{item.meta}</div>
                     </div>
-                    <div className="text-xs text-neutral font-medium">
-                      Details
-                    </div>
+                    <div className="text-xs text-black dark:text-white font-medium">Details</div>
                   </div>
-                </motion.li>
+                  <div className="h-1 w-full bg-gray-300 dark:bg-gray-700 mt-2 rounded-full">
+                    <div className="h-1 bg-gray-600 dark:bg-gray-300 rounded-full w-2/3"></div>
+                  </div>
+                </motion.div>
               ))}
-            </motion.ul>
+            </div>
           </motion.div>
         </motion.section>
 
