@@ -1,25 +1,38 @@
-import React, { useEffect } from "react";
+"use client";
+import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
+  const [theme, setTheme] = useState("light");
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
+    const stored = localStorage.getItem("theme");
+    if (stored) {
+      setTheme(stored);
+      document.documentElement.setAttribute("data-theme", stored);
+    } else {
+      // auto-detect system theme on first visit
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      const auto = prefersDark ? "dark" : "light";
+      setTheme(auto);
+      document.documentElement.setAttribute("data-theme", auto);
     }
   }, []);
 
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    const isDark = html.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
+  const toggle = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    localStorage.setItem("theme", next);
+    document.documentElement.setAttribute("data-theme", next);
   };
 
   return (
     <button
-      onClick={toggleTheme}
-      className="px-3 py-2 rounded-md bg-[#26A69A] text-white hover:bg-[#1F8D81] transition"
+      className="inline-block px-5 py-2 rounded-lg bg-neutral text-error font-medium shadow-md hover:shadow-xl transition"
+      onClick={toggle}
     >
-      Toggle Theme
+      {theme === "light" ? "Dark Mode" : "Light Mode"}
     </button>
   );
 }

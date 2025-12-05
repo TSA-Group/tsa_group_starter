@@ -17,6 +17,7 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@next/codemod": "^16.0.7",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^20",
     "@types/react": "^19",
