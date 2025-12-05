@@ -45,7 +45,7 @@ export default function Home() {
       variants={container}
     >
       {/* Main content */}
-      <main className="w-full max-w-7xl mx-auto px-60 py-20 mt-28 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <main className="w-full max-w-7xl mx-auto px-15 py-60 mt-28 grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* LEFT COLUMN */}
         <motion.section
           variants={fadeUp}
