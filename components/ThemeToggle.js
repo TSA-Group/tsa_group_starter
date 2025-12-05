@@ -6,17 +6,23 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.setAttribute("data-theme", stored);
+
+    if (stored === "dark") {
+      document.documentElement.classList.add("dark");
+      setTheme("dark");
+    } else if (stored === "light") {
+      document.documentElement.classList.remove("dark");
+      setTheme("light");
     } else {
-      // auto-detect system theme on first visit
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      const auto = prefersDark ? "dark" : "light";
-      setTheme(auto);
-      document.documentElement.setAttribute("data-theme", auto);
+      // detect system theme
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDark) {
+        document.documentElement.classList.add("dark");
+        setTheme("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        setTheme("light");
+      }
     }
   }, []);
 
@@ -24,12 +30,17 @@ export default function ThemeToggle() {
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
     localStorage.setItem("theme", next);
-    document.documentElement.setAttribute("data-theme", next);
+
+    if (next === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   };
 
   return (
     <button
-      className="inline-block px-5 py-2 rounded-lg bg-neutral text-error font-medium shadow-md hover:shadow-xl transition"
+      className="inline-block px-5 py-2 rounded-lg bg-black text-white dark:bg-white dark:text-black font-medium shadow-md hover:shadow-xl transition"
       onClick={toggle}
     >
       {theme === "light" ? "Dark Mode" : "Light Mode"}
