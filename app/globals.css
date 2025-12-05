@@ -44,6 +44,17 @@ body {
     color: var(--neutral);
     font-family: Arial, Helvetica, sans-serif;
     transition:
-        background 0.35s ease,
-        color 0.35s ease; /* smooth theme fade */
+        background 0.45s ease,
+        color 0.45s ease;
+}
+
+html {
+    transition:
+        background 0.45s ease,
+        color 0.45s ease;
+}
+
+/* optional: smooth globe sharpening */
+.planet {
+    transition: box-shadow 0.35s ease;
 }

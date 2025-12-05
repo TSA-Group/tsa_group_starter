@@ -39,6 +39,7 @@ export const Header: React.FC = () => {
             ))}
           </nav>
 
+          {/* 👇 The ONLY place ThemeToggle exists */}
           <ThemeToggle />
         </div>
       </div>

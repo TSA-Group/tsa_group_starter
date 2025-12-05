@@ -1,12 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}",
+    "./pages/**/*.{ts,tsx,js,jsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
+    "./app/**/*.{ts,tsx,js,jsx}",
   ],
   plugins: [require("daisyui")],
   daisyui: {
-    themes: false, // ⛔ disables default DaisyUI light & dark
+    themes: false, // disables DaisyUI's default light/dark so your CSS wins
   },
 };

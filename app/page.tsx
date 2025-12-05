@@ -3,7 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import { motion, Variants, easeInOut } from "framer-motion";
-import ThemeToggle from "../components/ThemeToggle"; // 👈 import toggle
 
 const container: Variants = {
   hidden: {},
@@ -41,13 +40,9 @@ export default function Home() {
       viewport={{ once: true, amount: 0.12 }}
       variants={container}
     >
-      {/* Theme Toggle */}
-      <div className="fixed top-4 right-4">
-        <ThemeToggle />
-      </div>
+      {/* 👇 ThemeToggle removed to avoid duplicate (now only in Header) */}
 
-      {/* Main content */}
-      <main className="w-full max-w-7xl mx-auto px-15 py-60 mt-28 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <main className="w-full max-w-7xl mx-auto px-6 py-12 mt-28 grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* LEFT COLUMN */}
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
@@ -165,7 +160,7 @@ export default function Home() {
               className="h-28 bg-info rounded-xl border border-success shadow-md flex items-center gap-4 p-4 hover:shadow-xl transition-colors duration-300"
               whileHover={{ translateY: -6 }}
             >
-              <div className="flex-none w-20 h-20 bg-	success-content rounded-md flex items-center justify-center text-neutral font-semibold">
+              <div className="flex-none w-20 h-20 bg-success-content rounded-md flex items-center justify-center text-neutral font-semibold">
                 IMG
               </div>
               <div className="flex-1">
