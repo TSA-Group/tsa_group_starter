@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import React from "react";
 import ThemeToggle from "./ThemeToggle";
 
-const navItems = ["Home", "Resources", "Events", "Contact"];
+const navItems = ["Map", "Events", "Contact"];
 
 export const Header: React.FC = () => {
   return (
