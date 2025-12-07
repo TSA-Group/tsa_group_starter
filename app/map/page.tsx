@@ -17,7 +17,7 @@ export default function Page() {
   const [center, setCenter] = useState<LatLng>({
     lat: 37.7749,
     lng: -122.4194,
-  }); // Default: San Francisco
+  });
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
@@ -39,7 +39,7 @@ export default function Page() {
           background: "#fff",
         }}
       >
-        {/* MAP CONTAINER */}
+        {/* MAP */}
         <div
           style={{
             width: "100%",
@@ -50,16 +50,12 @@ export default function Page() {
             overflow: "hidden",
           }}
         >
-          <Map
-            defaultZoom={12}
-            center={center}
-            mapId="8859a83a13a834f62d11ad10"
-          >
+          <Map defaultZoom={12} center={center} mapId="8859a83a13a834f62d11ad10">
             {selectedPlace && <Marker position={selectedPlace} />}
           </Map>
         </div>
 
-        {/* SEARCH BOX BELOW MAP */}
+        {/* SEARCH BOX */}
         <div style={{ width: "100%", maxWidth: "800px" }}>
           <SearchBox
             input={input}
@@ -95,10 +91,11 @@ function SearchBox({
   const placesLib = useMapsLibrary("places");
   const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
 
-  // Initialize AutocompleteService once
+  // Initialize service once when library is ready
   useEffect(() => {
-    if (!placesLib) return;
-    serviceRef.current = new placesLib.AutocompleteService();
+    if (placesLib && !serviceRef.current) {
+      serviceRef.current = new placesLib.AutocompleteService();
+    }
   }, [placesLib]);
 
   // Fetch predictions when input changes
@@ -126,11 +123,7 @@ function SearchBox({
         setCenter(loc);
         setSelectedPlace(loc);
         setInput(place.formatted_address || "");
-
-        // ✅ Clear predictions after selection
-        setTimeout(() => {
-          setPredictions([]);
-        }, 0);
+        setTimeout(() => setPredictions([]), 0);
       }
     });
   };
