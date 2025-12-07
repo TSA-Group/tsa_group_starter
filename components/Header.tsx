@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "./ThemeToggle";
 
 const navItems = ["Map", "Events", "Contact"];
 
@@ -14,7 +14,6 @@ export const Header: React.FC = () => {
       className="fixed top-0 left-0 w-full z-50 bg-base-200/30 backdrop-blur-xl text-base-content shadow-md"
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo / Home link */}
         <Link href="/" passHref>
           <motion.h1
             whileHover={{
@@ -27,7 +26,6 @@ export const Header: React.FC = () => {
           </motion.h1>
         </Link>
 
-        {/* Navigation + Theme toggle */}
         <div className="flex items-center gap-6 ml-auto">
           <nav className="flex gap-10 text-lg font-medium">
             {navItems.map((item) => (
