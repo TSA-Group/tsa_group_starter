@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   APIProvider,
   Map,
@@ -93,28 +93,29 @@ function SearchBox({
   setSelectedPlace,
 }: SearchBoxProps) {
   const placesLib = useMapsLibrary("places");
-  const [service, setService] =
-    useState<google.maps.places.AutocompleteService | null>(null);
+  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
 
+  // Initialize AutocompleteService once
   useEffect(() => {
     if (!placesLib) return;
-    setService(new placesLib.AutocompleteService());
+    serviceRef.current = new placesLib.AutocompleteService();
   }, [placesLib]);
 
+  // Fetch predictions when input changes
   useEffect(() => {
-    if (!service || !input) {
+    if (!serviceRef.current || !input) {
       setPredictions([]);
       return;
     }
-    service.getPlacePredictions({ input }, (res) => {
+    serviceRef.current.getPlacePredictions({ input }, (res) => {
       setPredictions(res || []);
     });
-  }, [input, service, setPredictions]);
+  }, [input, setPredictions]);
 
   const handleSelect = (placeId: string) => {
     if (!placesLib) return;
     const detailsService = new placesLib.PlacesService(
-      document.createElement("div"),
+      document.createElement("div")
     );
     detailsService.getDetails({ placeId }, (place) => {
       if (place?.geometry?.location) {
@@ -126,7 +127,7 @@ function SearchBox({
         setSelectedPlace(loc);
         setInput(place.formatted_address || "");
 
-        // ✅ Delay clearing predictions to avoid lingering dropdown
+        // ✅ Clear predictions after selection
         setTimeout(() => {
           setPredictions([]);
         }, 0);
