@@ -13,7 +13,7 @@ interface LatLng {
   lng: number;
 }
 
-export default function Page() {
+export default function MapWithSearch() {
   const [center, setCenter] = useState<LatLng>({
     lat: 37.7749,
     lng: -122.4194,
@@ -26,7 +26,7 @@ export default function Page() {
 
   return (
     <APIProvider
-      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+      apiKey="AIzaSyDzK6PTB7zsDG9ITehC9-F98UZlzgg2AEw"
       libraries={["places"]}
     >
       <div
