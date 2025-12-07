@@ -13,8 +13,10 @@
     "framer-motion": "^12.23.24",
     "next": "16.0.1",
     "postcss": "^8.5.6",
+    "radix-ui": "^1.4.3",
     "react": "^19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
     "@next/codemod": "^16.0.7",

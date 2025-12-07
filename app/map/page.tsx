@@ -1,110 +1,177 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   APIProvider,
   Map,
-  AdvancedMarker,
+  Marker,
+  useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 
-export default function MapWithSearch() {
-  const [position, setPosition] = useState({ lat: 53.54, lng: 10 });
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const initializedRef = useRef(false);
+interface LatLng {
+  lat: number;
+  lng: number;
+}
 
-  useEffect(() => {
-    if (
-      initializedRef.current ||
-      !window.google?.maps?.places ||
-      !inputRef.current
-    )
-      return;
-
-    
-    initializedRef.current = true;
-
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(
-      inputRef.current,
-      {
-        types: ["establishment"],
-        fields: ["geometry"],
-      }
-    );
-
-    autocompleteRef.current.addListener("place_changed", () => {
-      const place = autocompleteRef.current?.getPlace();
-      if (place?.geometry?.location) {
-        const loc = place.geometry.location;
-        setPosition({ lat: loc.lat(), lng: loc.lng() });
-      }
-    });
-  }, []);
-
-  const MAP_ID = "8859a83a13a834f62d11ad10"; // Replace with your actual Map ID
-
-  const wrapperStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#FFFFFF",
-    padding: "3rem 2rem 6rem",
-    paddingTop: "8rem",
-    gap: "1rem",
-  };
-
-  const mapContainerStyle: React.CSSProperties = {
-    height: "400px",
-    width: "100%",
-    maxWidth: "800px",
-    borderRadius: "20px",
-    border: "2px solid #ADD8E6",
-    boxShadow: "0 0 20px rgba(173, 216, 230, 5)",
-    overflow: "hidden",
-  };
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: "800px",
-    padding: "0.75rem",
-    borderRadius: "10px",
-    border: "2px solid #ADD8E6",
-    fontSize: "1rem",
-    boxShadow: "0 0 15px rgba(173, 216, 230, 5)",
-    backgroundColor: "#D3D3D3",
-    color: "rgba(0,0,0,0.6)",
-  };
+export default function Page() {
+  const [center, setCenter] = useState<LatLng>({
+    lat: 37.7749,
+    lng: -122.4194,
+  }); // Default: San Francisco
+  const [predictions, setPredictions] = useState<
+    google.maps.places.AutocompletePrediction[]
+  >([]);
+  const [input, setInput] = useState("");
+  const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
   return (
     <APIProvider
-      apiKey="AIzaSyDzK6PTB7zsDG9ITehC9-F98UZlzgg2AEw" // Replace with your actual API key
+      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
       libraries={["places"]}
     >
-      <div style={wrapperStyle}>
-        <motion.div
-          style={mapContainerStyle}
-          initial={{ opacity: 0, y: -80 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          minHeight: "100vh",
+          gap: "1rem",
+          background: "#fff",
+        }}
+      >
+        {/* MAP CONTAINER */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "800px",
+            height: "400px",
+            borderRadius: "16px",
+            border: "2px solid #ADD8E6",
+            overflow: "hidden",
+          }}
         >
           <Map
-            zoom={12}
-            center={position}
-            mapId={MAP_ID}
-            style={{ height: "100%", width: "100%" }}
+            defaultZoom={12}
+            center={center}
+            mapId="8859a83a13a834f62d11ad10"
           >
-            <AdvancedMarker position={position} />
+            {selectedPlace && <Marker position={selectedPlace} />}
           </Map>
-        </motion.div>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search for a place..."
-          style={inputStyle}
-        />
+        </div>
+
+        {/* SEARCH BOX BELOW MAP */}
+        <div style={{ width: "100%", maxWidth: "800px" }}>
+          <SearchBox
+            input={input}
+            setInput={setInput}
+            predictions={predictions}
+            setPredictions={setPredictions}
+            setCenter={setCenter}
+            setSelectedPlace={setSelectedPlace}
+          />
+        </div>
       </div>
     </APIProvider>
+  );
+}
+
+interface SearchBoxProps {
+  input: string;
+  setInput: (val: string) => void;
+  predictions: google.maps.places.AutocompletePrediction[];
+  setPredictions: (preds: google.maps.places.AutocompletePrediction[]) => void;
+  setCenter: (loc: LatLng) => void;
+  setSelectedPlace: (loc: LatLng | null) => void;
+}
+
+function SearchBox({
+  input,
+  setInput,
+  predictions,
+  setPredictions,
+  setCenter,
+  setSelectedPlace,
+}: SearchBoxProps) {
+  const placesLib = useMapsLibrary("places");
+  const [service, setService] =
+    useState<google.maps.places.AutocompleteService | null>(null);
+
+  useEffect(() => {
+    if (!placesLib) return;
+    setService(new placesLib.AutocompleteService());
+  }, [placesLib]);
+
+  useEffect(() => {
+    if (!service || !input) {
+      setPredictions([]);
+      return;
+    }
+    service.getPlacePredictions({ input }, (res) => {
+      setPredictions(res || []);
+    });
+  }, [input, service, setPredictions]);
+
+  const handleSelect = (placeId: string) => {
+    if (!placesLib) return;
+    const detailsService = new placesLib.PlacesService(
+      document.createElement("div"),
+    );
+    detailsService.getDetails({ placeId }, (place) => {
+      if (place?.geometry?.location) {
+        const loc = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        };
+        setCenter(loc);
+        setSelectedPlace(loc);
+        setInput(place.formatted_address || "");
+
+        // ✅ Delay clearing predictions to avoid lingering dropdown
+        setTimeout(() => {
+          setPredictions([]);
+        }, 0);
+      }
+    });
+  };
+
+  return (
+    <div
+      style={{
+        padding: "10px",
+        background: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      }}
+    >
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Search for a place..."
+        style={{
+          width: "100%",
+          padding: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      />
+      {predictions.length > 0 && (
+        <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0 0" }}>
+          {predictions.slice(0, 3).map((p) => (
+            <li
+              key={p.place_id}
+              onClick={() => handleSelect(p.place_id)}
+              style={{
+                padding: "8px",
+                cursor: "pointer",
+                borderBottom: "1px solid #eee",
+              }}
+            >
+              {p.description}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
