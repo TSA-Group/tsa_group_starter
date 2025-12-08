@@ -50,7 +50,6 @@ export default function Home() {
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
             variants={cardPop}
-            className="p-6 bg-info rounded-2xl shadow-lg border-l-4 border-neutral transition-colors duration-300"
             whileHover={{ y: -6 }}
           >
             
