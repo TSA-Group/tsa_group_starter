@@ -47,21 +47,7 @@ export default function Home() {
 
 
         {/* LEFT COLUMN — (NO “LAUNCH MAPS” ANYMORE) */}
-        <motion.section variants={fadeUp} className="space-y-8">
-          <motion.div
-            variants={cardPop}
-            className="p-6 bg-info rounded-2xl shadow-lg border-l-4 border-neutral transition-colors duration-300"
-            whileHover={{ y: -6 }}
-          >
-            <h2 className="text-2xl font-semibold mb-2">
-              Your Personal Geolocation Data Assembler
-            </h2>
-            <p className="text-sm text-base-content/70">
-              Automatically gathers and organizes nearby community resources —
-              neighborhood centers, food pantries, and local support events.
-            </p>
-          </motion.div>
-        </motion.section>
+ 
 
 
 
