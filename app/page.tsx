@@ -20,7 +20,7 @@ const fadeUp: Variants = {
 };
 
 const cardPop: Variants = {
-  hidden: { opacity: 0, y: 10, scale: 0.995 },
+  hidden: { opacity: 0, y: 10, scale: 0.98 },
   show: {
     opacity: 1,
     y: 0,
@@ -44,8 +44,9 @@ export default function Home() {
 
       {/* MAIN CONTENT */}
       <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
-        
-        {/* LEFT COLUMN */}
+
+
+        {/* LEFT COLUMN — (NO “LAUNCH MAPS” ANYMORE) */}
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
             variants={cardPop}
@@ -59,34 +60,19 @@ export default function Home() {
               Automatically gathers and organizes nearby community resources —
               neighborhood centers, food pantries, and local support events.
             </p>
-            <div className="mt-4">
-              <Link href="/map" legacyBehavior>
-                <a className="inline-block px-5 py-2 rounded-lg bg-neutral text-info font-medium shadow-md hover:shadow-xl transition">
-                  Launch Maps
-                </a>
-              </Link>
-            </div>
-          </motion.div>
-
-          <motion.div
-            variants={cardPop}
-            className="p-5 bg-info rounded-2xl shadow border border-success hover:shadow-xl transition-colors duration-300"
-            whileHover={{ y: -4 }}
-          >
-            <h3 className="text-lg font-semibold mb-1">Quick Actions</h3>
-            <p className="text-sm text-warning/70">
-              Brendan add something here.
-            </p>
           </motion.div>
         </motion.section>
 
-        {/* CENTER COLUMN */}
+
+
+        {/* CENTER COLUMN — GATHERLY + QUICK ACTIONS BELOW */}
         <motion.section
           variants={fadeUp}
           className="flex flex-col items-center space-y-8"
         >
+          {/* BIG TITLE */}
           <motion.h1
-            className="text-9xl md:text-9xl font-extrabold tracking-tight leading-none text-primary"
+            className="text-8xl md:text-9xl font-extrabold tracking-tight leading-none text-primary"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
@@ -98,17 +84,30 @@ export default function Home() {
             GATHERLY
           </motion.h1>
 
+          {/* QUICK ACTIONS BELOW THE TITLE */}
           <motion.div
             variants={cardPop}
-            className="w-full md:w-[88%] h-[350px] bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-2xl border border-gray-400 dark:border-gray-600 shadow-2xl p-4 relative overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transition-colors duration-300"
+            className="p-5 w-full md:w-[88%] bg-info rounded-2xl shadow border border-success hover:shadow-xl transition-colors duration-300"
+            whileHover={{ y: -4 }}
+          >
+            <h3 className="text-lg font-semibold mb-1">Quick Actions</h3>
+            <p className="text-sm text-warning/70">
+              Brendan add something here.
+            </p>
+          </motion.div>
+
+          {/* BULLETIN BOARD (STAYS IN CENTER) */}
+          <motion.div
+            variants={cardPop}
+            className="w-full md:w-[88%] h-[350px] bg-white/60 dark:bg-black/60 backdrop-blur-xl rounded-2xl 
+            border border-gray-400 dark:border-gray-600 shadow-2xl p-4 relative 
+            overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 
+            dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transition-colors duration-300"
             whileHover={{ scale: 1.01 }}
           >
             <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
               Bulletin Board
             </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-              Community posts, neighborhood updates, and shared resources.
-            </p>
 
             <ul className="space-y-4">
               {[
@@ -119,7 +118,8 @@ export default function Home() {
               ].map((item, i) => (
                 <li
                   key={i}
-                  className="bg-gray-100/60 dark:bg-gray-900/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-lg p-3 shadow-lg hover:shadow-xl transition"
+                  className="bg-gray-100/60 dark:bg-gray-900/60 backdrop-blur-xl 
+                  border border-gray-300 dark:border-gray-600 rounded-lg p-3 shadow-lg hover:shadow-xl transition"
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div>
@@ -142,40 +142,49 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN */}
-        <motion.section variants={fadeUp} className="space-y-8">
+
+
+        {/* RIGHT COLUMN — NOW A **BIG** UPCOMING EVENTS SECTION */}
+        <motion.section variants={fadeUp} className="space-y-8 flex flex-col">
+          
+          {/* BIGGER HEADER */}
           <motion.div
             variants={cardPop}
-            className="p-4 bg-info rounded-2xl shadow-lg border-l-4 border-neutral transition-colors duration-300"
+            className="p-6 bg-info rounded-2xl shadow-lg border-l-4 border-neutral transition-colors duration-300 text-center"
             whileHover={{ y: -4 }}
           >
-            <h2 className="text-xl font-semibold">Upcoming Events</h2>
-            <p className="text-xs text-warning/70 mt-1">
+            <h2 className="text-3xl font-semibold">Upcoming Events</h2>
+            <p className="text-sm text-warning/70 mt-1">
               Local gatherings & volunteer opportunities
             </p>
           </motion.div>
 
+          {/* BIGGER EVENT CARDS */}
           {[1, 2, 3].map((i) => (
             <motion.div
               key={i}
               variants={cardPop}
-              className="h-28 bg-info rounded-xl border border-success shadow-md flex items-center gap-4 p-4 hover:shadow-xl transition-colors duration-300"
+              className="h-36 bg-info rounded-xl border border-success shadow-md 
+              flex items-center gap-4 p-5 hover:shadow-xl transition-colors duration-300"
               whileHover={{ translateY: -6 }}
             >
-              <div className="flex-none w-20 h-20 bg-success-content rounded-md flex items-center justify-center text-neutral font-semibold">
+              <div className="flex-none w-24 h-24 bg-success-content rounded-md flex items-center justify-center text-neutral font-semibold">
                 IMG
               </div>
+
               <div className="flex-1">
-                <div className="text-sm font-medium">Neighborhood Meetup</div>
-                <div className="text-xs text-accent-content/70">
+                <div className="text-lg font-medium">Neighborhood Meetup</div>
+                <div className="text-sm text-accent-content/70">
                   Sat • 2:00 PM • Community Park
                 </div>
               </div>
-              <div className="text-xs text-neutral font-semibold">RSVP</div>
+
+              <div className="text-sm text-neutral font-semibold">RSVP</div>
             </motion.div>
           ))}
         </motion.section>
       </main>
+
 
       {/* FOOTER CONTACT */}
       <motion.footer
