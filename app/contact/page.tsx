@@ -14,7 +14,7 @@ export default function SpeechDemo() {
     <div>
       <h1>Speech Demo</h1>
       <p>
-        T
+        Welcome to the contact section, where you can access our finest community members
       </p>
     </div>
   );
