@@ -79,7 +79,7 @@ export default function Home() {
     className="relative text-white text-6xl md:text-7xl font-extrabold tracking-tight"
     style={{ fontFamily: "TAN Buster, sans-serif" }}
   >
-    GATHERLY
+    A FRIENDLY COMMUNITY RESOURSE HUB
   </motion.h1>
 
   {/* Scroll Indicator */}
