@@ -14,8 +14,7 @@ export default function SpeechDemo() {
     <div>
       <h1>Speech Demo</h1>
       <p>
-        This page will speak a welcome message when it loads using the Web Speech
-        API.
+        T
       </p>
     </div>
   );
