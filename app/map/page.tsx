@@ -24,11 +24,10 @@ export default function Page() {
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
-  // 👇 Track theme safely (no document access at init)
+  // 👇 Track theme safely
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    // Read current theme from <html data-theme="...">
     const current = document.documentElement.getAttribute("data-theme");
     setTheme(current === "dark" ? "dark" : "light");
 
@@ -40,9 +39,58 @@ export default function Page() {
     return () => window.removeEventListener("theme-change", handler);
   }, []);
 
-  // Replace with your actual Map IDs from Google Cloud
-  const lightMapId = "8859a83a13a834f62d11ad10";
-  const darkMapId = "8859a83a13a834f6b6b81e80";
+  // 👇 Google’s official Night Mode style JSON
+  const darkStyle: google.maps.MapTypeStyle[] = [
+    { elementType: "geometry", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#2c2c2c" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212121" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#8a8a8a" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#000000" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#3d3d3d" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "geometry",
+      stylers: [{ color: "#2c2c2c" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "geometry",
+      stylers: [{ color: "#181818" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#616161" }],
+    },
+    {
+      featureType: "poi.park",
+      elementType: "labels.text.stroke",
+      stylers: [{ color: "#1b1b1b" }],
+    },
+  ];
 
   return (
     <APIProvider
@@ -51,10 +99,14 @@ export default function Page() {
     >
       <div className="flex flex-col items-center min-h-screen gap-4 bg-base-100 text-base-content">
         <div className="w-full max-w-3xl h-[400px] rounded-xl border-2 border-primary overflow-hidden">
+          {/* 👇 key={theme} forces remount when theme changes */}
           <Map
+            key={theme}
             defaultZoom={12}
             center={center}
-            mapId={theme === "dark" ? darkMapId : lightMapId}
+            mapTypeId="roadmap"
+            // 👇 inject style JSON directly
+            styles={theme === "dark" ? darkStyle : []}
           >
             {selectedPlace && <Marker position={selectedPlace} />}
           </Map>
@@ -113,7 +165,6 @@ function SearchBox({
 
   const handleSelect = (placeId: string) => {
     if (!placesLib) return;
-    // Safe: document.createElement only runs client-side
     const detailsService = new placesLib.PlacesService(
       document.createElement("div"),
     );
