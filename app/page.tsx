@@ -43,7 +43,7 @@ export default function Home() {
       {/* Theme Toggle */}
 
       {/* Main content */}
-      <main className="w-full max-w-7xl mx-auto px-6 pt-0 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <main className="w-full max-w-7xl mx-auto px-12 pt-0 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* LEFT COLUMN */}
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
@@ -51,7 +51,7 @@ export default function Home() {
             className="p-6 bg-info rounded-2xl shadow-lg border-l-4 border-neutral transition-colors duration-300"
             whileHover={{ y: -6 }}
           >
-            <h2 className="text-xl font-semibold mb-2">
+            <h2 className="text-2xl font-semibold mb-2">
               Your Personal Geolocation Data Assembler
             </h2>
             <p className="text-sm text-base-content/70">
