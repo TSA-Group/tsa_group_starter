@@ -24,12 +24,14 @@ export default function Page() {
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
-  // 👇 Track theme from ThemeToggle
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    const current = document.documentElement.getAttribute("data-theme");
-    return current === "dark" ? "dark" : "light";
-  });
+  // 👇 Track theme safely (no document access at init)
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
   useEffect(() => {
+    // Read current theme from <html data-theme="...">
+    const current = document.documentElement.getAttribute("data-theme");
+    setTheme(current === "dark" ? "dark" : "light");
+
     const handler = (e: Event) => {
       const custom = e as CustomEvent<"light" | "dark">;
       setTheme(custom.detail);
@@ -111,6 +113,7 @@ function SearchBox({
 
   const handleSelect = (placeId: string) => {
     if (!placesLib) return;
+    // Safe: document.createElement only runs client-side
     const detailsService = new placesLib.PlacesService(
       document.createElement("div"),
     );
