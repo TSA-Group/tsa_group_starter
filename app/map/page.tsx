@@ -38,9 +38,13 @@ export default function Page() {
     return () => window.removeEventListener("theme-change", handler);
   }, []);
 
+  // Replace with your actual Map IDs from Google Cloud
+  const lightMapId = "8859a83a13a834f62d11ad10";
+  const darkMapId = "8859a83a13a834f6b6b81e80";
+
   return (
     <APIProvider
-      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
       libraries={["places"]}
     >
       <div className="flex flex-col items-center min-h-screen gap-4 bg-base-100 text-base-content">
@@ -48,59 +52,7 @@ export default function Page() {
           <Map
             defaultZoom={12}
             center={center}
-            style={{ height: "100%", width: "100%" }} // optional, for layout
-            options={{
-              styles:
-                theme === "dark"
-                  ? [
-                      {
-                        elementType: "geometry",
-                        stylers: [{ color: "#212121" }],
-                      },
-                      {
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#757575" }],
-                      },
-                      {
-                        elementType: "labels.text.stroke",
-                        stylers: [{ color: "#212121" }],
-                      },
-                      {
-                        featureType: "road",
-                        elementType: "geometry",
-                        stylers: [{ color: "#2c2c2c" }],
-                      },
-                      {
-                        featureType: "water",
-                        elementType: "geometry",
-                        stylers: [{ color: "#000000" }],
-                      },
-                    ]
-                  : [
-                      {
-                        elementType: "geometry",
-                        stylers: [{ color: "#ebe3cd" }],
-                      },
-                      {
-                        elementType: "labels.text.fill",
-                        stylers: [{ color: "#523735" }],
-                      },
-                      {
-                        elementType: "labels.text.stroke",
-                        stylers: [{ color: "#f5f1e6" }],
-                      },
-                      {
-                        featureType: "road",
-                        elementType: "geometry",
-                        stylers: [{ color: "#f5f1e6" }],
-                      },
-                      {
-                        featureType: "water",
-                        elementType: "geometry",
-                        stylers: [{ color: "#c9c9c9" }],
-                      },
-                    ],
-            }}
+            mapId={theme === "dark" ? darkMapId : lightMapId}
           >
             {selectedPlace && <Marker position={selectedPlace} />}
           </Map>
