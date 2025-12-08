@@ -51,7 +51,7 @@ export default function Home() {
             className="p-6 bg-info rounded-2xl shadow-lg border-l-4 border-neutral transition-colors duration-300"
             whileHover={{ y: -6 }}
           >
-            <h2 className="text-xl font-semibold mb-2">
+            <h2 className="text-2xl font-semibold mb-2">
               Your Personal Geolocation Data Assembler
             </h2>
             <p className="text-sm text-base-content/70">
