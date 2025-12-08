@@ -43,7 +43,7 @@ export default function Home() {
       {/* Theme Toggle */}
 
       {/* Main content */}
-      <main className="w-full max-w-7xl mx-auto px-12 pt-0 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* LEFT COLUMN */}
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
@@ -85,7 +85,7 @@ export default function Home() {
           className="flex flex-col items-center space-y-8"
         >
           <motion.h1
-            className="text-6xl md:text-7xl font-extrabold tracking-tight leading-none text-primary"
+            className="text-10xl md:text-7xl font-extrabold tracking-tight leading-none text-primary"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
