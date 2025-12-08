@@ -42,60 +42,6 @@ export default function Home() {
     >
 
 
-    <motion.section
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ duration: 1 }}
-  className="relative w-full h-[85vh] flex items-center justify-center overflow-hidden"
->
-
- 
-  <motion.div
-    initial={{ scale: 1.15 }}
-    animate={{ scale: 1 }}
-    transition={{ duration: 6, ease: "easeOut" }}
-    className="absolute inset-0"
-    style={{
-      backgroundImage: "url('/Home_image1.jpeg')", // ← IMAGE PATH UPDATED
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-    }}
-  />
-
-  {/* Dark overlay */}
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 0.45 }}
-    transition={{ duration: 1.4 }}
-    className="absolute inset-0 bg-black/50"
-  />
-
-  {/* Animated Heading */}
-  <motion.h1
-    initial={{ opacity: 0, y: 40 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 1.2, ease: "easeOut" }}
-    className="relative text-white text-6xl md:text-7xl font-extrabold tracking-tight"
-    style={{ fontFamily: "TAN Buster, sans-serif" }}
-  >
-    A FRIENDLY COMMUNITY RESOURSE HUB
-  </motion.h1>
-
-  {/* Scroll Indicator */}
-  <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 1.5 }}
-    className="absolute bottom-6 text-white text-sm"
-  >
-    Scroll Down ↓
-  </motion.div>
-
-</motion.section>
-
-
-
       {/* MAIN CONTENT */}
       <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
         
