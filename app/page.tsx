@@ -90,9 +90,9 @@ export default function Home() {
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
-              x: -40,
+              x: -100,
               y: [0, -6, 0],
-              transition: { duration: 4.5, ease: easeInOut },
+              transition: { duration: 2.5, ease: easeInOut },
             }}
           >
             GATHERLY
