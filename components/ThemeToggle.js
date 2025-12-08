@@ -10,14 +10,21 @@ export default function ThemeToggle() {
     if (stored) {
       setTheme(stored);
       document.documentElement.setAttribute("data-theme", stored);
+
+      // 🔔 Tell map.tsx immediately
+      window.dispatchEvent(new CustomEvent("theme-change", { detail: stored }));
       return;
     }
+
     const prefersDark =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
     const system = prefersDark ? "dark" : "light";
     setTheme(system);
     document.documentElement.setAttribute("data-theme", system);
+
+    // 🔔 Tell map.tsx immediately
+    window.dispatchEvent(new CustomEvent("theme-change", { detail: system }));
   }, []);
 
   const toggleTheme = () => {
