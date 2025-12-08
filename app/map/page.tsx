@@ -17,50 +17,96 @@ export default function Page() {
   const [center, setCenter] = useState<LatLng>({
     lat: 37.7749,
     lng: -122.4194,
-  }); // Default: San Francisco
+  });
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
+  // 👇 Track theme from ThemeToggle
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const current = document.documentElement.getAttribute("data-theme");
+    return current === "dark" ? "dark" : "light";
+  });
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<"light" | "dark">;
+      setTheme(custom.detail);
+    };
+    window.addEventListener("theme-change", handler);
+    return () => window.removeEventListener("theme-change", handler);
+  }, []);
+
   return (
     <APIProvider
-      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
+      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
       libraries={["places"]}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          minHeight: "100vh",
-          gap: "1rem",
-          background: "#fff",
-        }}
-      >
-        {/* MAP CONTAINER */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "800px",
-            height: "400px",
-            borderRadius: "16px",
-            border: "2px solid #ADD8E6",
-            overflow: "hidden",
-          }}
-        >
+      <div className="flex flex-col items-center min-h-screen gap-4 bg-base-100 text-base-content">
+        <div className="w-full max-w-3xl h-[400px] rounded-xl border-2 border-primary overflow-hidden">
           <Map
             defaultZoom={12}
             center={center}
-            mapId="8859a83a13a834f62d11ad10"
+            style={{ height: "100%", width: "100%" }} // optional, for layout
+            options={{
+              styles:
+                theme === "dark"
+                  ? [
+                      {
+                        elementType: "geometry",
+                        stylers: [{ color: "#212121" }],
+                      },
+                      {
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#757575" }],
+                      },
+                      {
+                        elementType: "labels.text.stroke",
+                        stylers: [{ color: "#212121" }],
+                      },
+                      {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#2c2c2c" }],
+                      },
+                      {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#000000" }],
+                      },
+                    ]
+                  : [
+                      {
+                        elementType: "geometry",
+                        stylers: [{ color: "#ebe3cd" }],
+                      },
+                      {
+                        elementType: "labels.text.fill",
+                        stylers: [{ color: "#523735" }],
+                      },
+                      {
+                        elementType: "labels.text.stroke",
+                        stylers: [{ color: "#f5f1e6" }],
+                      },
+                      {
+                        featureType: "road",
+                        elementType: "geometry",
+                        stylers: [{ color: "#f5f1e6" }],
+                      },
+                      {
+                        featureType: "water",
+                        elementType: "geometry",
+                        stylers: [{ color: "#c9c9c9" }],
+                      },
+                    ],
+            }}
           >
             {selectedPlace && <Marker position={selectedPlace} />}
           </Map>
         </div>
 
-        {/* SEARCH BOX BELOW MAP */}
-        <div style={{ width: "100%", maxWidth: "800px" }}>
+        <div className="w-full max-w-3xl">
           <SearchBox
             input={input}
             setInput={setInput}
@@ -75,15 +121,6 @@ export default function Page() {
   );
 }
 
-interface SearchBoxProps {
-  input: string;
-  setInput: (val: string) => void;
-  predictions: google.maps.places.AutocompletePrediction[];
-  setPredictions: (preds: google.maps.places.AutocompletePrediction[]) => void;
-  setCenter: (loc: LatLng) => void;
-  setSelectedPlace: (loc: LatLng | null) => void;
-}
-
 function SearchBox({
   input,
   setInput,
@@ -91,19 +128,25 @@ function SearchBox({
   setPredictions,
   setCenter,
   setSelectedPlace,
-}: SearchBoxProps) {
+}: {
+  input: string;
+  setInput: (val: string) => void;
+  predictions: google.maps.places.AutocompletePrediction[];
+  setPredictions: (preds: google.maps.places.AutocompletePrediction[]) => void;
+  setCenter: (loc: LatLng) => void;
+  setSelectedPlace: (loc: LatLng | null) => void;
+}) {
   const placesLib = useMapsLibrary("places");
   const serviceRef = useRef<google.maps.places.AutocompleteService | null>(
     null,
   );
 
-  // Initialize AutocompleteService once
   useEffect(() => {
-    if (!placesLib) return;
-    serviceRef.current = new placesLib.AutocompleteService();
+    if (placesLib && !serviceRef.current) {
+      serviceRef.current = new placesLib.AutocompleteService();
+    }
   }, [placesLib]);
 
-  // Fetch predictions when input changes
   useEffect(() => {
     if (!serviceRef.current || !input) {
       setPredictions([]);
@@ -128,47 +171,27 @@ function SearchBox({
         setCenter(loc);
         setSelectedPlace(loc);
         setInput(place.formatted_address || "");
-
-        // ✅ Clear predictions after selection
-        setTimeout(() => {
-          setPredictions([]);
-        }, 0);
+        setTimeout(() => setPredictions([]), 0);
       }
     });
   };
 
   return (
-    <div
-      style={{
-        padding: "10px",
-        background: "#fff",
-        borderRadius: "8px",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      }}
-    >
+    <div className="p-3 bg-base-200 rounded-lg shadow-md">
       <input
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Search for a place..."
-        style={{
-          width: "100%",
-          padding: "10px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
+        className="w-full p-2 border border-base-300 rounded-md bg-base-100 text-base-content"
       />
       {predictions.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0 0" }}>
+        <ul className="list-none mt-2 p-0">
           {predictions.slice(0, 3).map((p) => (
             <li
               key={p.place_id}
               onClick={() => handleSelect(p.place_id)}
-              style={{
-                padding: "8px",
-                cursor: "pointer",
-                borderBottom: "1px solid #eee",
-              }}
+              className="p-2 cursor-pointer border-b border-base-300 hover:bg-base-300"
             >
               {p.description}
             </li>

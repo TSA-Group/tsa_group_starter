@@ -25,6 +25,9 @@ export default function ThemeToggle() {
     setTheme(next);
     localStorage.setItem("theme", next);
     document.documentElement.setAttribute("data-theme", next);
+
+    // 🔔 Notify the rest of the app (like page.tsx)
+    window.dispatchEvent(new CustomEvent("theme-change", { detail: next }));
   };
 
   return (
