@@ -86,7 +86,7 @@ export default function Home() {
           className="flex flex-col items-center space-y-8"
         >
           <motion.h1
-            className="text-10xl md:text-6xl font-extrabold tracking-tight leading-none text-primary"
+            className="text-12xl md:text-6xl font-extrabold tracking-tight leading-none text-primary"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
