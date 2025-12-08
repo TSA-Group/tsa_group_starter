@@ -92,7 +92,7 @@ export default function Home() {
             animate={{
               x: -40,
               y: [0, -6, 0],
-              transition: { duration: 4.5, ease: easeInOut, repeat: Infinity },
+              transition: { duration: 4.5, ease: easeInOut, repeat: one },
             }}
           >
             GATHERLY
