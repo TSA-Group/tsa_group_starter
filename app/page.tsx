@@ -40,10 +40,65 @@ export default function Home() {
       viewport={{ once: true, amount: 0.12 }}
       variants={container}
     >
-      {/* Theme Toggle */}
 
-      {/* Main content */}
+
+    <motion.section
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ duration: 1 }}
+  className="relative w-full h-[85vh] flex items-center justify-center overflow-hidden"
+>
+
+ 
+  <motion.div
+    initial={{ scale: 1.15 }}
+    animate={{ scale: 1 }}
+    transition={{ duration: 6, ease: "easeOut" }}
+    className="absolute inset-0"
+    style={{
+      backgroundImage: "url('/Home_image1.jpeg')", // ← IMAGE PATH UPDATED
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    }}
+  />
+
+  {/* Dark overlay */}
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 0.45 }}
+    transition={{ duration: 1.4 }}
+    className="absolute inset-0 bg-black/50"
+  />
+
+  {/* Animated Heading */}
+  <motion.h1
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 1.2, ease: "easeOut" }}
+    className="relative text-white text-6xl md:text-7xl font-extrabold tracking-tight"
+    style={{ fontFamily: "TAN Buster, sans-serif" }}
+  >
+    GATHERLY
+  </motion.h1>
+
+  {/* Scroll Indicator */}
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 1.5 }}
+    className="absolute bottom-6 text-white text-sm"
+  >
+    Scroll Down ↓
+  </motion.div>
+
+</motion.section>
+
+
+
+      {/* MAIN CONTENT */}
       <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
+        
         {/* LEFT COLUMN */}
         <motion.section variants={fadeUp} className="space-y-8">
           <motion.div
@@ -110,15 +165,9 @@ export default function Home() {
 
             <ul className="space-y-4">
               {[
-                {
-                  title: "Free community dinner — Sat 6pm",
-                  meta: "Downtown Church",
-                },
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
-                {
-                  title: "Volunteer literacy tutors needed",
-                  meta: "Library Annex",
-                },
+                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
                 { title: "Brendan make something up", meta: "Some place" },
               ].map((item, i) => (
                 <li
@@ -134,11 +183,9 @@ export default function Home() {
                         {item.meta}
                       </div>
                     </div>
-                    <div className="text-xs text-black dark:text-white font-medium">
-                      Details
-                    </div>
+                    <div className="text-xs text-black dark:text-white font-medium">Details</div>
                   </div>
-                  {/* Progress bar */}
+
                   <div className="h-1 w-full bg-gray-300 dark:bg-gray-700 rounded-full">
                     <div className="h-1 bg-gray-600 dark:bg-gray-300 rounded-full w-2/3"></div>
                   </div>
@@ -168,7 +215,7 @@ export default function Home() {
               className="h-28 bg-info rounded-xl border border-success shadow-md flex items-center gap-4 p-4 hover:shadow-xl transition-colors duration-300"
               whileHover={{ translateY: -6 }}
             >
-              <div className="flex-none w-20 h-20 bg-	success-content rounded-md flex items-center justify-center text-neutral font-semibold">
+              <div className="flex-none w-20 h-20 bg-success-content rounded-md flex items-center justify-center text-neutral font-semibold">
                 IMG
               </div>
               <div className="flex-1">
