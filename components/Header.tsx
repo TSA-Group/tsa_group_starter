@@ -1,4 +1,5 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
@@ -8,35 +9,63 @@ const navItems = ["Map", "Events", "Contact"];
 export const Header: React.FC = () => {
   return (
     <motion.header
-      initial={false} // 👈 prevents re-animation on route change
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 w-full z-50 bg-base-200/30 backdrop-blur-xl text-base-content shadow-md"
+      className="
+        fixed top-0 left-0 w-full z-50
+        bg-white/70 backdrop-blur-xl
+        border-b border-gray-200
+        shadow-sm
+        text-gray-900
+      "
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* LOGO */}
         <Link href="/" passHref>
           <motion.h1
             whileHover={{
               scale: 1.05,
-              textShadow: "0px 0px 10px rgba(38,166,154,0.8)",
+              textShadow: "0px 0px 8px rgba(37, 99, 235, 0.25)",
             }}
-            className="text-4xl font-bold tracking-wide cursor-pointer"
+            transition={{ type: "spring", stiffness: 260 }}
+            className="
+              text-3xl font-extrabold tracking-tight
+              cursor-pointer
+              text-gray-950
+            "
+            style={{ fontFamily: "TAN Buster, sans-serif" }}
           >
             Gatherly
           </motion.h1>
         </Link>
 
-        <div className="flex items-center gap-6 ml-auto">
-          <nav className="flex gap-10 text-lg font-medium">
+        {/* NAV + TOGGLE */}
+        <div className="flex items-center gap-8 ml-auto">
+          <nav className="flex gap-10 text-base font-medium">
             {navItems.map((item) => (
               <motion.a
                 key={item}
-                whileHover={{ scale: 1.05, color: "#26A69A" }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="hover:text-[#26A69A] transition-colors duration-200"
                 href={`/${item.toLowerCase()}`}
+                whileHover={{ y: -2 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="
+                  relative text-gray-700
+                  hover:text-blue-600
+                  transition-colors duration-200
+                "
               >
                 {item}
+
+                {/* subtle underline on hover */}
+                <span
+                  className="
+                    absolute left-0 -bottom-1 h-[2px] w-0
+                    bg-blue-500
+                    transition-all duration-300
+                    group-hover:w-full
+                  "
+                />
               </motion.a>
             ))}
           </nav>
