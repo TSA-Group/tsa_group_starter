@@ -69,7 +69,7 @@ export default function Home() {
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
-              x: [-420, -460, -420],
+              x: [-380, -420, -380],
               y: [0, -6, 0],
               transition: { duration: 2.5, ease: easeInOut },
             }}
