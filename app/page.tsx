@@ -54,7 +54,7 @@ export default function Home() {
             animate={{
               x: [-20, 0, -20],
               y: [0, -6, 0],
-              transition: { duration: 3, ease: "easeInOut", repeat: Infinity },
+              transition: { duration: 3, ease: "easeInOut", },
             }}
           >
             GATHERLY
@@ -100,7 +100,10 @@ export default function Home() {
                 { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
                 { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
-                { title: "Brendan make something up", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
               ].map((item, i) => (
                 <li
                   key={i}
