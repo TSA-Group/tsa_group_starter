@@ -62,22 +62,28 @@ export default function Home() {
         >
           {/* BIG TITLE */}
           <motion.h1
-            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-grey-950"
+            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-gray-950"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
               x: [-60, -40, -60],
               y: [0, -6, 0],
-              transition: { duration: 2.5, ease: "easeInOut"},
+              transition: { duration: 2.5, ease: "easeInOut" },
             }}
           >
             GATHERLY
           </motion.h1>
 
-          {/* QUICK ACTIONS */}
+          {/* QUICK ACTIONS (extend left to start under the “G”) */}
           <motion.div
             variants={cardPop}
-            className="p-5 w-full md:w-[88%] bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition"
+            className="
+              p-5
+              w-full md:w-[120%]
+              md:-ml-[20%]
+              bg-white rounded-2xl shadow-sm border border-gray-200
+              hover:shadow-md transition
+            "
             whileHover={{ y: -3 }}
           >
             <h3 className="text-lg font-semibold mb-1 text-gray-950">
@@ -99,10 +105,17 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* VOLUNTEER OPPORTUNITIES */}
+          {/* VOLUNTEER OPPORTUNITIES (same width/offset as Quick Actions) */}
           <motion.div
             variants={cardPop}
-            className="w-full md:w-[88%] h-[350px] bg-white rounded-2xl border border-gray-200 shadow-sm p-4 relative overflow-y-auto"
+            className="
+              h-[350px]
+              p-4
+              relative overflow-y-auto
+              bg-white rounded-2xl border border-gray-200 shadow-sm
+              w-full md:w-[120%]
+              md:-ml-[20%]
+            "
             whileHover={{ scale: 1.01 }}
           >
             <h3 className="text-lg font-semibold text-gray-950 mb-2">
@@ -146,9 +159,8 @@ export default function Home() {
 
         {/* RIGHT SIDE — UPCOMING EVENTS + BIGGER CALENDAR */}
         <motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
-          {/* changed to 4 columns so calendar can be wider */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-            {/* Upcoming Events (fills remaining space) */}
+            {/* Upcoming Events */}
             <div className="lg:col-span-2 space-y-8">
               <motion.div
                 variants={cardPop}
@@ -163,7 +175,6 @@ export default function Home() {
                 </p>
               </motion.div>
 
-              {/* increased card height to “increase length” visually */}
               {[1, 2, 3].map((i) => (
                 <motion.div
                   key={i}
@@ -182,9 +193,7 @@ export default function Home() {
                     <div className="text-sm text-gray-500 mt-1">
                       Sat • 2:00 PM • Community Park
                     </div>
-                    <div className="text-sm text-gray-600 mt-3">
-                      {/* We will something here later, or we will make a drop down when you click on the box */}
-                    </div>
+                    <div className="text-sm text-gray-600 mt-3">{/* later */}</div>
                   </div>
 
                   <div className="text-sm text-blue-600 font-semibold">RSVP</div>
@@ -192,17 +201,14 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Calendar (≈ 30% bigger by giving more columns + more padding + slightly bigger cells) */}
+            {/* Calendar */}
             <motion.div
               variants={cardPop}
               className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-8 w-full"
               whileHover={{ y: -3 }}
             >
               <div className="flex items-center justify-between mb-5">
-                <button
-                  onClick={() => changeMonth(-1)}
-                  className="text-blue-600 text-lg"
-                >
+                <button onClick={() => changeMonth(-1)} className="text-blue-600 text-lg">
                   ❮
                 </button>
                 <h3 className="text-xl font-semibold text-gray-950">
@@ -211,10 +217,7 @@ export default function Home() {
                     year: "numeric",
                   })}
                 </h3>
-                <button
-                  onClick={() => changeMonth(1)}
-                  className="text-blue-600 text-lg"
-                >
+                <button onClick={() => changeMonth(1)} className="text-blue-600 text-lg">
                   ❯
                 </button>
               </div>
