@@ -52,9 +52,9 @@ export default function Home() {
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
-              x: [-20, 0, -20],
+              x: [-40, -20, -40],
               y: [0, -6, 0],
-              transition: { duration: 3, ease: "easeInOut", },
+              transition: { duration: 2.5, ease: "easeInOut", },
             }}
           >
             GATHERLY
@@ -70,10 +70,10 @@ export default function Home() {
               Quick Actions
             </h3>
             <p className="text-sm text-blue-600/80">
-              One highlighted action you cannot miss.
+              Easy Access To Our Valuable Community Resources
             </p>
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Post a bulletin", "Share an event"].map((action) => (
+              {["Visit Our Map", "Share an event"].map((action) => (
                 <div
                   key={action}
                   className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 border border-gray-200"
