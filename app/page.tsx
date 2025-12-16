@@ -94,7 +94,117 @@ export default function Home() {
             <h3 className="text-lg font-semibold text-gray-950 mb-2">
               Bulletin Board
             </h3>
+          const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 18, filter: "blur(4px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
 
+const cardPop: Variants = {
+  hidden: { opacity: 0, y: 10, scale: 0.98 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.55, ease: "easeOut" },
+  },
+};
+
+export default function Calendar() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const changeMonth = (dir: number) => {
+    setCurrentDate(new Date(year, month + dir, 1));
+  };
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      animate="show"
+      className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-5"
+    >
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => changeMonth(-1)}
+          className="text-blue-600 font-semibold hover:opacity-70 transition"
+        >
+          ❮
+        </button>
+
+        <h3 className="text-lg font-semibold text-gray-950">
+          {currentDate.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })}
+        </h3>
+
+        <button
+          onClick={() => changeMonth(1)}
+          className="text-blue-600 font-semibold hover:opacity-70 transition"
+        >
+          ❯
+        </button>
+      </div>
+
+      {/* DAYS */}
+      <div className="grid grid-cols-7 text-xs text-gray-500 mb-2">
+        {days.map((day) => (
+          <div key={day} className="text-center font-medium">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* DATES */}
+      <motion.div
+        variants={cardPop}
+        className="grid grid-cols-7 gap-2"
+      >
+        {Array.from({ length: firstDay }).map((_, i) => (
+          <div key={`empty-${i}`} />
+        ))}
+
+        {Array.from({ length: lastDate }).map((_, i) => {
+          const day = i + 1;
+          const isToday =
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+
+          return (
+            <motion.div
+              key={day}
+              whileHover={{ y: -3 }}
+              className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition
+                ${
+                  isToday
+                    ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                    : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100"
+                }`}
+            >
+              {day}
+            </motion.div>
+          );
+        })}
+      </motion.div>
+    </motion.div>
+  );
+}
             <ul className="space-y-4">
               {[
                 { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
