@@ -90,7 +90,9 @@ export default function Home() {
               Quick Actions
             </h3>
             <p className="text-sm text-blue-600/80">
-              Easy Access To Our Valuable Community Resources
+              <b>
+                Easy Access To Our Valuable Community Resources
+              </b>
             </p>
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Visit Our Map", "Share an event"].map((action) => (
