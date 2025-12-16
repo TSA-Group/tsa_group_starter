@@ -48,8 +48,8 @@ export const Header: React.FC = () => {
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300 }}
               className="
-                relative text-gray-700
-                hover:text-blue-600
+                relative text-blue-600/80
+                hover:text-grey-950
                 transition-colors duration-200
               "
             >
