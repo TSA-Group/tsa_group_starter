@@ -62,7 +62,7 @@ export default function Home() {
         >
           {/* BIG TITLE */}
           <motion.h1
-            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-blue-600/80"
+            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-grey-950"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
