@@ -102,14 +102,14 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* VOLUNTEER OPPURTUNITIES */}
+          {/* VOLUNTEER OPPORTUNITIES */}
           <motion.div
             variants={cardPop}
             className="w-full md:w-[88%] h-[350px] bg-white rounded-2xl border border-gray-200 shadow-sm p-4 relative overflow-y-auto"
             whileHover={{ scale: 1.01 }}
           >
             <h3 className="text-lg font-semibold text-gray-950 mb-2">
-              Volunteer Oppurtunities 
+              Volunteer Opportunities 
             </h3>
 
             <ul className="space-y-4">
