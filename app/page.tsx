@@ -229,27 +229,28 @@ export default function Home() {
                 ))}
 
                 {Array.from({ length: lastDate }).map((_, i) => {
-                  const day = i + 1;
-                  const isToday =
-                    day === today.getDate() &&
-                    calMonth === today.getMonth() &&
-                    calYear === today.getFullYear();
+  const day = i + 1;
 
-                  return (
-                    <motion.div
-                      key={day}
-                      whileHover={{ y: -3 }}
-                      className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition
-                        ${
-                          isToday
-                            ? "bg-blue-500 text-white border-blue-500 shadow-sm"
-                            : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100"
-                        }`}
-                    >
-                      {day}
-                    </motion.div>
-                  );
-                })}
+  const isToday =
+    day === today.getDate() &&
+    calMonth === today.getMonth() &&
+    calYear === today.getFullYear();
+
+  const dayClass = isToday
+    ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+    : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100";
+
+  return (
+    <motion.div
+      key={day}
+      whileHover={{ y: -3 }}
+      className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition ${dayClass}`}
+    >
+      {day}
+    </motion.div>
+  );
+})}
+
               </div>
             </motion.div>
           </div>
