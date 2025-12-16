@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import React from "react";
@@ -56,7 +55,7 @@ export default function Home() {
     >
       {/* MAIN CONTENT */}
       <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
-        {/* CENTER COLUMN — GATHERLY + QUICK ACTIONS BELOW */}
+        {/* CENTER COLUMN — TITLE + ACTIONS + VOLUNTEER */}
         <motion.section
           variants={fadeUp}
           className="flex flex-col items-center space-y-8"
@@ -188,7 +187,7 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Calendar (fills remaining right side) */}
+            {/* Calendar (safe: plain div day cells) */}
             <motion.div
               variants={cardPop}
               className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 w-full"
@@ -216,41 +215,39 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-7 text-xs text-gray-500 mb-2">
-                {days.map((day) => (
-                  <div key={day} className="text-center font-medium">
-                    {day}
+                {days.map((d) => (
+                  <div key={d} className="text-center font-medium">
+                    {d}
                   </div>
                 ))}
               </div>
 
               <div className="grid grid-cols-7 gap-2">
                 {Array.from({ length: firstDay }).map((_, i) => (
-                  <div key={i} />
+                  <div key={`empty-${i}`} />
                 ))}
 
                 {Array.from({ length: lastDate }).map((_, i) => {
-  const day = i + 1;
+                  const dayNum = i + 1;
 
-  const isToday =
-    day === today.getDate() &&
-    calMonth === today.getMonth() &&
-    calYear === today.getFullYear();
+                  const isToday =
+                    dayNum === today.getDate() &&
+                    calMonth === today.getMonth() &&
+                    calYear === today.getFullYear();
 
-  const dayClass = isToday
-    ? "bg-blue-500 text-white border-blue-500 shadow-sm"
-    : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100";
+                  const dayClass = isToday
+                    ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                    : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100";
 
-  return (
-    <motion.div
-      key={day}
-      whileHover={{ y: -3 }}
-      className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition ${dayClass}`}
-    >
-      {day}
-    </motion.div>
-  );
-})}
-
+                  return (
+                    <div
+                      key={dayNum}
+                      className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition hover:-translate-y-[2px] ${dayClass}`}
+                    >
+                      {dayNum}
+                    </div>
+                  );
+                })}
               </div>
             </motion.div>
           </div>
@@ -285,4 +282,3 @@ export default function Home() {
     </motion.div>
   );
 }
-```
