@@ -183,8 +183,7 @@ export default function Home() {
                       Sat • 2:00 PM • Community Park
                     </div>
                     <div className="text-sm text-gray-600 mt-3">
-                      Meet neighbors, share resources, and get connected with local
-                      programs.
+                      {/* We will something here later, or we will make a drop down when you click on the box */}
                     </div>
                   </div>
 
