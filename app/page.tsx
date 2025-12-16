@@ -46,6 +46,30 @@ export default function Home() {
     setCalendarDate(new Date(calYear, calMonth + dir, 1));
   };
 
+  /* ✅ Upcoming Events dropdown state */
+  const [openEventIndex, setOpenEventIndex] = React.useState<number | null>(null);
+
+  const events = [
+    {
+      title: "Neighborhood Meetup",
+      whenWhere: "Sat • 2:00 PM • Community Park",
+      details:
+        "Placeholder details: Bring a friend, grab a snack, and meet neighbors. We’ll share local resources, upcoming volunteer needs, and ways to stay connected. (Replace this text later.)",
+    },
+    {
+      title: "Community Clean-Up",
+      whenWhere: "Sun • 10:00 AM • Riverwalk Entrance",
+      details:
+        "Placeholder details: Gloves and bags provided. We’ll break into small groups and cover different areas. Kids welcome with supervision. (Replace this text later.)",
+    },
+    {
+      title: "Job & Skills Workshop",
+      whenWhere: "Wed • 6:30 PM • Library Annex",
+      details:
+        "Placeholder details: Resume tips, mock interviews, and networking with local partners. Bring a notebook or laptop if you can. (Replace this text later.)",
+    },
+  ];
+
   return (
     <motion.div
       className="min-h-screen bg-gray-50 text-gray-950 pb-20 transition-colors duration-300"
@@ -90,9 +114,7 @@ export default function Home() {
               Quick Actions
             </h3>
             <p className="text-sm text-blue-600/80">
-              <b>
-                Easy Access To Our Valuable Community Resources
-              </b>
+              <b>Easy Access To Our Valuable Community Resources</b>
             </p>
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Visit Our Map", "Share an event"].map((action) => (
@@ -159,7 +181,7 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT SIDE — UPCOMING EVENTS + BIGGER CALENDAR */}
+        {/* RIGHT SIDE — UPCOMING EVENTS + CALENDAR */}
         <motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             {/* Upcoming Events */}
@@ -177,30 +199,80 @@ export default function Home() {
                 </p>
               </motion.div>
 
-              {[1, 2, 3].map((i) => (
-                <motion.div
-                  key={i}
-                  variants={cardPop}
-                  className="h-44 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-6 hover:shadow-md transition"
-                  whileHover={{ translateY: -4 }}
-                >
-                  <div className="flex-none w-28 h-28 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
-                    IMG
-                  </div>
+              {events.map((ev, i) => {
+                const isOpen = openEventIndex === i;
 
-                  <div className="flex-1">
-                    <div className="text-xl font-medium text-gray-950">
-                      Neighborhood Meetup
-                    </div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      Sat • 2:00 PM • Community Park
-                    </div>
-                    <div className="text-sm text-gray-600 mt-3">{/* later */}</div>
-                  </div>
+                return (
+                  <motion.div
+                    key={ev.title}
+                    variants={cardPop}
+                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition"
+                  >
+                    {/* clickable header */}
+                    <button
+                      type="button"
+                      onClick={() => setOpenEventIndex(isOpen ? null : i)}
+                      aria-expanded={isOpen}
+                      className="w-full text-left p-6 flex items-center gap-4"
+                    >
+                      <div className="flex-none w-28 h-28 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
+                        IMG
+                      </div>
 
-                  <div className="text-sm text-blue-600 font-semibold">RSVP</div>
-                </motion.div>
-              ))}
+                      <div className="flex-1">
+                        <div className="text-xl font-medium text-gray-950">
+                          {ev.title}
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          {ev.whenWhere}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-blue-600 font-semibold">
+                          {isOpen ? "Hide" : "Details"}
+                        </span>
+                        <span
+                          className={`text-blue-600 transition-transform ${
+                            isOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        >
+                          ▼
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* dropdown */}
+                    <motion.div
+                      initial={false}
+                      animate={
+                        isOpen
+                          ? { height: "auto", opacity: 1 }
+                          : { height: 0, opacity: 0 }
+                      }
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 pb-6 pt-0">
+                        <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed">
+                          {ev.details}
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {["Bring water", "Family friendly", "Free"].map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs px-2 py-1 rounded-full bg-white border border-gray-200 text-gray-600"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Calendar */}
@@ -210,7 +282,10 @@ export default function Home() {
               whileHover={{ y: -3 }}
             >
               <div className="flex items-center justify-between mb-5">
-                <button onClick={() => changeMonth(-1)} className="text-blue-600 text-lg">
+                <button
+                  onClick={() => changeMonth(-1)}
+                  className="text-blue-600 text-lg"
+                >
                   ❮
                 </button>
                 <h3 className="text-xl font-semibold text-gray-950">
@@ -219,7 +294,10 @@ export default function Home() {
                     year: "numeric",
                   })}
                 </h3>
-                <button onClick={() => changeMonth(1)} className="text-blue-600 text-lg">
+                <button
+                  onClick={() => changeMonth(1)}
+                  className="text-blue-600 text-lg"
+                >
                   ❯
                 </button>
               </div>
