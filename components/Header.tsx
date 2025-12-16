@@ -14,13 +14,13 @@ export const Header: React.FC = () => {
     <motion.header
       initial={false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
+      transition={{ duration: 1, ease: "easeOut" }}
       className="
         fixed top-0 left-0 w-full z-50
         bg-white/70 backdrop-blur-xl
-        border-b border-gray-200
+        border-b border-blue-600/80
         shadow-sm
-        text-gray-900
+        text-blue-600/80
       "
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
