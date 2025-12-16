@@ -49,7 +49,7 @@ export const Header: React.FC = () => {
               transition={{ type: "spring", stiffness: 300 }}
               className="
                 relative text-blue-600/80
-                hover:text-grey-950
+                hover:text-gray-950
                 transition-colors duration-200
               "
             >
