@@ -144,12 +144,12 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT SIDE — NARROWER EVENTS + BIGGER CALENDAR */}
+        {/* RIGHT SIDE — UPCOMING EVENTS + BIGGER CALENDAR */}
         <motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
           {/* changed to 4 columns so calendar can be wider */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-            {/* Upcoming Events (now narrower: 1/4 width) */}
-            <div className="lg:col-span-1 space-y-8">
+            {/* Upcoming Events (fills remaining space) */}
+            <div className="lg:col-span-2 space-y-8">
               <motion.div
                 variants={cardPop}
                 className="p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-200 text-center"
@@ -163,23 +163,28 @@ export default function Home() {
                 </p>
               </motion.div>
 
+              {/* increased card height to “increase length” visually */}
               {[1, 2, 3].map((i) => (
                 <motion.div
                   key={i}
                   variants={cardPop}
-                  className="h-44 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-5 hover:shadow-md transition"
+                  className="h-44 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-6 hover:shadow-md transition"
                   whileHover={{ translateY: -4 }}
                 >
-                  <div className="flex-none w-20 h-20 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
+                  <div className="flex-none w-28 h-28 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
                     IMG
                   </div>
 
                   <div className="flex-1">
-                    <div className="text-base font-medium text-gray-950">
+                    <div className="text-xl font-medium text-gray-950">
                       Neighborhood Meetup
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 mt-1">
                       Sat • 2:00 PM • Community Park
+                    </div>
+                    <div className="text-sm text-gray-600 mt-3">
+                      Meet neighbors, share resources, and get connected with local
+                      programs.
                     </div>
                   </div>
 
@@ -188,20 +193,20 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Calendar (bigger: 3/4 width + taller) */}
+            {/* Calendar (≈ 30% bigger by giving more columns + more padding + slightly bigger cells) */}
             <motion.div
               variants={cardPop}
-              className="lg:col-span-3 bg-white rounded-2xl border border-gray-200 shadow-sm p-8 w-full"
+              className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-8 w-full"
               whileHover={{ y: -3 }}
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-5">
                 <button
                   onClick={() => changeMonth(-1)}
-                  className="text-blue-600 text-xl"
+                  className="text-blue-600 text-lg"
                 >
                   ❮
                 </button>
-                <h3 className="text-2xl font-semibold text-gray-950">
+                <h3 className="text-xl font-semibold text-gray-950">
                   {calendarDate.toLocaleString("default", {
                     month: "long",
                     year: "numeric",
@@ -209,21 +214,20 @@ export default function Home() {
                 </h3>
                 <button
                   onClick={() => changeMonth(1)}
-                  className="text-blue-600 text-xl"
+                  className="text-blue-600 text-lg"
                 >
                   ❯
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 text-sm text-gray-500 mb-4">
+              <div className="grid grid-cols-7 text-sm text-gray-500 mb-3">
                 {days.map((d) => (
-                  <div key={d} className="text-center font-semibold">
+                  <div key={d} className="text-center font-medium">
                     {d}
                   </div>
                 ))}
               </div>
 
-              {/* bigger gaps + taller cells */}
               <div className="grid grid-cols-7 gap-3">
                 {Array.from({ length: firstDay }).map((_, i) => (
                   <div key={`empty-${i}`} />
@@ -244,7 +248,7 @@ export default function Home() {
                   return (
                     <div
                       key={dayNum}
-                      className={`h-14 rounded-2xl flex items-center justify-center text-base cursor-pointer border transition hover:-translate-y-[2px] ${dayClass}`}
+                      className={`h-12 rounded-xl flex items-center justify-center text-base cursor-pointer border transition hover:-translate-y-[2px] ${dayClass}`}
                     >
                       {dayNum}
                     </div>
