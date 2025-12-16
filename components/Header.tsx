@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import ThemeToggle from "./ThemeToggle";
 
 const navItems = ["Map", "Events", "Contact"];
 
