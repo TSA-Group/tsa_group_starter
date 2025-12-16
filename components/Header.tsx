@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-const navItems = ["Map", "Events", "Contact"];
+const navItems = ["Resources", "Events", "Contact"];
 
 export const Header: React.FC = () => {
   return (
