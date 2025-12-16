@@ -30,8 +30,9 @@ const cardPop: Variants = {
 
 export default function Home() {
   const year = new Date().getFullYear();
+
+  /* 📅 CALENDAR STATE */
   const [calendarDate, setCalendarDate] = React.useState(new Date());
-  const [openEventIndex, setOpenEventIndex] = React.useState<number | null>(null);
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
@@ -45,97 +46,134 @@ export default function Home() {
     setCalendarDate(new Date(calYear, calMonth + dir, 1));
   };
 
+  /* ✅ Upcoming Events dropdown state */
+  const [openEventIndex, setOpenEventIndex] = React.useState<number | null>(null);
+
   const events = [
     {
       title: "Neighborhood Meetup",
       whenWhere: "Sat • 2:00 PM • Community Park",
       details:
-        "Bring a friend and meet neighbors. Share resources and get connected.",
+        "Placeholder details: 1",
     },
     {
       title: "Community Clean-Up",
       whenWhere: "Sun • 10:00 AM • Riverwalk Entrance",
       details:
-        "Gloves provided. Small groups, kid-friendly with supervision.",
+        "Placeholder details: 2",
     },
     {
       title: "Job & Skills Workshop",
       whenWhere: "Wed • 6:30 PM • Library Annex",
       details:
-        "Resume tips, mock interviews, and networking opportunities.",
+        "Placeholder details: 3",
     },
   ];
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-950 pb-20"
+      className="min-h-screen bg-gray-50 text-gray-950 pb-20 transition-colors duration-300"
       initial="hidden"
       animate="show"
       variants={container}
     >
-      <main className="max-w-7xl mx-auto px-6 pt-12 grid grid-cols-1 md:grid-cols-3 gap-10">
-        {/* CENTER COLUMN */}
-        <motion.section variants={fadeUp} className="space-y-8">
+      {/* MAIN CONTENT */}
+      <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
+        {/* CENTER COLUMN — TITLE + ACTIONS + VOLUNTEER */}
+        <motion.section
+          variants={fadeUp}
+          className="flex flex-col items-center space-y-8"
+        >
+          {/* BIG TITLE */}
           <motion.h1
-            className="text-8xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500"
+            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-gray-950"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
+            animate={{
+              x: [-60, -40, -60],
+              y: [0, -6, 0],
+              transition: { duration: 2.5, ease: "easeInOut" },
+            }}
           >
             GATHERLY
           </motion.h1>
 
-          {/* QUICK ACTIONS */}
+          {/* QUICK ACTIONS (extend left to start under the “G”) */}
           <motion.div
             variants={cardPop}
-            className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 shadow-sm"
+            className="
+              p-5
+              w-full md:w-[120%]
+              md:-ml-[20%]
+              bg-white rounded-2xl shadow-sm border border-gray-200
+              hover:shadow-md transition
+            "
             whileHover={{ y: -3 }}
           >
-            <h3 className="font-semibold text-lg text-indigo-900">
+            <h3 className="text-lg font-semibold mb-1 text-gray-950">
               Quick Actions
             </h3>
-            <p className="text-sm text-blue-700 mt-1">
-              Easy access to community resources
+            <p className="text-sm text-blue-600/80">
+              <b>Easy Access To Our Valuable Community Resources</b>
             </p>
-
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Visit Our Map", "Share an Event"].map((action) => (
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {["Visit Our Map", "Share an event"].map((action) => (
                 <div
                   key={action}
-                  className="rounded-xl bg-white hover:bg-blue-100 border border-blue-200 px-4 py-3 flex justify-between transition"
+                  className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 border border-gray-200"
                 >
-                  <span className="text-sm font-medium text-gray-900">
-                    {action}
-                  </span>
-                  <span className="text-sm text-blue-700 font-semibold">
-                    Go →
-                  </span>
+                  <span className="text-sm text-gray-900">{action}</span>
+                  <span className="text-xs font-semibold text-blue-600">Go</span>
                 </div>
               ))}
             </div>
           </motion.div>
 
-          {/* VOLUNTEER */}
+          {/* VOLUNTEER OPPORTUNITIES (same width/offset as Quick Actions) */}
           <motion.div
             variants={cardPop}
-            className="p-5 bg-white rounded-2xl border border-emerald-200 shadow-sm"
+            className="
+              h-[350px]
+              p-4
+              relative overflow-y-auto
+              bg-white rounded-2xl border border-gray-200 shadow-sm
+              w-full md:w-[120%]
+              md:-ml-[20%]
+            "
+            whileHover={{ scale: 1.01 }}
           >
-            <h3 className="font-semibold text-lg text-emerald-700 mb-4">
+            <h3 className="text-lg font-semibold text-gray-950 mb-2">
               Volunteer Opportunities
             </h3>
 
             <ul className="space-y-4">
               {[
-                "Free community dinner",
-                "Warm clothing drive",
-                "Literacy tutoring",
-              ].map((title, i) => (
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
+                { title: "Warm clothing drive", meta: "Westside Center" },
+                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+                { title: "Brendan make something up also add date+time", meta: "Some place" },
+              ].map((item, i) => (
                 <li
                   key={i}
-                  className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition"
+                  className="bg-gray-50 border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition"
                 >
-                  <div className="font-medium text-gray-900">{title}</div>
-                  <div className="h-1 mt-3 bg-emerald-200 rounded-full">
-                    <div className="h-1 w-2/3 bg-emerald-500 rounded-full" />
+                  <div className="flex justify-between items-center mb-2">
+                    <div>
+                      <div className="text-sm font-semibold text-gray-950">
+                        {item.title}
+                      </div>
+                      <div className="text-xs text-gray-500">{item.meta}</div>
+                    </div>
+                    <div className="text-xs text-blue-600 font-medium">
+                      Details
+                    </div>
+                  </div>
+
+                  <div className="h-1 w-full bg-gray-200 rounded-full">
+                    <div className="h-1 bg-blue-500 rounded-full w-2/3" />
                   </div>
                 </li>
               ))}
@@ -143,124 +181,192 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT SIDE — UPCOMING EVENTS + CALENDAR */}
         <motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
-          {/* EVENTS HEADER */}
-          <motion.div
-            variants={cardPop}
-            className="p-6 rounded-2xl bg-gradient-to-r from-indigo-50 to-blue-50 border-l-4 border-indigo-500"
-          >
-            <h2 className="text-3xl font-semibold text-indigo-900">
-              Upcoming Events
-            </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Local gatherings & opportunities
-            </p>
-          </motion.div>
-
-          {/* EVENTS */}
-          {events.map((ev, i) => {
-            const isOpen = openEventIndex === i;
-
-            return (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            {/* Upcoming Events */}
+            <div className="lg:col-span-2 space-y-8">
               <motion.div
-                key={ev.title}
                 variants={cardPop}
-                className="bg-white rounded-2xl border border-indigo-200 shadow-sm"
+                className="p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-200 text-center"
+                whileHover={{ y: -3 }}
               >
-                <button
-                  onClick={() =>
-                    setOpenEventIndex(isOpen ? null : i)
-                  }
-                  className="w-full p-6 flex items-center justify-between text-left"
-                >
-                  <div>
-                    <div className="text-xl font-medium text-gray-950">
-                      {ev.title}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {ev.whenWhere}
-                    </div>
-                  </div>
-                  <span className="text-indigo-600 font-semibold">
-                    {isOpen ? "Hide" : "Details"}
-                  </span>
-                </button>
-
-                {isOpen && (
-                  <div className="px-6 pb-6">
-                    <div className="p-4 rounded-xl bg-indigo-50 text-sm text-gray-700">
-                      {ev.details}
-                    </div>
-
-                    <div className="mt-3 flex gap-2">
-                      {["Free", "Family Friendly"].map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <h2 className="text-3xl font-semibold text-gray-950">
+                  Upcoming Events
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Local gatherings & volunteer opportunities
+                </p>
               </motion.div>
-            );
-          })}
 
-          {/* CALENDAR */}
-          <motion.div
-            variants={cardPop}
-            className="bg-white rounded-2xl border border-indigo-200 p-6 shadow-sm"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <button onClick={() => changeMonth(-1)} className="text-indigo-600">
-                ❮
-              </button>
-              <h3 className="font-semibold text-lg text-indigo-900">
-                {calendarDate.toLocaleString("default", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h3>
-              <button onClick={() => changeMonth(1)} className="text-indigo-600">
-                ❯
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: lastDate }).map((_, i) => {
-                const day = i + 1;
-                const isToday =
-                  day === today.getDate() &&
-                  calMonth === today.getMonth() &&
-                  calYear === today.getFullYear();
+              {events.map((ev, i) => {
+                const isOpen = openEventIndex === i;
 
                 return (
-                  <div
-                    key={day}
-                    className={`h-10 flex items-center justify-center rounded-xl border transition
-                      ${
-                        isToday
-                          ? "bg-gradient-to-br from-blue-500 to-indigo-500 text-white border-indigo-500"
-                          : "bg-gray-50 hover:bg-indigo-50 border-gray-200"
-                      }`}
+                  <motion.div
+                    key={ev.title}
+                    variants={cardPop}
+                    className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition"
                   >
-                    {day}
-                  </div>
+                    {/* clickable header */}
+                    <button
+                      type="button"
+                      onClick={() => setOpenEventIndex(isOpen ? null : i)}
+                      aria-expanded={isOpen}
+                      className="w-full text-left p-6 flex items-center gap-4"
+                    >
+                      <div className="flex-none w-28 h-28 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
+                        IMG
+                      </div>
+
+                      <div className="flex-1">
+                        <div className="text-xl font-medium text-gray-950">
+                          {ev.title}
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          {ev.whenWhere}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-blue-600 font-semibold">
+                          {isOpen ? "Hide" : "Details"}
+                        </span>
+                        <span
+                          className={`text-blue-600 transition-transform ${
+                            isOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        >
+                          ▼
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* dropdown */}
+                    <motion.div
+                      initial={false}
+                      animate={
+                        isOpen
+                          ? { height: "auto", opacity: 1 }
+                          : { height: 0, opacity: 0 }
+                      }
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 pb-6 pt-0">
+                        <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700 leading-relaxed">
+                          {ev.details}
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {["Bring water", "Family friendly", "Free"].map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs px-2 py-1 rounded-full bg-white border border-gray-200 text-gray-600"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </motion.div>
                 );
               })}
             </div>
-          </motion.div>
+
+            {/* Calendar */}
+            <motion.div
+              variants={cardPop}
+              className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-8 w-full"
+              whileHover={{ y: -3 }}
+            >
+              <div className="flex items-center justify-between mb-5">
+                <button
+                  onClick={() => changeMonth(-1)}
+                  className="text-blue-600 text-lg"
+                >
+                  ❮
+                </button>
+                <h3 className="text-xl font-semibold text-gray-950">
+                  {calendarDate.toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </h3>
+                <button
+                  onClick={() => changeMonth(1)}
+                  className="text-blue-600 text-lg"
+                >
+                  ❯
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 text-sm text-gray-500 mb-3">
+                {days.map((d) => (
+                  <div key={d} className="text-center font-medium">
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-3">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
+
+                {Array.from({ length: lastDate }).map((_, i) => {
+                  const dayNum = i + 1;
+
+                  const isToday =
+                    dayNum === today.getDate() &&
+                    calMonth === today.getMonth() &&
+                    calYear === today.getFullYear();
+
+                  const dayClass = isToday
+                    ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                    : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100";
+
+                  return (
+                    <div
+                      key={dayNum}
+                      className={`h-12 rounded-xl flex items-center justify-center text-base cursor-pointer border transition hover:-translate-y-[2px] ${dayClass}`}
+                    >
+                      {dayNum}
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
         </motion.section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="mt-16 text-center text-sm text-gray-500">
+      {/* FOOTER CONTACT */}
+      <motion.footer
+        variants={fadeUp}
+        className="w-full p-6 bg-white border-t border-gray-200 mt-12 text-gray-700"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="font-semibold underline mb-2 text-gray-950">
+            Contact Our Community Staff:
+          </p>
+          <div className="flex flex-col md:flex-row md:items-center md:gap-8 text-sm">
+            <a className="text-blue-600" href="mailto:Gatherly@gmail.com">
+              Gatherly@gmail.com
+            </a>
+            <a className="text-blue-600" href="tel:012-345-6789">
+              012-345-6789
+            </a>
+            <span className="text-gray-500">[enter info]</span>
+          </div>
+        </div>
+      </motion.footer>
+
+      {/* COPYRIGHT FOOTER */}
+      <footer className="w-full p-4 text-center text-sm text-gray-500 bg-gray-50 border-t border-gray-200">
         © {year} Gatherly. All rights reserved.
       </footer>
     </motion.div>
   );
 }
-
