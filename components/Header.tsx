@@ -3,7 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-const navItems = ["Resources", "Events", "Contact"];
+const navItems = [
+  { label: "Resources", href: "/map" }, 
+  { label: "Events", href: "/events" },
+  { label: "Contact", href: "/contact" },
+];
 
 export const Header: React.FC = () => {
   return (
@@ -28,11 +32,7 @@ export const Header: React.FC = () => {
               textShadow: "0px 0px 8px rgba(37, 99, 235, 0.25)",
             }}
             transition={{ type: "spring", stiffness: 260 }}
-            className="
-              text-3xl font-extrabold tracking-tight
-              cursor-pointer
-              text-gray-950
-            "
+            className="text-3xl font-extrabold tracking-tight cursor-pointer text-gray-950"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
           >
             Gatherly
@@ -41,10 +41,10 @@ export const Header: React.FC = () => {
 
         {/* NAV */}
         <nav className="flex gap-10 text-base font-medium ml-auto">
-          {navItems.map((item) => (
+          {navItems.map(({ label, href }) => (
             <motion.a
-              key={item}
-              href={`/${item.toLowerCase()}`}
+              key={label}
+              href={href}
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 300 }}
               className="
@@ -53,7 +53,7 @@ export const Header: React.FC = () => {
                 transition-colors duration-200
               "
             >
-              {item}
+              {label}
 
               <span
                 className="
