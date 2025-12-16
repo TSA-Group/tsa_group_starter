@@ -54,19 +54,19 @@ export default function Home() {
       title: "Neighborhood Meetup",
       whenWhere: "Sat • 2:00 PM • Community Park",
       details:
-        "Placeholder details: Bring a friend, grab a snack, and meet neighbors. We’ll share local resources, upcoming volunteer needs, and ways to stay connected. (Replace this text later.)",
+        "Placeholder details: 1",
     },
     {
       title: "Community Clean-Up",
       whenWhere: "Sun • 10:00 AM • Riverwalk Entrance",
       details:
-        "Placeholder details: Gloves and bags provided. We’ll break into small groups and cover different areas. Kids welcome with supervision. (Replace this text later.)",
+        "Placeholder details: 2",
     },
     {
       title: "Job & Skills Workshop",
       whenWhere: "Wed • 6:30 PM • Library Annex",
       details:
-        "Placeholder details: Resume tips, mock interviews, and networking with local partners. Bring a notebook or laptop if you can. (Replace this text later.)",
+        "Placeholder details: 3",
     },
   ];
 
