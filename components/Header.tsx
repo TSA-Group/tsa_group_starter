@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
               textShadow: "0px 0px 8px rgba(37, 99, 235, 0.25)",
             }}
             transition={{ type: "spring", stiffness: 260 }}
-            className="text-3xl font-extrabold tracking-tight cursor-pointer text-gray-950"
+            className="text-3xl font-extrabold tracking-tight cursor-pointer text-blue-600/80"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
           >
             Gatherly
