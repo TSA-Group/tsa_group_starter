@@ -1,5 +1,4 @@
 
-+import React from "react";
 +import { motion, Variants, easeInOut } from "framer-motion";
 +
 +const container: Variants = {
