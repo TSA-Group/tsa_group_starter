@@ -39,38 +39,32 @@ export const Header: React.FC = () => {
           </motion.h1>
         </Link>
 
-        {/* NAV + TOGGLE */}
-        <div className="flex items-center gap-8 ml-auto">
-          <nav className="flex gap-10 text-base font-medium">
-            {navItems.map((item) => (
-              <motion.a
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                whileHover={{ y: -2 }}
-                transition={{ type: "spring", stiffness: 300 }}
+        {/* NAV */}
+        <nav className="flex gap-10 text-base font-medium ml-auto">
+          {navItems.map((item) => (
+            <motion.a
+              key={item}
+              href={`/${item.toLowerCase()}`}
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="
+                relative text-gray-700
+                hover:text-blue-600
+                transition-colors duration-200
+              "
+            >
+              {item}
+
+              <span
                 className="
-                  relative text-gray-700
-                  hover:text-blue-600
-                  transition-colors duration-200
+                  absolute left-0 -bottom-1 h-[2px] w-0
+                  bg-blue-500
+                  transition-all duration-300
                 "
-              >
-                {item}
-
-                {/* subtle underline on hover */}
-                <span
-                  className="
-                    absolute left-0 -bottom-1 h-[2px] w-0
-                    bg-blue-500
-                    transition-all duration-300
-                    group-hover:w-full
-                  "
-                />
-              </motion.a>
-            ))}
-          </nav>
-
-          <ThemeToggle />
-        </div>
+              />
+            </motion.a>
+          ))}
+        </nav>
       </div>
     </motion.header>
   );
