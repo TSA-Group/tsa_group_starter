@@ -62,13 +62,13 @@ export default function Home() {
         >
           {/* BIG TITLE */}
           <motion.h1
-            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-gray-950"
+            className="text-7xl md:text-8xl font-extrabold tracking-tight leading-none text-blue-600/80"
             style={{ fontFamily: "TAN Buster, sans-serif" }}
             variants={cardPop}
             animate={{
               x: [-60, -40, -60],
               y: [0, -6, 0],
-              transition: { duration: 2.5, ease: "easeInOut", repeat: Infinity },
+              transition: { duration: 2.5, ease: "easeInOut"},
             }}
           >
             GATHERLY
