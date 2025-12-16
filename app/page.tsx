@@ -144,11 +144,12 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT SIDE — UPCOMING EVENTS (LEFT) + CALENDAR (RIGHT) */}
+        {/* RIGHT SIDE — NARROWER EVENTS + BIGGER CALENDAR */}
         <motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            {/* Upcoming Events (2/3 width) */}
-            <div className="lg:col-span-2 space-y-8">
+          {/* changed to 4 columns so calendar can be wider */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            {/* Upcoming Events (now narrower: 1/4 width) */}
+            <div className="lg:col-span-1 space-y-8">
               <motion.div
                 variants={cardPop}
                 className="p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-200 text-center"
@@ -166,15 +167,15 @@ export default function Home() {
                 <motion.div
                   key={i}
                   variants={cardPop}
-                  className="h-36 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-5 hover:shadow-md transition"
+                  className="h-44 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-5 hover:shadow-md transition"
                   whileHover={{ translateY: -4 }}
                 >
-                  <div className="flex-none w-24 h-24 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
+                  <div className="flex-none w-20 h-20 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
                     IMG
                   </div>
 
                   <div className="flex-1">
-                    <div className="text-lg font-medium text-gray-950">
+                    <div className="text-base font-medium text-gray-950">
                       Neighborhood Meetup
                     </div>
                     <div className="text-sm text-gray-500">
@@ -187,20 +188,20 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Calendar (safe: plain div day cells) */}
+            {/* Calendar (bigger: 3/4 width + taller) */}
             <motion.div
               variants={cardPop}
-              className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 w-full"
+              className="lg:col-span-3 bg-white rounded-2xl border border-gray-200 shadow-sm p-8 w-full"
               whileHover={{ y: -3 }}
             >
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <button
                   onClick={() => changeMonth(-1)}
-                  className="text-blue-600"
+                  className="text-blue-600 text-xl"
                 >
                   ❮
                 </button>
-                <h3 className="text-lg font-semibold text-gray-950">
+                <h3 className="text-2xl font-semibold text-gray-950">
                   {calendarDate.toLocaleString("default", {
                     month: "long",
                     year: "numeric",
@@ -208,21 +209,22 @@ export default function Home() {
                 </h3>
                 <button
                   onClick={() => changeMonth(1)}
-                  className="text-blue-600"
+                  className="text-blue-600 text-xl"
                 >
                   ❯
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 text-xs text-gray-500 mb-2">
+              <div className="grid grid-cols-7 text-sm text-gray-500 mb-4">
                 {days.map((d) => (
-                  <div key={d} className="text-center font-medium">
+                  <div key={d} className="text-center font-semibold">
                     {d}
                   </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-2">
+              {/* bigger gaps + taller cells */}
+              <div className="grid grid-cols-7 gap-3">
                 {Array.from({ length: firstDay }).map((_, i) => (
                   <div key={`empty-${i}`} />
                 ))}
@@ -242,7 +244,7 @@ export default function Home() {
                   return (
                     <div
                       key={dayNum}
-                      className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition hover:-translate-y-[2px] ${dayClass}`}
+                      className={`h-14 rounded-2xl flex items-center justify-center text-base cursor-pointer border transition hover:-translate-y-[2px] ${dayClass}`}
                     >
                       {dayNum}
                     </div>
