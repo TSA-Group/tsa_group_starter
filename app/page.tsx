@@ -40,14 +40,6 @@ export default function Home() {
     >
       {/* MAIN CONTENT */}
       <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
-        {/* LEFT COLUMN — reserved for future content */}
-        <motion.section variants={fadeUp} className="space-y-8">
-          {/* removed the monochrome widgets card */}
-          <motion.div
-            variants={cardPop}
-            className="h-36 rounded-2xl border border-gray-200 bg-white shadow-sm"
-          />
-        </motion.section>
 
         {/* CENTER COLUMN — GATHERLY + QUICK ACTIONS BELOW */}
         <motion.section
