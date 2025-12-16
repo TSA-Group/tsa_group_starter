@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import React from "react";
@@ -55,7 +56,6 @@ export default function Home() {
     >
       {/* MAIN CONTENT */}
       <main className="w-full max-w-7xl mx-auto px-6 pt-12 pb-[80vh] mt-0 grid grid-cols-1 md:grid-cols-3 gap-10">
-
         {/* CENTER COLUMN — GATHERLY + QUICK ACTIONS BELOW */}
         <motion.section
           variants={fadeUp}
@@ -69,13 +69,13 @@ export default function Home() {
             animate={{
               x: [-60, -40, -60],
               y: [0, -6, 0],
-              transition: { duration: 2.5, ease: "easeInOut" },
+              transition: { duration: 2.5, ease: "easeInOut", repeat: Infinity },
             }}
           >
             GATHERLY
           </motion.h1>
 
-          {/* QUICK ACTIONS BELOW THE TITLE */}
+          {/* QUICK ACTIONS */}
           <motion.div
             variants={cardPop}
             className="p-5 w-full md:w-[88%] bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition"
@@ -94,9 +94,7 @@ export default function Home() {
                   className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 border border-gray-200"
                 >
                   <span className="text-sm text-gray-900">{action}</span>
-                  <span className="text-xs font-semibold text-blue-600">
-                    Go
-                  </span>
+                  <span className="text-xs font-semibold text-blue-600">Go</span>
                 </div>
               ))}
             </div>
@@ -109,7 +107,7 @@ export default function Home() {
             whileHover={{ scale: 1.01 }}
           >
             <h3 className="text-lg font-semibold text-gray-950 mb-2">
-              Volunteer Opportunities 
+              Volunteer Opportunities
             </h3>
 
             <ul className="space-y-4">
@@ -131,9 +129,7 @@ export default function Home() {
                       <div className="text-sm font-semibold text-gray-950">
                         {item.title}
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {item.meta}
-                      </div>
+                      <div className="text-xs text-gray-500">{item.meta}</div>
                     </div>
                     <div className="text-xs text-blue-600 font-medium">
                       Details
@@ -149,146 +145,114 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN — UPCOMING EVENTS + CALENDAR */}
-        <motion.section variants={fadeUp} className="space-y-8 flex flex-col">
-          <motion.div
-            variants={cardPop}
-            className="p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-200 text-center"
-            whileHover={{ y: -3 }}
-          >
-            <h2 className="text-3xl font-semibold text-gray-950">
-              Upcoming Events
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Local gatherings & volunteer opportunities
-            </p>
-          </motion.div>
+        {/* RIGHT SIDE — UPCOMING EVENTS (LEFT) + CALENDAR (RIGHT) */}
+        <motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Upcoming Events (2/3 width) */}
+            <div className="lg:col-span-2 space-y-8">
+              <motion.div
+                variants={cardPop}
+                className="p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-200 text-center"
+                whileHover={{ y: -3 }}
+              >
+                <h2 className="text-3xl font-semibold text-gray-950">
+                  Upcoming Events
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Local gatherings & volunteer opportunities
+                </p>
+              </motion.div>
 
-          {[1, 2, 3].map((i) => (
-            <motion.div
-              key={i}
-              variants={cardPop}
-              className="h-36 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-5 hover:shadow-md transition"
-              whileHover={{ translateY: -4 }}
-            >
-              <div className="flex-none w-24 h-24 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
-                IMG
-              </div>
+              {[1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  variants={cardPop}
+                  className="h-36 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-5 hover:shadow-md transition"
+                  whileHover={{ translateY: -4 }}
+                >
+                  <div className="flex-none w-24 h-24 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
+                    IMG
+                  </div>
 
-              <div className="flex-1">
-                <div className="text-lg font-medium text-gray-950">
-                  Neighborhood Meetup
-                </div>
-                <div className="text-sm text-gray-500">
-                  Sat • 2:00 PM • Community Park
-                </div>
-              </div>
+                  <div className="flex-1">
+                    <div className="text-lg font-medium text-gray-950">
+                      Neighborhood Meetup
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Sat • 2:00 PM • Community Park
+                    </div>
+                  </div>
 
-              <div className="text-sm text-blue-600 font-semibold">
-                RSVP
-              </div>
-            </motion.div>
-          ))}
-
-
-<motion.section variants={fadeUp} className="md:col-span-2 space-y-8">
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-    {/* LEFT SIDE: Upcoming Events (takes 2/3 width) */}
-    <div className="lg:col-span-2 space-y-8">
-      <motion.div
-        variants={cardPop}
-        className="p-6 bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-200 text-center"
-        whileHover={{ y: -3 }}
-      >
-        <h2 className="text-3xl font-semibold text-gray-950">Upcoming Events</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Local gatherings & volunteer opportunities
-        </p>
-      </motion.div>
-
-      {[1, 2, 3].map((i) => (
-        <motion.div
-          key={i}
-          variants={cardPop}
-          className="h-36 bg-white rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4 p-5 hover:shadow-md transition"
-          whileHover={{ translateY: -4 }}
-        >
-          <div className="flex-none w-24 h-24 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
-            IMG
-          </div>
-
-          <div className="flex-1">
-            <div className="text-lg font-medium text-gray-950">Neighborhood Meetup</div>
-            <div className="text-sm text-gray-500">Sat • 2:00 PM • Community Park</div>
-          </div>
-
-          <div className="text-sm text-blue-600 font-semibold">RSVP</div>
-        </motion.div>
-      ))}
-    </div>
-
-    {/* RIGHT SIDE: Calendar (fills remaining right space, wider) */}
-    <motion.div
-      variants={cardPop}
-      className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 w-full"
-      whileHover={{ y: -3 }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => changeMonth(-1)} className="text-blue-600">
-          ❮
-        </button>
-        <h3 className="text-lg font-semibold text-gray-950">
-          {calendarDate.toLocaleString("default", { month: "long", year: "numeric" })}
-        </h3>
-        <button onClick={() => changeMonth(1)} className="text-blue-600">
-          ❯
-        </button>
-      </div>
-
-      <div className="grid grid-cols-7 text-xs text-gray-500 mb-2">
-        {days.map((day) => (
-          <div key={day} className="text-center font-medium">
-            {day}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-2">
-        {Array.from({ length: firstDay }).map((_, i) => (
-          <div key={i} />
-        ))}
-
-        {Array.from({ length: lastDate }).map((_, i) => {
-          const day = i + 1;
-          const isToday =
-            day === today.getDate() &&
-            calMonth === today.getMonth() &&
-            calYear === today.getFullYear();
-
-          return (
-            <motion.div
-              key={day}
-              whileHover={{ y: -3 }}
-              className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition
-                ${
-                  isToday
-                    ? "bg-blue-500 text-white border-blue-500 shadow-sm"
-                    : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100"
-                }`}
-            >
-              {day}
-            </motion.div>
-          );
-        })}
-      </div>
-    </motion.div>
-  </div>
-</motion.section>
-
-                );
-              })}
+                  <div className="text-sm text-blue-600 font-semibold">RSVP</div>
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
+
+            {/* Calendar (fills remaining right side) */}
+            <motion.div
+              variants={cardPop}
+              className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 w-full"
+              whileHover={{ y: -3 }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={() => changeMonth(-1)}
+                  className="text-blue-600"
+                >
+                  ❮
+                </button>
+                <h3 className="text-lg font-semibold text-gray-950">
+                  {calendarDate.toLocaleString("default", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </h3>
+                <button
+                  onClick={() => changeMonth(1)}
+                  className="text-blue-600"
+                >
+                  ❯
+                </button>
+              </div>
+
+              <div className="grid grid-cols-7 text-xs text-gray-500 mb-2">
+                {days.map((day) => (
+                  <div key={day} className="text-center font-medium">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <div key={i} />
+                ))}
+
+                {Array.from({ length: lastDate }).map((_, i) => {
+                  const day = i + 1;
+                  const isToday =
+                    day === today.getDate() &&
+                    calMonth === today.getMonth() &&
+                    calYear === today.getFullYear();
+
+                  return (
+                    <motion.div
+                      key={day}
+                      whileHover={{ y: -3 }}
+                      className={`h-10 rounded-xl flex items-center justify-center text-sm cursor-pointer border transition
+                        ${
+                          isToday
+                            ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                            : "bg-gray-50 text-gray-900 border-gray-200 hover:bg-gray-100"
+                        }`}
+                    >
+                      {day}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
         </motion.section>
       </main>
 
@@ -320,3 +284,4 @@ export default function Home() {
     </motion.div>
   );
 }
+```
