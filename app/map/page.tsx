@@ -1,4 +1,5 @@
 "use client";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { useState, useEffect, useRef } from "react";
 import {
@@ -146,6 +147,9 @@ function SearchBox({
   const serviceRef = useRef<google.maps.places.AutocompleteService | null>(
     null,
   );
+  const boxRef = useRef<HTMLDivElement | null>(null);
+
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (placesLib && !serviceRef.current) {
@@ -154,56 +158,98 @@ function SearchBox({
   }, [placesLib]);
 
   useEffect(() => {
-    if (!serviceRef.current || !input) {
+    if (!serviceRef.current || !input || !open) {
       setPredictions([]);
       return;
     }
+
     serviceRef.current.getPlacePredictions({ input }, (res) => {
       setPredictions(res || []);
     });
-  }, [input, setPredictions]);
+  }, [input, open, setPredictions]);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const handleSelect = (placeId: string) => {
     if (!placesLib) return;
+
     const detailsService = new placesLib.PlacesService(
       document.createElement("div"),
     );
+
     detailsService.getDetails({ placeId }, (place) => {
       if (place?.geometry?.location) {
         const loc = {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng(),
         };
+
         setCenter(loc);
         setSelectedPlace(loc);
         setInput(place.formatted_address || "");
-        setTimeout(() => setPredictions([]), 0);
+
+        setOpen(false);
+        setPredictions([]);
       }
     });
   };
 
   return (
-    <div className="p-3 bg-base-200 rounded-lg shadow-md">
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Search for a place..."
-        className="w-full p-2 border border-base-300 rounded-md bg-base-100 text-base-content"
-      />
-      {predictions.length > 0 && (
-        <ul className="list-none mt-2 p-0">
-          {predictions.slice(0, 3).map((p) => (
-            <li
-              key={p.place_id}
-              onClick={() => handleSelect(p.place_id)}
-              className="p-2 cursor-pointer border-b border-base-300 hover:bg-base-300"
+    <div ref={boxRef} className="p-3 bg-base-200 rounded-lg shadow-md">
+      {/* 👇 positioning wrapper (NO padding) */}
+      <div className="relative">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => {
+            setInput(e.target.value);
+            setOpen(true);
+          }}
+          placeholder="Search for a place..."
+          className="w-full p-2 border border-base-300 rounded-md bg-base-100 text-base-content"
+        />
+
+        <AnimatePresence>
+          {open && predictions.length > 0 && (
+            <motion.ul
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="
+                absolute left-0 right-0
+                mt-3
+                bg-base-100 border border-base-300
+                rounded-md overflow-hidden
+                shadow-lg z-20
+              "
             >
-              {p.description}
-            </li>
-          ))}
-        </ul>
-      )}
+              {predictions.slice(0, 3).map((p, idx) => (
+                <li
+                  key={p.place_id}
+                  onClick={() => handleSelect(p.place_id)}
+                  className={`
+                    p-3 cursor-pointer transition-colors
+                    hover:bg-base-300
+                    ${idx !== 0 ? "border-t border-base-300" : ""}
+                  `}
+                >
+                  {p.description}
+                </li>
+              ))}
+            </motion.ul>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
