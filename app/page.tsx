@@ -47,12 +47,12 @@ export default function Home() {
   return (
     <motion.div
       layoutRoot
-      className="min-h-screen overflow-x-hidden bg-gray-50 text-gray-950"
+      className="min-h-screen overflow-x-hidden bg-gradient-to-br from-gray-50 via-stone-50 to-gray-100 text-gray-950"
       initial="hidden"
       animate="show"
       variants={container}
     >
-      {/* TITLE — FULL WIDTH */}
+      {/* HEADER */}
       <motion.header
         layout
         variants={fadeUp}
@@ -73,7 +73,7 @@ export default function Home() {
         </motion.h1>
       </motion.header>
 
-      {/* MAIN GRID */}
+      {/* MAIN */}
       <motion.main
         layout
         className="
@@ -87,14 +87,14 @@ export default function Home() {
       >
         {/* LEFT COLUMN */}
         <motion.section layout variants={fadeUp} className="space-y-8">
-          {/* Quick Actions */}
+          {/* QUICK ACTIONS */}
           <motion.div
             layout
             variants={cardPop}
-            className="p-5 bg-white rounded-2xl border border-gray-200 shadow-sm"
+            className="p-5 bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <h3 className="text-lg font-semibold mb-1">Quick Actions</h3>
-            <p className="text-sm text-blue-600/80">
+            <p className="text-sm text-slate-600">
               Easy Access To Our Valuable Community Resources
             </p>
 
@@ -102,10 +102,10 @@ export default function Home() {
               {["Visit Our Map", "Share an Event"].map((action) => (
                 <div
                   key={action}
-                  className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 border border-gray-200"
+                  className="flex items-center justify-between rounded-xl bg-stone-100 px-4 py-3 border border-gray-200"
                 >
                   <span className="text-sm">{action}</span>
-                  <span className="text-xs font-semibold text-blue-600">
+                  <span className="text-xs font-semibold text-slate-700">
                     Go
                   </span>
                 </div>
@@ -113,11 +113,11 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Volunteer Opportunities */}
+          {/* VOLUNTEER */}
           <motion.div
             layout
             variants={cardPop}
-            className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-gray-200 shadow-sm"
+            className="h-[350px] p-4 overflow-y-auto bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <h3 className="text-lg font-semibold mb-3">
               Volunteer Opportunities
@@ -125,41 +125,29 @@ export default function Home() {
 
             <ul className="space-y-4">
               {[
-                {
-                  title: "Free community dinner — Sat 6pm",
-                  meta: "Downtown Church",
-                },
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
-                {
-                  title: "Volunteer literacy tutors needed",
-                  meta: "Library Annex",
-                },
-                {
-                  title: "Neighborhood cleanup — Sun 10am",
-                  meta: "Riverside Park",
-                },
-                {
-                  title: "Food pantry helpers — Wed 4pm",
-                  meta: "Community Hall",
-                },
+                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
+                { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
+                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
               ].map((item, i) => (
                 <motion.li
                   layout
                   key={i}
-                  className="bg-gray-50 border border-gray-200 rounded-xl p-3 shadow-sm"
+                  className="bg-stone-100 border border-gray-200 rounded-xl p-3 shadow-sm"
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div>
                       <div className="text-sm font-semibold">{item.title}</div>
                       <div className="text-xs text-gray-500">{item.meta}</div>
                     </div>
-                    <span className="text-xs font-medium text-blue-600">
+                    <span className="text-xs font-medium text-slate-700">
                       Details
                     </span>
                   </div>
 
                   <div className="h-1 w-full bg-gray-200 rounded-full">
-                    <div className="h-1 w-2/3 bg-blue-500 rounded-full" />
+                    <div className="h-1 w-2/3 bg-slate-400 rounded-full" />
                   </div>
                 </motion.li>
               ))}
@@ -174,12 +162,12 @@ export default function Home() {
           className="lg:col-span-2 space-y-8"
         >
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-            {/* Upcoming Events */}
+            {/* EVENTS */}
             <motion.div layout className="xl:col-span-2 space-y-8">
               <motion.div
                 layout
                 variants={cardPop}
-                className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border border-gray-200 shadow-sm text-center"
+                className="p-6 bg-stone-50 rounded-2xl border-l-4 border-slate-400 border border-gray-200 shadow-sm text-center"
               >
                 <h2 className="text-3xl font-semibold">Upcoming Events</h2>
                 <p className="text-sm text-gray-500 mt-1">
@@ -192,9 +180,9 @@ export default function Home() {
                   layout
                   key={i}
                   variants={cardPop}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-4 p-6"
+                  className="bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 p-6"
                 >
-                  <div className="w-full sm:w-28 aspect-square bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center text-blue-600 font-semibold">
+                  <div className="w-full sm:w-28 aspect-square bg-gradient-to-br from-stone-50 to-gray-100 border border-gray-200 rounded-xl flex items-center justify-center text-slate-700 font-semibold">
                     IMG
                   </div>
 
@@ -207,23 +195,23 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <span className="text-sm font-semibold text-blue-600 self-start sm:self-center">
+                  <span className="text-sm font-semibold text-slate-700 self-start sm:self-center">
                     RSVP
                   </span>
                 </motion.div>
               ))}
             </motion.div>
 
-            {/* Calendar */}
+            {/* CALENDAR */}
             <motion.div
               layout
               variants={cardPop}
-              className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 w-full"
+              className="bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 w-full"
             >
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={() => changeMonth(-1)}
-                  className="text-blue-600"
+                  className="text-slate-700"
                 >
                   ❮
                 </button>
@@ -237,7 +225,7 @@ export default function Home() {
 
                 <button
                   onClick={() => changeMonth(1)}
-                  className="text-blue-600"
+                  className="text-slate-700"
                 >
                   ❯
                 </button>
@@ -269,8 +257,8 @@ export default function Home() {
                       key={dayNum}
                       className={`aspect-square rounded-xl flex items-center justify-center cursor-pointer border transition ${
                         isToday
-                          ? "bg-blue-500 text-white border-blue-500"
-                          : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                          ? "bg-slate-800 text-white border-slate-800"
+                          : "bg-stone-100 border-gray-200 hover:bg-stone-200"
                       }`}
                     >
                       {dayNum}
@@ -284,23 +272,23 @@ export default function Home() {
       </motion.main>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-200 bg-white">
+      <footer className="border-t border-gray-200 bg-stone-50">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <p className="font-semibold underline mb-2">
             Contact Our Community Staff:
           </p>
           <div className="flex flex-col sm:flex-row sm:gap-8 text-sm">
-            <a className="text-blue-600" href="mailto:Gatherly@gmail.com">
+            <a className="text-slate-700 hover:text-slate-900" href="mailto:Gatherly@gmail.com">
               Gatherly@gmail.com
             </a>
-            <a className="text-blue-600" href="tel:012-345-6789">
+            <a className="text-slate-700 hover:text-slate-900" href="tel:012-345-6789">
               012-345-6789
             </a>
             <span className="text-gray-500">[enter info]</span>
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-500 py-4 bg-gray-50">
+        <div className="text-center text-sm text-gray-600 py-4 bg-gray-100">
           © {year} Gatherly. All rights reserved.
         </div>
       </footer>
