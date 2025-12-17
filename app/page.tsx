@@ -51,10 +51,10 @@ export default function Home() {
       animate="show"
       variants={container}
       className="
-        min-h-screen overflow-x-hidden text-gray-950
-        bg-[radial-gradient(1200px_600px_at_20%_-10%,rgba(56,189,248,0.25),transparent_60%),
-            radial-gradient(800px_400px_at_80%_10%,rgba(251,191,36,0.25),transparent_55%),
-            linear-gradient(to_bottom,rgba(240,249,255,1),rgba(255,251,235,1))]
+        min-h-screen overflow-x-hidden text-slate-950
+        bg-[radial-gradient(1200px_600px_at_20%_-10%,rgba(56,189,248,0.35),transparent_60%),
+            radial-gradient(900px_500px_at_80%_10%,rgba(14,165,233,0.25),transparent_55%),
+            linear-gradient(to_bottom,rgba(239,246,255,1),rgba(219,234,254,1))]
       "
     >
       {/* HEADER */}
@@ -96,7 +96,7 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="p-5 bg-gradient-to-br from-white to-sky-50 rounded-2xl border border-sky-100 shadow-sm hover:shadow-md transition-shadow"
+            className="p-5 bg-gradient-to-br from-white to-sky-50 rounded-2xl border border-sky-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <h3 className="text-lg font-semibold mb-1 text-sky-900">
               Quick Actions
@@ -109,10 +109,10 @@ export default function Home() {
               {["Visit Our Map", "Share an Event"].map((action) => (
                 <div
                   key={action}
-                  className="flex items-center justify-between rounded-xl bg-sky-50 px-4 py-3 border border-sky-200 hover:bg-sky-100 transition"
+                  className="flex items-center justify-between rounded-xl bg-sky-100 px-4 py-3 border border-sky-200 hover:bg-sky-200 transition"
                 >
                   <span className="text-sm">{action}</span>
-                  <span className="text-xs font-semibold text-sky-700">
+                  <span className="text-xs font-semibold text-sky-800">
                     Go
                   </span>
                 </div>
@@ -124,9 +124,9 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="h-[350px] p-4 overflow-y-auto bg-gradient-to-br from-white to-teal-50 rounded-2xl border border-teal-100 shadow-sm hover:shadow-md transition-shadow"
+            className="h-[350px] p-4 overflow-y-auto bg-gradient-to-br from-white to-blue-50 rounded-2xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-lg font-semibold mb-3 text-teal-900">
+            <h3 className="text-lg font-semibold mb-3 text-blue-900">
               Volunteer Opportunities
             </h3>
 
@@ -141,20 +141,20 @@ export default function Home() {
                 <motion.li
                   layout
                   key={i}
-                  className="bg-teal-50 border border-teal-200 rounded-xl p-3 shadow-sm"
+                  className="bg-blue-100 border border-blue-200 rounded-xl p-3 shadow-sm"
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div>
                       <div className="text-sm font-semibold">{item.title}</div>
-                      <div className="text-xs text-gray-500">{item.meta}</div>
+                      <div className="text-xs text-blue-700">{item.meta}</div>
                     </div>
-                    <span className="text-xs font-medium text-teal-700">
+                    <span className="text-xs font-medium text-blue-800">
                       Details
                     </span>
                   </div>
 
-                  <div className="h-1 w-full bg-teal-100 rounded-full">
-                    <div className="h-1 w-2/3 bg-teal-400 rounded-full" />
+                  <div className="h-1 w-full bg-blue-200 rounded-full">
+                    <div className="h-1 w-2/3 bg-blue-500 rounded-full" />
                   </div>
                 </motion.li>
               ))}
@@ -174,7 +174,7 @@ export default function Home() {
               <motion.div
                 layout
                 variants={cardPop}
-                className="p-6 bg-gradient-to-br from-sky-50 to-white rounded-2xl border-l-4 border-sky-500 border border-sky-100 shadow-sm text-center"
+                className="p-6 bg-gradient-to-br from-sky-100 to-white rounded-2xl border-l-4 border-sky-500 border border-sky-200 shadow-sm text-center"
               >
                 <h2 className="text-3xl font-semibold text-sky-900">
                   Upcoming Events
@@ -189,9 +189,9 @@ export default function Home() {
                   layout
                   key={i}
                   variants={cardPop}
-                  className="bg-gradient-to-br from-white to-amber-50 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 p-6"
+                  className="bg-gradient-to-br from-white to-blue-50 rounded-2xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 p-6"
                 >
-                  <div className="w-full sm:w-28 aspect-square bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-300 rounded-xl flex items-center justify-center text-amber-800 font-semibold">
+                  <div className="w-full sm:w-28 aspect-square bg-gradient-to-br from-blue-200 to-blue-300 border border-blue-300 rounded-xl flex items-center justify-center text-blue-900 font-semibold">
                     IMG
                   </div>
 
@@ -199,12 +199,12 @@ export default function Home() {
                     <div className="text-xl font-medium">
                       Neighborhood Meetup
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className="text-sm text-blue-700 mt-1">
                       Sat • 2:00 PM • Community Park
                     </div>
                   </div>
 
-                  <span className="text-sm font-semibold text-amber-700 self-start sm:self-center">
+                  <span className="text-sm font-semibold text-blue-800 self-start sm:self-center">
                     RSVP
                   </span>
                 </motion.div>
@@ -215,7 +215,7 @@ export default function Home() {
             <motion.div
               layout
               variants={cardPop}
-              className="bg-gradient-to-br from-white to-sky-50 rounded-2xl border border-sky-100 shadow-sm p-6 sm:p-8 w-full"
+              className="bg-gradient-to-br from-white to-sky-50 rounded-2xl border border-sky-200 shadow-sm p-6 sm:p-8 w-full"
             >
               <div className="flex items-center justify-between mb-4">
                 <button
@@ -240,7 +240,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 text-xs sm:text-sm text-gray-500 mb-2">
+              <div className="grid grid-cols-7 text-xs sm:text-sm text-sky-700 mb-2">
                 {days.map((d) => (
                   <div key={d} className="text-center font-medium">
                     {d}
@@ -266,8 +266,8 @@ export default function Home() {
                       key={dayNum}
                       className={`aspect-square rounded-xl flex items-center justify-center cursor-pointer border transition ${
                         isToday
-                          ? "bg-sky-600 text-white border-sky-600"
-                          : "bg-sky-50 border-sky-200 hover:bg-sky-100"
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-blue-100 border-blue-200 hover:bg-blue-200"
                       }`}
                     >
                       {dayNum}
@@ -281,23 +281,23 @@ export default function Home() {
       </motion.main>
 
       {/* FOOTER */}
-      <footer className="border-t border-sky-100 bg-gradient-to-r from-sky-100 via-white to-amber-100">
+      <footer className="border-t border-blue-200 bg-gradient-to-r from-blue-100 via-sky-50 to-blue-200">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <p className="font-semibold underline mb-2 text-sky-900">
+          <p className="font-semibold underline mb-2 text-blue-900">
             Contact Our Community Staff:
           </p>
           <div className="flex flex-col sm:flex-row sm:gap-8 text-sm">
-            <a className="text-sky-700 hover:text-sky-900" href="mailto:Gatherly@gmail.com">
+            <a className="text-blue-700 hover:text-blue-900" href="mailto:Gatherly@gmail.com">
               Gatherly@gmail.com
             </a>
-            <a className="text-sky-700 hover:text-sky-900" href="tel:012-345-6789">
+            <a className="text-blue-700 hover:text-blue-900" href="tel:012-345-6789">
               012-345-6789
             </a>
-            <span className="text-gray-500">[enter info]</span>
+            <span className="text-blue-700">[enter info]</span>
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-600 py-4 bg-white/70">
+        <div className="text-center text-sm text-blue-700 py-4 bg-white/70">
           © {year} Gatherly. All rights reserved.
         </div>
       </footer>
