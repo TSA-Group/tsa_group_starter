@@ -1,6 +1,5 @@
 "use client";
 
-
 import React from "react";
 import { motion, Variants } from "framer-motion";
 
@@ -48,7 +47,7 @@ export default function Home() {
   return (
     <motion.div
       layoutRoot
-      className="min-h-screen overflow-x-hidden bg-gradient-to-br from-indigo-50 via-stone-50 to-amber-50 text-gray-950"
+      className="min-h-screen overflow-x-hidden bg-gradient-to-br from-sky-50 via-stone-50 to-amber-50 text-gray-950"
       initial="hidden"
       animate="show"
       variants={container}
@@ -67,7 +66,7 @@ export default function Home() {
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left text-indigo-900"
+          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left text-sky-900"
           style={{ fontFamily: "TAN Buster, sans-serif" }}
         >
           GATHERLY
@@ -92,12 +91,12 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="p-5 bg-gradient-to-br from-white to-indigo-50 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow"
+            className="p-5 bg-gradient-to-br from-white to-sky-50 rounded-2xl border border-sky-100 shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-lg font-semibold mb-1 text-indigo-900">
+            <h3 className="text-lg font-semibold mb-1 text-sky-900">
               Quick Actions
             </h3>
-            <p className="text-sm text-indigo-700">
+            <p className="text-sm text-sky-700">
               Easy Access To Our Valuable Community Resources
             </p>
 
@@ -105,10 +104,10 @@ export default function Home() {
               {["Visit Our Map", "Share an Event"].map((action) => (
                 <div
                   key={action}
-                  className="flex items-center justify-between rounded-xl bg-indigo-50 px-4 py-3 border border-indigo-200 hover:bg-indigo-100 transition"
+                  className="flex items-center justify-between rounded-xl bg-sky-50 px-4 py-3 border border-sky-200 hover:bg-sky-100 transition"
                 >
                   <span className="text-sm">{action}</span>
-                  <span className="text-xs font-semibold text-indigo-700">
+                  <span className="text-xs font-semibold text-sky-700">
                     Go
                   </span>
                 </div>
@@ -170,12 +169,12 @@ export default function Home() {
               <motion.div
                 layout
                 variants={cardPop}
-                className="p-6 bg-gradient-to-br from-indigo-50 to-white rounded-2xl border-l-4 border-indigo-500 border border-indigo-100 shadow-sm text-center"
+                className="p-6 bg-gradient-to-br from-sky-50 to-white rounded-2xl border-l-4 border-sky-500 border border-sky-100 shadow-sm text-center"
               >
-                <h2 className="text-3xl font-semibold text-indigo-900">
+                <h2 className="text-3xl font-semibold text-sky-900">
                   Upcoming Events
                 </h2>
-                <p className="text-sm text-indigo-700 mt-1">
+                <p className="text-sm text-sky-700 mt-1">
                   Local gatherings & volunteer opportunities
                 </p>
               </motion.div>
@@ -211,17 +210,17 @@ export default function Home() {
             <motion.div
               layout
               variants={cardPop}
-              className="bg-gradient-to-br from-white to-indigo-50 rounded-2xl border border-indigo-100 shadow-sm p-6 sm:p-8 w-full"
+              className="bg-gradient-to-br from-white to-sky-50 rounded-2xl border border-sky-100 shadow-sm p-6 sm:p-8 w-full"
             >
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={() => changeMonth(-1)}
-                  className="text-indigo-700"
+                  className="text-sky-700"
                 >
                   ❮
                 </button>
 
-                <h3 className="text-lg sm:text-xl font-semibold text-indigo-900">
+                <h3 className="text-lg sm:text-xl font-semibold text-sky-900">
                   {calendarDate.toLocaleString("default", {
                     month: "long",
                     year: "numeric",
@@ -230,7 +229,7 @@ export default function Home() {
 
                 <button
                   onClick={() => changeMonth(1)}
-                  className="text-indigo-700"
+                  className="text-sky-700"
                 >
                   ❯
                 </button>
@@ -262,8 +261,8 @@ export default function Home() {
                       key={dayNum}
                       className={`aspect-square rounded-xl flex items-center justify-center cursor-pointer border transition ${
                         isToday
-                          ? "bg-indigo-600 text-white border-indigo-600"
-                          : "bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
+                          ? "bg-sky-600 text-white border-sky-600"
+                          : "bg-sky-50 border-sky-200 hover:bg-sky-100"
                       }`}
                     >
                       {dayNum}
@@ -277,16 +276,16 @@ export default function Home() {
       </motion.main>
 
       {/* FOOTER */}
-      <footer className="border-t border-indigo-100 bg-gradient-to-r from-indigo-50 to-amber-50">
+      <footer className="border-t border-sky-100 bg-gradient-to-r from-sky-50 to-amber-50">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <p className="font-semibold underline mb-2 text-indigo-900">
+          <p className="font-semibold underline mb-2 text-sky-900">
             Contact Our Community Staff:
           </p>
           <div className="flex flex-col sm:flex-row sm:gap-8 text-sm">
-            <a className="text-indigo-700 hover:text-indigo-900" href="mailto:Gatherly@gmail.com">
+            <a className="text-sky-700 hover:text-sky-900" href="mailto:Gatherly@gmail.com">
               Gatherly@gmail.com
             </a>
-            <a className="text-indigo-700 hover:text-indigo-900" href="tel:012-345-6789">
+            <a className="text-sky-700 hover:text-sky-900" href="tel:012-345-6789">
               012-345-6789
             </a>
             <span className="text-gray-500">[enter info]</span>
