@@ -36,7 +36,7 @@ export default function Home() {
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(".dropdown-btn") && !target.closest(".dropdown-menu")) {
+      if (!target.closest(".dropdown-menu")) {
         setOpenMenu(null);
       }
     };
@@ -192,7 +192,8 @@ export default function Home() {
                   layout
                   key={i}
                   variants={cardPop}
-                  className="relative bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm flex flex-col sm:flex-row gap-4 p-6"
+                  className="relative bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm flex flex-col sm:flex-row gap-4 p-6 cursor-pointer"
+                  onClick={() => setOpenMenu(openMenu === i ? null : i)} // entire card clickable
                 >
                   {/* IMAGE */}
                   <div className="w-full sm:w-28 aspect-square bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-900 font-semibold">
@@ -210,17 +211,6 @@ export default function Home() {
                           Sat • 2:00 PM • Community Park
                         </div>
                       </div>
-
-                      {/* DROPDOWN BUTTON */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation(); // prevent document click
-                          setOpenMenu(openMenu === i ? null : i);
-                        }}
-                        className="dropdown-btn text-blue-700 hover:text-blue-900 px-2"
-                      >
-                        ⋮
-                      </button>
                     </div>
                   </div>
 
