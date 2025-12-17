@@ -47,10 +47,15 @@ export default function Home() {
   return (
     <motion.div
       layoutRoot
-      className="min-h-screen overflow-x-hidden bg-gradient-to-br from-sky-50 via-stone-50 to-amber-50 text-gray-950"
       initial="hidden"
       animate="show"
       variants={container}
+      className="
+        min-h-screen overflow-x-hidden text-gray-950
+        bg-[radial-gradient(1200px_600px_at_20%_-10%,rgba(56,189,248,0.25),transparent_60%),
+            radial-gradient(800px_400px_at_80%_10%,rgba(251,191,36,0.25),transparent_55%),
+            linear-gradient(to_bottom,rgba(240,249,255,1),rgba(255,251,235,1))]
+      "
     >
       {/* HEADER */}
       <motion.header
@@ -66,7 +71,7 @@ export default function Home() {
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left text-sky-900"
+          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left text-sky-900 drop-shadow-sm"
           style={{ fontFamily: "TAN Buster, sans-serif" }}
         >
           GATHERLY
@@ -276,7 +281,7 @@ export default function Home() {
       </motion.main>
 
       {/* FOOTER */}
-      <footer className="border-t border-sky-100 bg-gradient-to-r from-sky-50 to-amber-50">
+      <footer className="border-t border-sky-100 bg-gradient-to-r from-sky-100 via-white to-amber-100">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <p className="font-semibold underline mb-2 text-sky-900">
             Contact Our Community Staff:
