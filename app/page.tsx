@@ -36,7 +36,7 @@ export default function Home() {
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(".dropdown-menu")) {
+      if (!target.closest(".dropdown-menu") && !target.closest(".card-clickable")) {
         setOpenMenu(null);
       }
     };
@@ -192,32 +192,33 @@ export default function Home() {
                   layout
                   key={i}
                   variants={cardPop}
-                  className="relative bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm flex flex-col sm:flex-row gap-4 p-6 cursor-pointer"
-                  onClick={() => setOpenMenu(openMenu === i ? null : i)} // entire card clickable
+                  className="relative cursor-pointer"
                 >
-                  {/* IMAGE */}
-                  <div className="w-full sm:w-28 aspect-square bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-900 font-semibold">
-                    IMG
-                  </div>
+                  {/* Card content wrapper */}
+                  <div
+                    className="card-clickable bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm flex flex-col sm:flex-row gap-4 p-6"
+                    onClick={() => setOpenMenu(openMenu === i ? null : i)}
+                  >
+                    {/* IMAGE */}
+                    <div className="w-full sm:w-28 aspect-square bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-900 font-semibold">
+                      IMG
+                    </div>
 
-                  {/* CONTENT */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <div className="text-xl font-medium text-blue-900">
-                          Neighborhood Meetup
-                        </div>
-                        <div className="text-sm text-blue-700 mt-1">
-                          Sat • 2:00 PM • Community Park
-                        </div>
+                    {/* CONTENT */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xl font-medium text-blue-900">
+                        Neighborhood Meetup
+                      </div>
+                      <div className="text-sm text-blue-700 mt-1">
+                        Sat • 2:00 PM • Community Park
                       </div>
                     </div>
-                  </div>
 
-                  {/* RSVP */}
-                  <span className="text-sm font-semibold text-blue-800 self-start sm:self-center">
-                    RSVP
-                  </span>
+                    {/* RSVP */}
+                    <span className="text-sm font-semibold text-blue-800 self-start sm:self-center">
+                      RSVP
+                    </span>
+                  </div>
 
                   {/* DROPDOWN MENU */}
                   {openMenu === i && (
@@ -227,7 +228,10 @@ export default function Home() {
                           <button
                             key={item}
                             className="w-full text-left px-4 py-2 text-sm text-blue-900 hover:bg-blue-50 first:rounded-t-xl last:rounded-b-xl"
-                            onClick={() => setOpenMenu(null)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenu(null);
+                            }}
                           >
                             {item}
                           </button>
