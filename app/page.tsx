@@ -47,7 +47,7 @@ export default function Home() {
   return (
     <motion.div
       layoutRoot
-      className="min-h-screen overflow-x-hidden bg-gradient-to-br from-gray-50 via-stone-50 to-gray-100 text-gray-950"
+      className="min-h-screen overflow-x-hidden bg-gradient-to-br from-indigo-50 via-stone-50 to-amber-50 text-gray-950"
       initial="hidden"
       animate="show"
       variants={container}
@@ -66,7 +66,7 @@ export default function Home() {
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left"
+          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left text-indigo-900"
           style={{ fontFamily: "TAN Buster, sans-serif" }}
         >
           GATHERLY
@@ -91,10 +91,12 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="p-5 bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            className="p-5 bg-gradient-to-br from-white to-indigo-50 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-lg font-semibold mb-1">Quick Actions</h3>
-            <p className="text-sm text-slate-600">
+            <h3 className="text-lg font-semibold mb-1 text-indigo-900">
+              Quick Actions
+            </h3>
+            <p className="text-sm text-indigo-700">
               Easy Access To Our Valuable Community Resources
             </p>
 
@@ -102,10 +104,10 @@ export default function Home() {
               {["Visit Our Map", "Share an Event"].map((action) => (
                 <div
                   key={action}
-                  className="flex items-center justify-between rounded-xl bg-stone-100 px-4 py-3 border border-gray-200"
+                  className="flex items-center justify-between rounded-xl bg-indigo-50 px-4 py-3 border border-indigo-200 hover:bg-indigo-100 transition"
                 >
                   <span className="text-sm">{action}</span>
-                  <span className="text-xs font-semibold text-slate-700">
+                  <span className="text-xs font-semibold text-indigo-700">
                     Go
                   </span>
                 </div>
@@ -117,9 +119,9 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="h-[350px] p-4 overflow-y-auto bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            className="h-[350px] p-4 overflow-y-auto bg-gradient-to-br from-white to-teal-50 rounded-2xl border border-teal-100 shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-lg font-semibold mb-3">
+            <h3 className="text-lg font-semibold mb-3 text-teal-900">
               Volunteer Opportunities
             </h3>
 
@@ -134,20 +136,20 @@ export default function Home() {
                 <motion.li
                   layout
                   key={i}
-                  className="bg-stone-100 border border-gray-200 rounded-xl p-3 shadow-sm"
+                  className="bg-teal-50 border border-teal-200 rounded-xl p-3 shadow-sm"
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div>
                       <div className="text-sm font-semibold">{item.title}</div>
                       <div className="text-xs text-gray-500">{item.meta}</div>
                     </div>
-                    <span className="text-xs font-medium text-slate-700">
+                    <span className="text-xs font-medium text-teal-700">
                       Details
                     </span>
                   </div>
 
-                  <div className="h-1 w-full bg-gray-200 rounded-full">
-                    <div className="h-1 w-2/3 bg-slate-400 rounded-full" />
+                  <div className="h-1 w-full bg-teal-100 rounded-full">
+                    <div className="h-1 w-2/3 bg-teal-400 rounded-full" />
                   </div>
                 </motion.li>
               ))}
@@ -167,10 +169,12 @@ export default function Home() {
               <motion.div
                 layout
                 variants={cardPop}
-                className="p-6 bg-stone-50 rounded-2xl border-l-4 border-slate-400 border border-gray-200 shadow-sm text-center"
+                className="p-6 bg-gradient-to-br from-indigo-50 to-white rounded-2xl border-l-4 border-indigo-500 border border-indigo-100 shadow-sm text-center"
               >
-                <h2 className="text-3xl font-semibold">Upcoming Events</h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <h2 className="text-3xl font-semibold text-indigo-900">
+                  Upcoming Events
+                </h2>
+                <p className="text-sm text-indigo-700 mt-1">
                   Local gatherings & volunteer opportunities
                 </p>
               </motion.div>
@@ -180,9 +184,9 @@ export default function Home() {
                   layout
                   key={i}
                   variants={cardPop}
-                  className="bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 p-6"
+                  className="bg-gradient-to-br from-white to-amber-50 rounded-2xl border border-amber-100 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 p-6"
                 >
-                  <div className="w-full sm:w-28 aspect-square bg-gradient-to-br from-stone-50 to-gray-100 border border-gray-200 rounded-xl flex items-center justify-center text-slate-700 font-semibold">
+                  <div className="w-full sm:w-28 aspect-square bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-300 rounded-xl flex items-center justify-center text-amber-800 font-semibold">
                     IMG
                   </div>
 
@@ -190,12 +194,12 @@ export default function Home() {
                     <div className="text-xl font-medium">
                       Neighborhood Meetup
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-gray-600 mt-1">
                       Sat • 2:00 PM • Community Park
                     </div>
                   </div>
 
-                  <span className="text-sm font-semibold text-slate-700 self-start sm:self-center">
+                  <span className="text-sm font-semibold text-amber-700 self-start sm:self-center">
                     RSVP
                   </span>
                 </motion.div>
@@ -206,17 +210,17 @@ export default function Home() {
             <motion.div
               layout
               variants={cardPop}
-              className="bg-stone-50/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 w-full"
+              className="bg-gradient-to-br from-white to-indigo-50 rounded-2xl border border-indigo-100 shadow-sm p-6 sm:p-8 w-full"
             >
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={() => changeMonth(-1)}
-                  className="text-slate-700"
+                  className="text-indigo-700"
                 >
                   ❮
                 </button>
 
-                <h3 className="text-lg sm:text-xl font-semibold">
+                <h3 className="text-lg sm:text-xl font-semibold text-indigo-900">
                   {calendarDate.toLocaleString("default", {
                     month: "long",
                     year: "numeric",
@@ -225,7 +229,7 @@ export default function Home() {
 
                 <button
                   onClick={() => changeMonth(1)}
-                  className="text-slate-700"
+                  className="text-indigo-700"
                 >
                   ❯
                 </button>
@@ -257,8 +261,8 @@ export default function Home() {
                       key={dayNum}
                       className={`aspect-square rounded-xl flex items-center justify-center cursor-pointer border transition ${
                         isToday
-                          ? "bg-slate-800 text-white border-slate-800"
-                          : "bg-stone-100 border-gray-200 hover:bg-stone-200"
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "bg-indigo-50 border-indigo-200 hover:bg-indigo-100"
                       }`}
                     >
                       {dayNum}
@@ -272,23 +276,23 @@ export default function Home() {
       </motion.main>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-200 bg-stone-50">
+      <footer className="border-t border-indigo-100 bg-gradient-to-r from-indigo-50 to-amber-50">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <p className="font-semibold underline mb-2">
+          <p className="font-semibold underline mb-2 text-indigo-900">
             Contact Our Community Staff:
           </p>
           <div className="flex flex-col sm:flex-row sm:gap-8 text-sm">
-            <a className="text-slate-700 hover:text-slate-900" href="mailto:Gatherly@gmail.com">
+            <a className="text-indigo-700 hover:text-indigo-900" href="mailto:Gatherly@gmail.com">
               Gatherly@gmail.com
             </a>
-            <a className="text-slate-700 hover:text-slate-900" href="tel:012-345-6789">
+            <a className="text-indigo-700 hover:text-indigo-900" href="tel:012-345-6789">
               012-345-6789
             </a>
             <span className="text-gray-500">[enter info]</span>
           </div>
         </div>
 
-        <div className="text-center text-sm text-gray-600 py-4 bg-gray-100">
+        <div className="text-center text-sm text-gray-600 py-4 bg-white/70">
           © {year} Gatherly. All rights reserved.
         </div>
       </footer>
