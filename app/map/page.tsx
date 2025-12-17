@@ -215,41 +215,77 @@ function SearchBox({
             setOpen(true);
           }}
           placeholder="Search for a place..."
-          className="w-full p-2 border border-base-300 rounded-md bg-base-100 text-base-content"
+          className="
+            w-full
+            p-2 pr-12
+            border border-base-300 rounded-md
+            bg-base-100 text-base-content
+          "
         />
 
-        <AnimatePresence>
-          {open && predictions.length > 0 && (
-            <motion.ul
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="
-                absolute left-0 right-0
-                mt-3
-                bg-base-100 border border-base-300
-                rounded-md overflow-hidden
-                shadow-lg z-20
-              "
-            >
-              {predictions.slice(0, 3).map((p, idx) => (
-                <li
-                  key={p.place_id}
-                  onClick={() => handleSelect(p.place_id)}
-                  className={`
+        {input.trim().length > 0 && (
+          <motion.button
+            type="button"
+            aria-label="Show results"
+            onClick={() => {
+              setOpen(false);
+              setPredictions([]);
+            }}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            whileHover={{ scale: 1.1, x: 2 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 18 }}
+            className="
+              absolute right-2 top-1/2 -translate-y-1/2
+              w-9 h-9
+              flex items-center justify-center
+              rounded-full
+              bg-blue-600 text-white
+              shadow-md
+            "
+          >
+            →
+          </motion.button>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {open && predictions.length > 0 && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="
+              absolute left-0
+              w-full max-w-full
+              mt-3
+              bg-base-100
+              border border-base-300
+              rounded-md
+              overflow-hidden
+              shadow-lg
+              z-20
+            "
+          >
+            {predictions.slice(0, 3).map((p, idx) => (
+              <li
+                key={p.place_id}
+                onClick={() => handleSelect(p.place_id)}
+                className={`
                     p-3 cursor-pointer transition-colors
                     hover:bg-base-300
                     ${idx !== 0 ? "border-t border-base-300" : ""}
                   `}
-                >
-                  {p.description}
-                </li>
-              ))}
-            </motion.ul>
-          )}
-        </AnimatePresence>
-      </div>
+              >
+                {p.description}
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
