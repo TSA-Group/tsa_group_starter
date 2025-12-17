@@ -33,6 +33,17 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = React.useState(new Date());
   const [openMenu, setOpenMenu] = React.useState<number | null>(null);
 
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".dropdown-btn") && !target.closest(".dropdown-menu")) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
   const firstDay = new Date(calYear, calMonth, 1).getDay();
@@ -202,10 +213,11 @@ export default function Home() {
 
                       {/* DROPDOWN BUTTON */}
                       <button
-                        onClick={() =>
-                          setOpenMenu(openMenu === i ? null : i)
-                        }
-                        className="text-blue-700 hover:text-blue-900 px-2"
+                        onClick={(e) => {
+                          e.stopPropagation(); // prevent document click
+                          setOpenMenu(openMenu === i ? null : i);
+                        }}
+                        className="dropdown-btn text-blue-700 hover:text-blue-900 px-2"
                       >
                         ⋮
                       </button>
@@ -219,13 +231,13 @@ export default function Home() {
 
                   {/* DROPDOWN MENU */}
                   {openMenu === i && (
-                    <div className="absolute top-14 right-6 z-20 w-44 rounded-xl bg-white border border-blue-200 shadow-lg">
+                    <div className="dropdown-menu absolute top-14 right-6 z-20 w-44 rounded-xl bg-white border border-blue-200 shadow-lg">
                       {["View Details", "Add to Calendar", "Share Event"].map(
                         (item) => (
                           <button
                             key={item}
-                            onClick={() => setOpenMenu(null)}
                             className="w-full text-left px-4 py-2 text-sm text-blue-900 hover:bg-blue-50 first:rounded-t-xl last:rounded-b-xl"
+                            onClick={() => setOpenMenu(null)}
                           >
                             {item}
                           </button>
