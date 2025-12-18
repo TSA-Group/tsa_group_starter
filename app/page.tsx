@@ -32,6 +32,7 @@ export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
+  const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
   // Get today's date in Texas (Central Time)
   const now = new Date();
@@ -223,11 +224,52 @@ export default function Home() {
                 key={i}
                 layout
                 variants={cardPop}
-                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
+                className="relative bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
                 onClick={() => setOpenEvent(openEvent === i ? null : i)}
               >
-                <h3 className="text-lg font-semibold text-blue-900">{event.title}</h3>
-                <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-900">{event.title}</h3>
+                    <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
+                  </div>
+
+                  {/* Three-dot menu */}
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpenIndex(menuOpenIndex === i ? null : i);
+                      }}
+                      className="text-blue-700 text-xl font-bold px-2 py-1"
+                    >
+                      ⋮
+                    </button>
+
+                    <AnimatePresence>
+                      {menuOpenIndex === i && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="absolute right-0 mt-2 w-32 bg-white border border-blue-200 rounded-xl shadow-lg z-10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ul className="flex flex-col">
+                            {["Edit", "Share", "Delete"].map((option) => (
+                              <li
+                                key={option}
+                                className="px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 cursor-pointer"
+                                onClick={() => setMenuOpenIndex(null)}
+                              >
+                                {option}
+                              </li>
+                            ))}
+                          </ul>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
 
                 {/* Expandable details inside same card */}
                 <AnimatePresence>
@@ -329,3 +371,4 @@ export default function Home() {
     </motion.div>
   );
 }
+
