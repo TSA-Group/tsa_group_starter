@@ -99,7 +99,7 @@ export default function Home() {
           layout
           variants={cardPop}
           animate={{
-            x: [-20, 0, -20],
+            x: [-40, 0, -40],
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
