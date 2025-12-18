@@ -141,10 +141,7 @@ export default function Home() {
 
             <ul className="space-y-4">
               {[
-                {
-                  title: "Free community dinner — Sat 6pm",
-                  meta: "Downtown Church",
-                },
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
                 { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
@@ -160,9 +157,7 @@ export default function Home() {
                       <div className="text-sm font-semibold">{item.title}</div>
                       <div className="text-xs text-blue-700">{item.meta}</div>
                     </div>
-                    <span className="text-xs font-medium text-blue-800">
-                      Details
-                    </span>
+                    <span className="text-xs font-medium text-blue-800">Details</span>
                   </div>
 
                   <div className="h-1 w-full bg-blue-200 rounded-full">
@@ -174,26 +169,38 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN - horizontal layout: left=events, right=calendar */}
+        {/* RIGHT COLUMN - events and calendar */}
         <motion.section
           layout
           variants={fadeUp}
           className="lg:col-span-2 flex flex-col lg:flex-row gap-6"
         >
-          {/* Event Cards Left */}
-          <div className="flex flex-col gap-4 lg:w-1/2">
+          {/* Left: Events */}
+          <div className="lg:w-1/2 flex flex-col gap-4">
+            {/* Upcoming Events Box */}
+            <motion.div
+              layout
+              variants={cardPop}
+              className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border border-blue-200 ring-1 ring-blue-100 shadow-sm text-center"
+            >
+              <h2 className="text-2xl sm:text-3xl font-semibold text-blue-900">
+                Upcoming Events
+              </h2>
+              <p className="text-sm text-blue-700 mt-1">
+                Local gatherings & volunteer opportunities
+              </p>
+            </motion.div>
+
+            {/* Event Cards */}
             {events.map((event, i) => (
               <div key={i} className="flex flex-col gap-1">
-                {/* Card */}
                 <motion.div
                   layout
                   variants={cardPop}
                   className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
                   onClick={() => setOpenEvent(openEvent === i ? null : i)}
                 >
-                  <h3 className="text-lg font-semibold text-blue-900">
-                    {event.title}
-                  </h3>
+                  <h3 className="text-lg font-semibold text-blue-900">{event.title}</h3>
                   <p className="text-sm text-blue-700">
                     {event.date} • {event.location}
                   </p>
@@ -218,11 +225,11 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Calendar Right */}
+          {/* Right: Calendar */}
           <motion.div
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8 lg:w-1/2"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2"
           >
             <div className="flex items-center justify-between mb-4">
               <button
@@ -232,11 +239,8 @@ export default function Home() {
                 ❮
               </button>
 
-              <h3 className="text-lg sm:text-2xl font-semibold text-blue-900">
-                {calendarDate.toLocaleString("default", {
-                  month: "long",
-                  year: "numeric",
-                })}
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+                {calendarDate.toLocaleString("default", { month: "long", year: "numeric" })}
               </h3>
 
               <button
@@ -247,18 +251,16 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="grid grid-cols-7 text-sm text-blue-700 mb-2">
+            {/* Weekdays */}
+            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {days.map((d) => (
-                <div key={d} className="text-center font-medium">
-                  {d}
-                </div>
+                <div key={d} className="text-center">{d}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-2 sm:gap-3">
-              {Array.from({ length: firstDay }).map((_, i) => (
-                <div key={`empty-${i}`} />
-              ))}
+            {/* Dates */}
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
 
               {Array.from({ length: lastDate }).map((_, i) => {
                 const dayNum = i + 1;
@@ -268,17 +270,16 @@ export default function Home() {
                   calYear === today.getFullYear();
 
                 return (
-                  <motion.div
-                    layout
+                  <div
                     key={dayNum}
-                    className={`h-[50px] w-[50px] flex items-center justify-center rounded-xl cursor-pointer border text-sm font-semibold transition ${
+                    className={`flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition ${
                       isToday
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-900"
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-50 hover:bg-blue-100 text-blue-900"
                     }`}
                   >
                     {dayNum}
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
