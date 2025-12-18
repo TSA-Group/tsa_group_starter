@@ -39,9 +39,12 @@ export default function Home() {
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
 
   const events = [
     {
@@ -67,6 +70,23 @@ export default function Home() {
   const changeMonth = (dir: number) => {
     setCalendarDate(new Date(calYear, calMonth + dir, 1));
   };
+
+  // Build calendar days with empty slots at start
+  const generateCalendarDays = () => {
+    const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const daysArray: (Date | null)[] = [];
+
+    for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
+    for (let i = 1; i <= daysInMonth; i++) {
+      const d = new Date(calYear, calMonth, i);
+      d.setHours(0,0,0,0);
+      daysArray.push(d);
+    }
+    return daysArray;
+  };
+
+  const calendarDays = generateCalendarDays();
 
   return (
     <motion.div
@@ -236,54 +256,48 @@ export default function Home() {
           >
             <div className="flex items-center justify-between mb-4">
               <button
-                onClick={() => changeMonth(-1)}
+                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
                 className="text-blue-700 text-2xl font-bold"
               >
                 ❮
               </button>
 
               <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
-                {calendarDate.toLocaleString("default", { month: "long", year: "numeric" })}
+                {monthNames[calMonth]} {calYear}
               </h3>
 
               <button
-                onClick={() => changeMonth(1)}
+                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
                 className="text-blue-700 text-2xl font-bold"
               >
                 ❯
               </button>
             </div>
 
-            {/* Weekdays */}
+            {/* Weekday labels */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-              {days.map((d) => (
+              {daysOfWeek.map((d) => (
                 <div key={d} className="text-center">{d}</div>
               ))}
             </div>
 
             {/* Dates */}
             <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
+              {generateCalendarDays().map((date, idx) => {
+                if (!date) return <div key={idx}></div>;
 
-              {Array.from({ length: lastDate }).map((_, i) => {
-                const dayNum = i + 1;
-
-                // Create a date object for each cell and normalize
-                const cellDate = new Date(calYear, calMonth, dayNum);
-                cellDate.setHours(0, 0, 0, 0);
-
-                const isToday = cellDate.getTime() === today.getTime();
+                const isToday = date.getTime() === today.getTime();
 
                 return (
                   <div
-                    key={dayNum}
+                    key={idx}
                     className={`flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition ${
                       isToday
                         ? "bg-blue-600 text-white"
                         : "bg-blue-50 hover:bg-blue-100 text-blue-900"
                     }`}
                   >
-                    {dayNum}
+                    {date.getDate()}
                   </div>
                 );
               })}
@@ -316,4 +330,3 @@ export default function Home() {
     </motion.div>
   );
 }
-
