@@ -141,36 +141,31 @@ export default function Home() {
             <p className="text-sm text-blue-700">
               Easy Access To Our Valuable Community Resources
             </p>
+
+            
             const actions = [
               { label: "Visit Our Map", href: "/map" },
               { label: "Contact Us", href: "/contact" },
             ];
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Visit Our Map"].map((action) => (
-                <Link key={action} href="/map" className="block">
-                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
-                    <span className="text-sm">{action}</span>
-                    <span className="text-xs font-semibold text-blue-700">
-                      Go
-                    </span>
-                  </div>
-                </Link>
-                ))}
-            </div>
-            
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Contact Us"].map((action) => (
-                <Link key={action} href="/contact" className="block">
-                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
-                    <span className="text-sm">{action}</span>
-                    <span className="text-xs font-semibold text-blue-700">
-                      Go
-                    </span>
-                  </div>
-                </Link>
-                ))}
-            </div>
-          </motion.div>
+
+            export default function Actions() {
+              return (
+                <motion.div>
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {actions.map(({ label, href }) => (
+                      <Link key={label} href={href} className="block">
+                        <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
+                          <span className="text-sm">{label}</span>
+                          <span className="text-xs font-semibold text-blue-700">
+                            Go
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                </div>
+              </motion.div>
+              );
+            }
 
           {/* VOLUNTEER */}
           <motion.div
