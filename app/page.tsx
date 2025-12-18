@@ -142,7 +142,9 @@ export default function Home() {
             </p>
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Visit Our Map", "Share an Event"].map((action) => (
+              <a href: "/map">
+                {["Visit Our Map", "Share an Event"].map((action) => (
+              
                 <div
                   key={action}
                   className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200"
@@ -152,6 +154,7 @@ export default function Home() {
                     Go
                   </span>
                 </div>
+            </a>
               ))}
             </div>
           </motion.div>
