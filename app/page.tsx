@@ -219,35 +219,31 @@ export default function Home() {
 
             {/* Event Cards */}
             {events.map((event, i) => (
-              <div key={i} className="flex flex-col gap-1">
-                <motion.div
-                  layout
-                  variants={cardPop}
-                  className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
-                  onClick={() => setOpenEvent(openEvent === i ? null : i)}
-                >
-                  <h3 className="text-lg font-semibold text-blue-900">{event.title}</h3>
-                  <p className="text-sm text-blue-700">
-                    {event.date} • {event.location}
-                  </p>
-                </motion.div>
+              <motion.div
+                key={i}
+                layout
+                variants={cardPop}
+                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
+                onClick={() => setOpenEvent(openEvent === i ? null : i)}
+              >
+                <h3 className="text-lg font-semibold text-blue-900">{event.title}</h3>
+                <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
 
-                {/* Dropdown box */}
+                {/* Expandable details inside same card */}
                 <AnimatePresence>
                   {openEvent === i && (
                     <motion.div
                       layout
-                      variants={cardPop}
                       initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="bg-white border border-blue-200 rounded-xl shadow-sm p-4 text-blue-800"
+                      animate={{ opacity: 1, height: "auto", marginTop: "0.5rem" }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      className="text-blue-800 text-sm"
                     >
                       {event.details}
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             ))}
           </div>
 
