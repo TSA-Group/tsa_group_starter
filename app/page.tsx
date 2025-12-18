@@ -33,9 +33,12 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
 
-  // Normalize today's date to midnight
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Get today's date in Texas (Central Time)
+  const now = new Date();
+  const texasToday = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
+  );
+  texasToday.setHours(0, 0, 0, 0); // normalize to midnight
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
@@ -286,7 +289,7 @@ export default function Home() {
               {generateCalendarDays().map((date, idx) => {
                 if (!date) return <div key={idx}></div>;
 
-                const isToday = date.getTime() === today.getTime();
+                const isToday = date.getTime() === texasToday.getTime();
 
                 return (
                   <div
