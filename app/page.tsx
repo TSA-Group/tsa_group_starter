@@ -141,7 +141,10 @@ export default function Home() {
             <p className="text-sm text-blue-700">
               Easy Access To Our Valuable Community Resources
             </p>
-
+            const actions = [
+              { label: "Visit Our Map", href: "/map" },
+              { label: "Contact Us", href: "/contact" },
+            ];
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Visit Our Map"].map((action) => (
                 <Link key={action} href="/map" className="block">
@@ -154,9 +157,9 @@ export default function Home() {
                 </Link>
                 ))}
             </div>
-
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Contact Us"].contact((action) => (
+            
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {["Contact Us"].map((action) => (
                 <Link key={action} href="/contact" className="block">
                   <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
                     <span className="text-sm">{action}</span>
