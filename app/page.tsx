@@ -33,11 +33,13 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
 
+  // Current real date
+  const today = new Date();
+
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
-  const today = new Date();
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const events = [
@@ -264,6 +266,7 @@ export default function Home() {
 
               {Array.from({ length: lastDate }).map((_, i) => {
                 const dayNum = i + 1;
+                // Highlight correct today date
                 const isToday =
                   dayNum === today.getDate() &&
                   calMonth === today.getMonth() &&
