@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, Variants, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 const container: Variants = {
   hidden: {},
@@ -143,19 +144,15 @@ export default function Home() {
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Visit Our Map", "Share an Event"].map((action) => (
-                <a
-                  key={action}
-                  href="/map"
-                  className="block"
-                >
-                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200">
+                <Link key={action} href="/map" className="block">
+                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
                     <span className="text-sm">{action}</span>
                     <span className="text-xs font-semibold text-blue-700">
                       Go
                     </span>
-              </div>
-              </a>
-            ))}
+                  </div>
+                </Link>
+                ))}
 
               ))}
             </div>
