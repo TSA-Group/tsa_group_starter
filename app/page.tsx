@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 
 const container: Variants = {
   hidden: {},
@@ -46,19 +46,19 @@ export default function Home() {
       title: "Neighborhood Meetup",
       date: "Sat • 2:00 PM",
       location: "Community Park",
-      details: "Meet local residents and join community discussions."
+      details: "Meet local residents and join community discussions.",
     },
     {
       title: "Community Dinner",
       date: "Sat • 6:00 PM",
       location: "Downtown Church",
-      details: "Enjoy a free meal and fellowship with neighbors."
+      details: "Enjoy a free meal and fellowship with neighbors.",
     },
     {
       title: "Clothing Drive",
       date: "Sun • 10:00 AM",
       location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer."
+      details: "Donate clothes for those in need and volunteer.",
     },
   ];
 
@@ -66,15 +66,20 @@ export default function Home() {
     setCalendarDate(new Date(calYear, calMonth + dir, 1));
   };
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest(".event-card") && !target.closest(".event-dropdown")) {
+      if (
+        !target.closest(".event-card") &&
+        !target.closest(".event-dropdown")
+      ) {
         setOpenEvent(null);
       }
     };
     document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    return () =>
+      document.removeEventListener("click", handleClickOutside);
   }, []);
 
   return (
@@ -153,7 +158,10 @@ export default function Home() {
 
             <ul className="space-y-4">
               {[
-                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
+                {
+                  title: "Free community dinner — Sat 6pm",
+                  meta: "Downtown Church",
+                },
                 { title: "Warm clothing drive", meta: "Westside Center" },
                 { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
@@ -184,32 +192,34 @@ export default function Home() {
         </motion.section>
 
         {/* RIGHT COLUMN */}
-        <motion.section
-          layout
-          variants={fadeUp}
-          className="lg:col-span-2 space-y-8"
-        >
-          {/* Event Cards with Dropdown */}
+        <motion.section layout variants={fadeUp} className="lg:col-span-2 space-y-6">
+          {/* Event Cards */}
           {events.map((event, i) => (
-            <motion.div key={i} layout variants={cardPop} className="relative">
+            <motion.div layout key={i} variants={cardPop}>
               <div
                 className="event-card cursor-pointer bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 hover:bg-blue-50"
                 onClick={() => setOpenEvent(openEvent === i ? null : i)}
               >
-                <h3 className="text-xl font-semibold text-blue-900">{event.title}</h3>
-                <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
+                <h3 className="text-xl font-semibold text-blue-900">
+                  {event.title}
+                </h3>
+                <p className="text-sm text-blue-700">
+                  {event.date} • {event.location}
+                </p>
               </div>
 
-              {openEvent === i && (
-                <motion.div
-                  className="event-dropdown bg-white border border-blue-200 rounded-xl shadow-lg p-4 mt-2 text-blue-800"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                >
-                  <p>{event.details}</p>
-                </motion.div>
-              )}
+              <AnimatePresence>
+                {openEvent === i && (
+                  <motion.div
+                    className="event-dropdown bg-white border border-blue-200 rounded-xl shadow-lg p-4 mt-2 text-blue-800"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <p>{event.details}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
 
@@ -217,7 +227,7 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8 mt-4"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8"
           >
             <div className="flex items-center justify-between mb-4">
               <button
@@ -305,4 +315,3 @@ export default function Home() {
     </motion.div>
   );
 }
-
