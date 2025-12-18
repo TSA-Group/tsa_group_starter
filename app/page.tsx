@@ -135,10 +135,9 @@ export default function Home() {
             { label: "Contact Us", href: "/contact" },
           ];
           
-          export default function QuickActionsSection() {
+          export default function QuickActions() {
             return (
               <motion.section layout variants={fadeUp} className="space-y-8">
-                {/* QUICK ACTIONS */}
                 <motion.div
                   layout
                   variants={cardPop}
