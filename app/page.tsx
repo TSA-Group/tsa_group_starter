@@ -66,7 +66,6 @@ export default function Home() {
     setCalendarDate(new Date(calYear, calMonth + dir, 1));
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -84,10 +83,7 @@ export default function Home() {
       initial="hidden"
       animate="show"
       variants={container}
-      className="
-        min-h-screen overflow-x-hidden text-slate-950
-        bg-[linear-gradient(to_bottom,rgba(219,234,254,0.55)_0%,rgba(255,255,255,1)_180px)]
-      "
+      className="min-h-screen overflow-x-hidden text-slate-950 bg-[linear-gradient(to_bottom,rgba(219,234,254,0.55)_0%,rgba(255,255,255,1)_180px)]"
     >
       {/* HEADER */}
       <motion.header
@@ -99,7 +95,7 @@ export default function Home() {
           layout
           variants={cardPop}
           animate={{
-            x: [-40, 0, -40],
+            x: [-20, 0, -20],
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
@@ -193,103 +189,95 @@ export default function Home() {
           variants={fadeUp}
           className="lg:col-span-2 space-y-8"
         >
-          <div className="grid grid-cols-1 gap-6">
-            {/* EVENT CARDS */}
-            {events.map((event, i) => (
-              <motion.div
-                key={i}
-                layout
-                variants={cardPop}
-                className="relative"
+          {/* Event Cards with Dropdown */}
+          {events.map((event, i) => (
+            <motion.div key={i} layout variants={cardPop} className="relative">
+              <div
+                className="event-card cursor-pointer bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 hover:bg-blue-50"
+                onClick={() => setOpenEvent(openEvent === i ? null : i)}
               >
-                <div
-                  className="event-card cursor-pointer bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 hover:bg-blue-50"
-                  onClick={() => setOpenEvent(openEvent === i ? null : i)}
-                >
-                  <h3 className="text-xl font-semibold text-blue-900">{event.title}</h3>
-                  <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
-                </div>
-
-                {/* Dropdown Box */}
-                {openEvent === i && (
-                  <motion.div
-                    className="event-dropdown absolute top-full mt-2 left-0 w-full bg-white border border-blue-200 rounded-xl shadow-lg p-4 text-blue-800 z-20"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    <p>{event.details}</p>
-                  </motion.div>
-                )}
-              </motion.div>
-            ))}
-
-            {/* CALENDAR */}
-            <motion.div
-              layout
-              variants={cardPop}
-              className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  onClick={() => changeMonth(-1)}
-                  className="text-blue-700 text-2xl font-bold"
-                >
-                  ❮
-                </button>
-
-                <h3 className="text-lg sm:text-2xl font-semibold text-blue-900">
-                  {calendarDate.toLocaleString("default", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </h3>
-
-                <button
-                  onClick={() => changeMonth(1)}
-                  className="text-blue-700 text-2xl font-bold"
-                >
-                  ❯
-                </button>
+                <h3 className="text-xl font-semibold text-blue-900">{event.title}</h3>
+                <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
               </div>
 
-              <div className="grid grid-cols-7 text-sm text-blue-700 mb-2">
-                {days.map((d) => (
-                  <div key={d} className="text-center font-medium">
-                    {d}
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-2 sm:gap-3">
-                {Array.from({ length: firstDay }).map((_, i) => (
-                  <div key={`empty-${i}`} />
-                ))}
-
-                {Array.from({ length: lastDate }).map((_, i) => {
-                  const dayNum = i + 1;
-                  const isToday =
-                    dayNum === today.getDate() &&
-                    calMonth === today.getMonth() &&
-                    calYear === today.getFullYear();
-
-                  return (
-                    <motion.div
-                      layout
-                      key={dayNum}
-                      className={`h-[60px] w-[60px] flex items-center justify-center rounded-xl cursor-pointer border text-lg font-semibold transition ${
-                        isToday
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-900"
-                      }`}
-                    >
-                      {dayNum}
-                    </motion.div>
-                  );
-                })}
-              </div>
+              {openEvent === i && (
+                <motion.div
+                  className="event-dropdown bg-white border border-blue-200 rounded-xl shadow-lg p-4 mt-2 text-blue-800"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <p>{event.details}</p>
+                </motion.div>
+              )}
             </motion.div>
-          </div>
+          ))}
+
+          {/* Calendar */}
+          <motion.div
+            layout
+            variants={cardPop}
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8 mt-4"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => changeMonth(-1)}
+                className="text-blue-700 text-2xl font-bold"
+              >
+                ❮
+              </button>
+
+              <h3 className="text-lg sm:text-2xl font-semibold text-blue-900">
+                {calendarDate.toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h3>
+
+              <button
+                onClick={() => changeMonth(1)}
+                className="text-blue-700 text-2xl font-bold"
+              >
+                ❯
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 text-sm text-blue-700 mb-2">
+              {days.map((d) => (
+                <div key={d} className="text-center font-medium">
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-2 sm:gap-3">
+              {Array.from({ length: firstDay }).map((_, i) => (
+                <div key={`empty-${i}`} />
+              ))}
+
+              {Array.from({ length: lastDate }).map((_, i) => {
+                const dayNum = i + 1;
+                const isToday =
+                  dayNum === today.getDate() &&
+                  calMonth === today.getMonth() &&
+                  calYear === today.getFullYear();
+
+                return (
+                  <motion.div
+                    layout
+                    key={dayNum}
+                    className={`h-[60px] w-[60px] flex items-center justify-center rounded-xl cursor-pointer border text-lg font-semibold transition ${
+                      isToday
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-900"
+                    }`}
+                  >
+                    {dayNum}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
         </motion.section>
       </motion.main>
 
@@ -317,3 +305,4 @@ export default function Home() {
     </motion.div>
   );
 }
+
