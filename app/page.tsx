@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
+// Animation variants
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12 } },
@@ -29,18 +30,55 @@ const cardPop: Variants = {
   },
 };
 
+// QuickActions component
+const actions = [
+  { label: "Visit Our Map", href: "/map" },
+  { label: "Contact Us", href: "/contact" },
+];
+
+function QuickActions() {
+  return (
+    <motion.section layout variants={fadeUp} className="space-y-8">
+      <motion.div
+        layout
+        variants={cardPop}
+        className="p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+      >
+        <h3 className="text-lg font-semibold mb-1 text-blue-900">
+          Quick Actions
+        </h3>
+        <p className="text-sm text-blue-700">
+          Easy Access To Our Valuable Community Resources
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {actions.map(({ label, href }) => (
+            <Link key={label} href={href} className="block">
+              <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
+                <span className="text-sm">{label}</span>
+                <span className="text-xs font-semibold text-blue-700">Go</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </motion.div>
+    </motion.section>
+  );
+}
+
+// Main Home component
 export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  // Get today's date in Texas (Central Time)
+  // Today's date in Texas (Central Time)
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
   );
-  texasToday.setHours(0, 0, 0, 0); // normalize to midnight
+  texasToday.setHours(0, 0, 0, 0);
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
@@ -72,11 +110,6 @@ export default function Home() {
     },
   ];
 
-  const changeMonth = (dir: number) => {
-    setCalendarDate(new Date(calYear, calMonth + dir, 1));
-  };
-
-  // Build calendar days with empty slots at start
   const generateCalendarDays = () => {
     const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -85,7 +118,7 @@ export default function Home() {
     for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(calYear, calMonth, i);
-      d.setHours(0,0,0,0);
+      d.setHours(0, 0, 0, 0);
       daysArray.push(d);
     }
     return daysArray;
@@ -128,47 +161,10 @@ export default function Home() {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
       >
         {/* LEFT COLUMN */}
-        
+        <motion.section layout className="space-y-8 lg:col-span-1">
+          <QuickActions />
 
-          const actions = [
-            { label: "Visit Our Map", href: "/map" },
-            { label: "Contact Us", href: "/contact" },
-          ];
-          
-          export default function QuickActions() {
-            return (
-              <motion.section layout variants={fadeUp} className="space-y-8">
-                <motion.div
-                  layout
-                  variants={cardPop}
-                  className="p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
-                >
-                  <h3 className="text-lg font-semibold mb-1 text-blue-900">
-                    Quick Actions
-                  </h3>
-                  <p className="text-sm text-blue-700">
-                    Easy Access To Our Valuable Community Resources
-                  </p>
-          
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {actions.map(({ label, href }) => (
-                      <Link key={label} href={href} className="block">
-                        <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
-                          <span className="text-sm">{label}</span>
-                          <span className="text-xs font-semibold text-blue-700">
-                            Go
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              </motion.section>
-            );
-          }
-
-
-          {/* VOLUNTEER */}
+          {/* Volunteer Opportunities */}
           <motion.div
             layout
             variants={cardPop}
@@ -208,15 +204,14 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN - events and calendar */}
+        {/* RIGHT COLUMN - Events & Calendar */}
         <motion.section
           layout
           variants={fadeUp}
           className="lg:col-span-2 flex flex-col lg:flex-row gap-6"
         >
-          {/* Left: Events */}
+          {/* Events */}
           <div className="lg:w-1/2 flex flex-col gap-4">
-            {/* Upcoming Events Box */}
             <motion.div
               layout
               variants={cardPop}
@@ -230,7 +225,6 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {/* Event Cards */}
             {events.map((event, i) => (
               <motion.div
                 key={i}
@@ -245,7 +239,6 @@ export default function Home() {
                     <p className="text-sm text-blue-700">{event.date} • {event.location}</p>
                   </div>
 
-                  {/* Three-dot menu */}
                   <div className="relative">
                     <button
                       onClick={(e) => {
@@ -283,7 +276,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Expandable details inside same card */}
                 <AnimatePresence>
                   {openEvent === i && (
                     <motion.div
@@ -301,7 +293,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Right: Calendar */}
+          {/* Calendar */}
           <motion.div
             layout
             variants={cardPop}
@@ -327,20 +319,16 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Weekday labels */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map((d) => (
                 <div key={d} className="text-center">{d}</div>
               ))}
             </div>
 
-            {/* Dates */}
             <div className="grid grid-cols-7 gap-1">
-              {generateCalendarDays().map((date, idx) => {
+              {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx}></div>;
-
                 const isToday = date.getTime() === texasToday.getTime();
-
                 return (
                   <div
                     key={idx}
@@ -383,4 +371,3 @@ export default function Home() {
     </motion.div>
   );
 }
-
