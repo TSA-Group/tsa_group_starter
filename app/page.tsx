@@ -255,7 +255,7 @@ export default function Home() {
                           onClick={(e) => e.stopPropagation()}
                         >
                           <ul className="flex flex-col">
-                            {["Edit", "Share", "Delete"].map((option) => (
+                            {["Save Event", "Share Event"].map((option) => (
                               <li
                                 key={option}
                                 className="px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 cursor-pointer"
