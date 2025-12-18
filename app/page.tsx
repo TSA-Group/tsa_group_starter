@@ -31,6 +31,18 @@ const cardPop: Variants = {
 export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = React.useState(new Date());
+  const [openMenu, setOpenMenu] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".dropdown-menu") && !target.closest(".card-clickable")) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
@@ -175,21 +187,60 @@ export default function Home() {
                 </p>
               </motion.div>
 
-              {/* Dropdown box for events */}
-              <motion.div
-                layout
-                variants={cardPop}
-                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6"
-              >
-                <label className="block text-blue-900 font-semibold mb-2">
-                  Select Event
-                </label>
-                <select className="w-full p-4 border border-blue-200 rounded-xl text-blue-900 text-lg">
-                  <option>Neighborhood Meetup • Sat • 2:00 PM • Community Park</option>
-                  <option>Community Dinner • Sat • 6:00 PM • Downtown Church</option>
-                  <option>Clothing Drive • Sun • 10:00 AM • Westside Center</option>
-                </select>
-              </motion.div>
+              {[1, 2, 3].map((i) => (
+                <motion.div
+                  layout
+                  key={i}
+                  variants={cardPop}
+                  className="relative cursor-pointer"
+                >
+                  {/* Card content wrapper */}
+                  <div
+                    className="card-clickable bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm flex flex-col sm:flex-row gap-4 p-6"
+                    onClick={() => setOpenMenu(openMenu === i ? null : i)}
+                  >
+                    {/* IMAGE */}
+                    <div className="w-full sm:w-28 aspect-square bg-blue-100 border border-blue-200 rounded-xl flex items-center justify-center text-blue-900 font-semibold">
+                      IMG
+                    </div>
+
+                    {/* CONTENT */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xl font-medium text-blue-900">
+                        Neighborhood Meetup
+                      </div>
+                      <div className="text-sm text-blue-700 mt-1">
+                        Sat • 2:00 PM • Community Park
+                      </div>
+                    </div>
+
+                    {/* RSVP */}
+                    <span className="text-sm font-semibold text-blue-800 self-start sm:self-center">
+                      RSVP
+                    </span>
+                  </div>
+
+                  {/* DROPDOWN MENU */}
+                  {openMenu === i && (
+                    <div className="dropdown-menu absolute top-14 right-6 z-20 w-44 rounded-xl bg-white border border-blue-200 shadow-lg">
+                      {["View Details", "Add to Calendar", "Share Event"].map(
+                        (item) => (
+                          <button
+                            key={item}
+                            className="w-full text-left px-4 py-2 text-sm text-blue-900 hover:bg-blue-50 first:rounded-t-xl last:rounded-b-xl"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenu(null);
+                            }}
+                          >
+                            {item}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
             </motion.div>
 
             {/* CALENDAR */}
@@ -201,12 +252,12 @@ export default function Home() {
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={() => changeMonth(-1)}
-                  className="text-blue-700 text-2xl font-bold"
+                  className="text-blue-700"
                 >
                   ❮
                 </button>
 
-                <h3 className="text-lg sm:text-2xl font-semibold text-blue-900">
+                <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                   {calendarDate.toLocaleString("default", {
                     month: "long",
                     year: "numeric",
@@ -215,13 +266,13 @@ export default function Home() {
 
                 <button
                   onClick={() => changeMonth(1)}
-                  className="text-blue-700 text-2xl font-bold"
+                  className="text-blue-700"
                 >
                   ❯
                 </button>
               </div>
 
-              <div className="grid grid-cols-7 text-sm text-blue-700 mb-2">
+              <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 mb-2">
                 {days.map((d) => (
                   <div key={d} className="text-center font-medium">
                     {d}
@@ -245,10 +296,10 @@ export default function Home() {
                     <motion.div
                       layout
                       key={dayNum}
-                      className={`h-[60px] w-[60px] flex items-center justify-center rounded-xl cursor-pointer border text-lg font-semibold transition ${
+                      className={`aspect-square rounded-xl flex items-center justify-center cursor-pointer border ${
                         isToday
                           ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-900"
+                          : "bg-blue-50 border-blue-200 hover:bg-blue-100"
                       }`}
                     >
                       {dayNum}
