@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
 const container: Variants = {
@@ -38,7 +38,6 @@ export default function Home() {
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
   const today = new Date();
-
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const events = [
@@ -65,22 +64,6 @@ export default function Home() {
   const changeMonth = (dir: number) => {
     setCalendarDate(new Date(calYear, calMonth + dir, 1));
   };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        !target.closest(".event-card") &&
-        !target.closest(".event-dropdown")
-      ) {
-        setOpenEvent(null);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () =>
-      document.removeEventListener("click", handleClickOutside);
-  }, []);
 
   return (
     <motion.div
@@ -193,16 +176,16 @@ export default function Home() {
 
         {/* RIGHT COLUMN */}
         <motion.section layout variants={fadeUp} className="lg:col-span-2 space-y-6">
-          {/* Event Cards */}
           {events.map((event, i) => (
-            <motion.div layout key={i} variants={cardPop}>
-              <div
-                className="event-card cursor-pointer bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 hover:bg-blue-50"
-                onClick={() => setOpenEvent(openEvent === i ? null : i)}
-              >
-                <h3 className="text-xl font-semibold text-blue-900">
-                  {event.title}
-                </h3>
+            <motion.div
+              layout
+              key={i}
+              variants={cardPop}
+              className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm cursor-pointer overflow-hidden"
+              onClick={() => setOpenEvent(openEvent === i ? null : i)}
+            >
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-blue-900">{event.title}</h3>
                 <p className="text-sm text-blue-700">
                   {event.date} • {event.location}
                 </p>
@@ -211,12 +194,12 @@ export default function Home() {
               <AnimatePresence>
                 {openEvent === i && (
                   <motion.div
-                    className="event-dropdown bg-white border border-blue-200 rounded-xl shadow-lg p-4 mt-2 text-blue-800"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
+                    className="px-6 pb-6 text-blue-800 text-sm border-t border-blue-200"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
                   >
-                    <p>{event.details}</p>
+                    {event.details}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -227,7 +210,7 @@ export default function Home() {
           <motion.div
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8 mt-4"
           >
             <div className="flex items-center justify-between mb-4">
               <button
