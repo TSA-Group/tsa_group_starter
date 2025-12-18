@@ -145,7 +145,20 @@ export default function Home() {
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Visit Our Map"].map((action) => (
                 <Link key={action} href="/map" className="block">
-                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-7 py-3 border border-blue-200 cursor-pointer">
+                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
+                    <span className="text-sm">{action}</span>
+                    <span className="text-xs font-semibold text-blue-700">
+                      Go
+                    </span>
+                  </div>
+                </Link>
+                ))}
+            </div>
+          </motion.div>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {["Contact Us"].contact((action) => (
+                <Link key={action} href="/contact" className="block">
+                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
                     <span className="text-sm">{action}</span>
                     <span className="text-xs font-semibold text-blue-700">
                       Go
