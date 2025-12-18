@@ -174,43 +174,55 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN */}
-        <motion.section layout variants={fadeUp} className="lg:col-span-2 space-y-6">
-          {events.map((event, i) => (
-            <motion.div
-              layout
-              key={i}
-              variants={cardPop}
-              className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm cursor-pointer overflow-hidden"
-              onClick={() => setOpenEvent(openEvent === i ? null : i)}
-            >
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-blue-900">{event.title}</h3>
-                <p className="text-sm text-blue-700">
-                  {event.date} • {event.location}
-                </p>
+        {/* RIGHT COLUMN - horizontal layout: left=events, right=calendar */}
+        <motion.section
+          layout
+          variants={fadeUp}
+          className="lg:col-span-2 flex flex-col lg:flex-row gap-6"
+        >
+          {/* Event Cards Left */}
+          <div className="flex flex-col gap-4 lg:w-1/2">
+            {events.map((event, i) => (
+              <div key={i} className="flex flex-col gap-1">
+                {/* Card */}
+                <motion.div
+                  layout
+                  variants={cardPop}
+                  className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
+                  onClick={() => setOpenEvent(openEvent === i ? null : i)}
+                >
+                  <h3 className="text-lg font-semibold text-blue-900">
+                    {event.title}
+                  </h3>
+                  <p className="text-sm text-blue-700">
+                    {event.date} • {event.location}
+                  </p>
+                </motion.div>
+
+                {/* Dropdown box */}
+                <AnimatePresence>
+                  {openEvent === i && (
+                    <motion.div
+                      layout
+                      variants={cardPop}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-white border border-blue-200 rounded-xl shadow-sm p-4 text-blue-800"
+                    >
+                      {event.details}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+            ))}
+          </div>
 
-              <AnimatePresence>
-                {openEvent === i && (
-                  <motion.div
-                    className="px-6 pb-6 text-blue-800 text-sm border-t border-blue-200"
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                  >
-                    {event.details}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-
-          {/* Calendar */}
+          {/* Calendar Right */}
           <motion.div
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8 mt-4"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 sm:p-8 lg:w-1/2"
           >
             <div className="flex items-center justify-between mb-4">
               <button
@@ -259,7 +271,7 @@ export default function Home() {
                   <motion.div
                     layout
                     key={dayNum}
-                    className={`h-[60px] w-[60px] flex items-center justify-center rounded-xl cursor-pointer border text-lg font-semibold transition ${
+                    className={`h-[50px] w-[50px] flex items-center justify-center rounded-xl cursor-pointer border text-sm font-semibold transition ${
                       isToday
                         ? "bg-blue-600 text-white border-blue-600"
                         : "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-900"
