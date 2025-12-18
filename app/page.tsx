@@ -142,19 +142,21 @@ export default function Home() {
             </p>
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <a href: "/map">
-                {["Visit Our Map", "Share an Event"].map((action) => (
-              
-                <div
+              {["Visit Our Map", "Share an Event"].map((action) => (
+                <a
                   key={action}
-                  className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200"
+                  href="/map"
+                  className="block"
                 >
-                  <span className="text-sm">{action}</span>
-                  <span className="text-xs font-semibold text-blue-700">
-                    Go
-                  </span>
-                </div>
-            </a>
+                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200">
+                    <span className="text-sm">{action}</span>
+                    <span className="text-xs font-semibold text-blue-700">
+                      Go
+                    </span>
+              </div>
+              </a>
+            ))}
+
               ))}
             </div>
           </motion.div>
