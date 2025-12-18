@@ -143,7 +143,7 @@ export default function Home() {
             </p>
 
             
-            const actions = [
+            const navItems = [
               { label: "Visit Our Map", href: "/map" },
               { label: "Contact Us", href: "/contact" },
             ];
