@@ -154,8 +154,8 @@ export default function Home() {
                 </Link>
                 ))}
             </div>
-          </motion.div>
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Contact Us"].contact((action) => (
                 <Link key={action} href="/contact" className="block">
                   <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
