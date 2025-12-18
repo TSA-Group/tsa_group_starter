@@ -33,8 +33,9 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
 
-  // Current real date
+  // Normalize today's date to midnight
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
@@ -266,11 +267,12 @@ export default function Home() {
 
               {Array.from({ length: lastDate }).map((_, i) => {
                 const dayNum = i + 1;
-                // Highlight correct today date
-                const isToday =
-                  dayNum === today.getDate() &&
-                  calMonth === today.getMonth() &&
-                  calYear === today.getFullYear();
+
+                // Create a date object for each cell and normalize
+                const cellDate = new Date(calYear, calMonth, dayNum);
+                cellDate.setHours(0, 0, 0, 0);
+
+                const isToday = cellDate.getTime() === today.getTime();
 
                 return (
                   <div
@@ -314,3 +316,4 @@ export default function Home() {
     </motion.div>
   );
 }
+
