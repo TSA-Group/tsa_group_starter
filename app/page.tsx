@@ -143,7 +143,7 @@ export default function Home() {
             </p>
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {["Visit Our Map", "Share an Event"].map((action) => (
+              {["Visit Our Map"].map((action) => (
                 <Link key={action} href="/map" className="block">
                   <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
                     <span className="text-sm">{action}</span>
