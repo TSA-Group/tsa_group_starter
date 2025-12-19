@@ -81,7 +81,10 @@ export default function Home() {
   }, []);
 
   // Background color changes gradually as you scroll the whole page
-  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#90CAF9"]);
+  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#C3E0FF"]);
+
+  // Header text color changes along with scroll
+  const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E40AF"]);
 
   // Today's date in Texas (Central Time)
   const now = new Date();
@@ -159,8 +162,8 @@ export default function Home() {
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left text-blue-900"
-          style={{ fontFamily: "TAN Buster, sans-serif" }}
+          style={{ color: headerColor, fontFamily: "TAN Buster, sans-serif" }}
+          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left"
         >
           GATHERLY
         </motion.h1>
