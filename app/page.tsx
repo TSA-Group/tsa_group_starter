@@ -158,7 +158,7 @@ export default function Home() {
       {/* MAIN GRID */}
       <motion.main
         layout
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[80rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[160rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
       >
         {/* rest of your content unchanged */}
 {/* LEFT COLUMN */}
