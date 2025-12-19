@@ -74,15 +74,14 @@ export default function Home() {
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
   // Scroll triggered background
-  const { scrollY } = useScroll();
   const background = useTransform(
-    scrollY,
-    [0, 300], // Adjust scroll range as needed
-    [
-      "linear-gradient(to bottom, rgba(219,234,254,0.55), white)", // top
-      "linear-gradient(to bottom, rgba(226,232,240,1), rgba(200,210,220,1))" // scrolled
-    ]
-  );
+  scrollY,
+  [0, 300],
+  [
+    "linear-gradient(to bottom, rgba(255,255,255,1), rgba(219,234,254,0.7))", // top
+    "linear-gradient(to bottom, #90CAF9, #42A5F5)" // bright medium blue
+  ]
+);
 
   //(Central Time)
   const now = new Date();
