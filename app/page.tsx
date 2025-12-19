@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, Variants, AnimatePresence } from "framer-motion";
+import { motion, Variants, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 
 // Animation variants
@@ -73,7 +73,18 @@ export default function Home() {
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  // Today's date in Texas (Central Time)
+  // Scroll triggered background
+  const { scrollY } = useScroll();
+  const background = useTransform(
+    scrollY,
+    [0, 300], // Adjust scroll range as needed
+    [
+      "linear-gradient(to bottom, rgba(219,234,254,0.55), white)", // top
+      "linear-gradient(to bottom, rgba(226,232,240,1), rgba(200,210,220,1))" // scrolled
+    ]
+  );
+
+  //(Central Time)
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
@@ -132,7 +143,8 @@ export default function Home() {
       initial="hidden"
       animate="show"
       variants={container}
-      className="min-h-screen overflow-x-hidden text-slate-950 bg-[linear-gradient(to_bottom,rgba(219,234,254,0.55)_0%,rgba(255,255,255,1)_180px)]"
+      style={{ background }}
+      className="min-h-screen overflow-x-hidden text-slate-950"
     >
       {/* HEADER */}
       <motion.header
@@ -158,10 +170,9 @@ export default function Home() {
       {/* MAIN GRID */}
       <motion.main
         layout
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[160rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[150rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
       >
-        {/* rest of your content unchanged */}
-{/* LEFT COLUMN */}
+        {/* LEFT COLUMN */}
         <motion.section layout className="space-y-8 lg:col-span-1">
           <QuickActions />
 
