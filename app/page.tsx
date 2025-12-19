@@ -1,17 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  motion,
-  Variants,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-} from "framer-motion";
+import { motion, Variants, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
-/* ---------------- ANIMATION VARIANTS ---------------- */
-
+// Animation variants
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12 } },
@@ -37,8 +30,7 @@ const cardPop: Variants = {
   },
 };
 
-/* ---------------- QUICK ACTIONS ---------------- */
-
+// QuickActions component
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
@@ -74,29 +66,14 @@ function QuickActions() {
   );
 }
 
-/* ---------------- MAIN HOME ---------------- */
-
+// Main Home component
 export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  /* -------- SCROLL BACKGROUND ANIMATION -------- */
-
-  const { scrollYProgress } = useScroll();
-
-  const background = useTransform(
-    scrollYProgress,
-    [0, 0.35],
-    [
-      "linear-gradient(to bottom, rgba(219,234,254,0.55), white)",
-      "linear-gradient(to bottom, rgb(241,245,249), rgb(226,232,240))",
-    ]
-  );
-
-  /* -------- CALENDAR LOGIC -------- */
-
+  // Today's date in Texas (Central Time)
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
@@ -155,8 +132,7 @@ export default function Home() {
       initial="hidden"
       animate="show"
       variants={container}
-      style={{ background }}
-      className="min-h-screen overflow-x-hidden text-slate-950"
+      className="min-h-screen overflow-x-hidden text-slate-950 bg-[linear-gradient(to_bottom,rgba(219,234,254,0.55)_0%,rgba(255,255,255,1)_180px)]"
     >
       {/* HEADER */}
       <motion.header
@@ -182,12 +158,14 @@ export default function Home() {
       {/* MAIN GRID */}
       <motion.main
         layout
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-64 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
       >
-        {/* LEFT COLUMN */}
+        {/* rest of your content unchanged */}
+{/* LEFT COLUMN */}
         <motion.section layout className="space-y-8 lg:col-span-1">
           <QuickActions />
 
+          {/* Volunteer Opportunities */}
           <motion.div
             layout
             variants={cardPop}
@@ -227,13 +205,13 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN */}
+        {/* RIGHT COLUMN - Events & Calendar */}
         <motion.section
           layout
           variants={fadeUp}
           className="lg:col-span-2 flex flex-col lg:flex-row gap-6"
         >
-          {/* EVENTS */}
+          {/* Events */}
           <div className="lg:w-1/2 flex flex-col gap-4">
             <motion.div
               layout
@@ -258,10 +236,48 @@ export default function Home() {
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-900">{event.title}</h3>
+                    <h3 className="text-lg font-semibold text-blue-900">
+                      {event.title}
+                    </h3>
                     <p className="text-sm text-blue-700">
                       {event.date} • {event.location}
                     </p>
+                  </div>
+
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpenIndex(menuOpenIndex === i ? null : i);
+                      }}
+                      className="text-blue-700 text-xl font-bold px-2 py-1"
+                    >
+                      ⋮
+                    </button>
+
+                    <AnimatePresence>
+                      {menuOpenIndex === i && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="absolute right-0 mt-2 w-32 bg-white border border-blue-200 rounded-xl shadow-lg z-10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ul className="flex flex-col">
+                            {["Save Event", "Share Event"].map((option) => (
+                              <li
+                                key={option}
+                                className="px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 cursor-pointer"
+                                onClick={() => setMenuOpenIndex(null)}
+                              >
+                                {option}
+                              </li>
+                            ))}
+                          </ul>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -282,23 +298,49 @@ export default function Home() {
             ))}
           </div>
 
-          {/* CALENDAR */}
+          {/* Calendar */}
           <motion.div
             layout
             variants={cardPop}
             className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2"
           >
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+                className="text-blue-700 text-2xl font-bold"
+              >
+                ❮
+              </button>
+
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+                {monthNames[calMonth]} {calYear}
+              </h3>
+
+              <button
+                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+                className="text-blue-700 text-2xl font-bold"
+              >
+                ❯
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
+              {daysOfWeek.map((d) => (
+                <div key={d} className="text-center">{d}</div>
+              ))}
+            </div>
+
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
-                if (!date) return <div key={idx} />;
+                if (!date) return <div key={idx}></div>;
                 const isToday = date.getTime() === texasToday.getTime();
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-center h-12 rounded-lg font-semibold ${
+                    className={`flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition ${
                       isToday
                         ? "bg-blue-600 text-white"
-                        : "bg-blue-50 text-blue-900"
+                        : "bg-blue-50 hover:bg-blue-100 text-blue-900"
                     }`}
                   >
                     {date.getDate()}
