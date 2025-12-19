@@ -73,17 +73,11 @@ export default function Home() {
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
 
-  // Scroll triggered background
-  const background = useTransform(
-  scrollY,
-  [0, 300],
-  [
-    "linear-gradient(to bottom, rgba(255,255,255,1), rgba(219,234,254,0.7))", // top
-    "linear-gradient(to bottom, #90CAF9, #42A5F5)" // bright medium blue
-  ]
-);
+  // Scroll-triggered background
+  const { scrollY } = useScroll();
+  const background = useTransform(scrollY, [0, 300], ["#ffffff", "#90CAF9"]); // white → light blue
 
-  //(Central Time)
+  // Today's date in Texas (Central Time)
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
