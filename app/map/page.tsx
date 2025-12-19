@@ -67,63 +67,66 @@ const pop: Variants = {
 const ALL_LOCATIONS: LocationItem[] = [
   {
     id: "loc-1",
-    title: "Downtown Church — Free Community Dinner",
-    address: "Downtown Church, San Francisco, CA",
-    position: { lat: 37.7817, lng: -122.4091 },
+    title: "Sugar Land Town Square — Free Community Dinner",
+    address: "Sugar Land Town Square, Sugar Land, TX 77479",
+    position: { lat: 29.5959, lng: -95.6221 },
     eventType: "Community Dinner",
     activities: ["Food", "Family", "Volunteering"],
     when: "Sat • 6:00 PM",
-    host: "Downtown Church",
+    host: "Sugar Land Community Partners",
   },
   {
     id: "loc-2",
-    title: "Community Park — Neighborhood Meetup",
-    address: "Community Park, San Francisco, CA",
-    position: { lat: 37.7694, lng: -122.4862 },
+    title: "Sugar Land Memorial Park — Neighborhood Meetup",
+    address: "15300 University Blvd, Sugar Land, TX 77479",
+    position: { lat: 29.5747, lng: -95.6510 },
     eventType: "Neighborhood Meetup",
     activities: ["Outdoors", "Family"],
     when: "Sat • 2:00 PM",
-    host: "Community Org",
+    host: "Sugar Land Neighborhood Association",
   },
   {
     id: "loc-3",
-    title: "Westside Center — Warm Clothing Drive",
-    address: "Westside Center, San Francisco, CA",
-    position: { lat: 37.7642, lng: -122.4665 },
+    title: "Fort Bend County Libraries (Sugar Land) — Warm Clothing Drive",
+    address: "550 Eldridge Rd, Sugar Land, TX 77478",
+    position: { lat: 29.5602, lng: -95.6580 },
     eventType: "Clothing Drive",
     activities: ["Donations", "Volunteering"],
     when: "Sun • 10:00 AM",
-    host: "Westside Center",
+    host: "Fort Bend County Libraries",
   },
   {
     id: "loc-4",
-    title: "Library Annex — Literacy Tutors Needed",
-    address: "Library Annex, San Francisco, CA",
-    position: { lat: 37.7849, lng: -122.4333 },
+    title: "T.E. Harman Center — Literacy Tutors Needed",
+    address: "3110 University Blvd, Sugar Land, TX 77479",
+    position: { lat: 29.6079, lng: -95.6376 },
     eventType: "Literacy Tutoring",
     activities: ["Education", "Volunteering"],
     when: "Weekdays • Flexible",
-    host: "Library Annex",
+    host: "T.E. Harman Center",
   },
   {
     id: "loc-5",
-    title: "Mission Pantry — Food Pantry Pickup",
-    address: "Mission District, San Francisco, CA",
-    position: { lat: 37.7599, lng: -122.4148 },
+    title: "First Colony Mall Area — Food Pantry Pickup",
+    address: "16535 Southwest Fwy, Sugar Land, TX 77479",
+    position: { lat: 29.5955, lng: -95.6200 },
     eventType: "Food Pantry",
     activities: ["Food", "Family"],
     when: "Wed • 4:00 PM",
+    host: "First Colony Community Outreach",
   },
   {
     id: "loc-6",
-    title: "Beachfront — Volunteer Cleanup",
-    address: "Ocean Beach, San Francisco, CA",
-    position: { lat: 37.7593, lng: -122.5107 },
+    title: "Constellation Field — Volunteer Cleanup",
+    address: "1 Stadium Dr, Sugar Land, TX 77498",
+    position: { lat: 29.6243, lng: -95.6516 },
     eventType: "Volunteer Cleanup",
     activities: ["Outdoors", "Volunteering"],
     when: "Sun • 9:00 AM",
+    host: "Sugar Land Parks & Recreation",
   },
 ];
+
 
 const EVENT_OPTIONS: EventType[] = [
   "Community Dinner",
@@ -146,9 +149,9 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
 /** ---------- Page ---------- */
 export default function Page() {
   const [center, setCenter] = useState<LatLng>({
-    lat: 37.7749,
-    lng: -122.4194,
-  });
+  lat: 29.5959,
+  lng: -95.6221,
+});
 
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
