@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, Variants, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 
@@ -72,10 +72,16 @@ export default function Home() {
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
-
-  // Scroll-triggered background
   const { scrollY } = useScroll();
-  const background = useTransform(scrollY, [0, 300], ["#ffffff", "#90CAF9"]); // white → light blue
+  const [scrollRange, setScrollRange] = useState(0);
+
+  // Set scroll range dynamically
+  useEffect(() => {
+    setScrollRange(document.body.scrollHeight - window.innerHeight);
+  }, []);
+
+  // Background color changes gradually as you scroll the whole page
+  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#90CAF9"]);
 
   // Today's date in Texas (Central Time)
   const now = new Date();
