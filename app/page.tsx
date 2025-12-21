@@ -249,7 +249,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* CALENDAR WITH EVENTS */}
+          {/* CALENDAR WITH TOGGLE */}
           <motion.div
             layout
             variants={cardPop}
@@ -311,7 +311,11 @@ export default function Home() {
                         ? "bg-blue-600 text-white"
                         : "bg-blue-50 hover:bg-blue-100 text-blue-900"
                     }`}
-                    onClick={() => setSelectedDate(date)}
+                    onClick={() =>
+                      setSelectedDate(prev =>
+                        prev && prev.getTime() === date.getTime() ? null : date
+                      )
+                    }
                   >
                     {date.getDate()}
 
@@ -351,11 +355,9 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* IMAGE + TEXT BOXES (ALTERNATING) */}
+      {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
       <motion.section
         initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-100px" }}
         variants={container}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16"
       >
@@ -381,7 +383,10 @@ export default function Home() {
         ].map((item, i) => (
           <motion.div
             key={i}
-            variants={cardPop}
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-100px" }}
             className={`flex ${item.align === "right" ? "justify-end" : "justify-start"}`}
           >
             <Link href={item.href} className="block w-full md:w-[48%]">
@@ -390,12 +395,9 @@ export default function Home() {
                 transition={{ type: "spring", stiffness: 260, damping: 18 }}
                 className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer"
               >
-                {/* Image */}
                 <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
                   Image Here
                 </div>
-
-                {/* Text */}
                 <div className="p-5 space-y-2">
                   <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
                   <p className="text-sm text-blue-700">{item.text}</p>
