@@ -123,25 +123,19 @@ export default function Home() {
     "July","August","September","October","November","December"
   ];
 
-  // Events with dateString for calendar
-  const events = [
+  // Upcoming events (right column)
+  const upcomingEvents = [
     {
       title: "Neighborhood Meetup",
-      dateString: "2026-02-03T14:00:00",
+      dateString: "2025-12-21T14:00:00",
       location: "Community Park",
       details: "Meet local residents and join community discussions.",
     },
     {
       title: "Community Dinner",
-      dateString: "2026-02-01T18:00:00",
+      dateString: "2025-12-21T18:00:00",
       location: "Downtown Church",
-      details: "Enjoy a free meal and meet with neighbors.",
-    },
-    {
-      title: "Clothing Drive",
-      dateString: "2026-01-31T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need (volunteers needed.)",
+      details: "Enjoy a free meal and fellowship with neighbors.",
     },
     {
       title: "Clothing Drive",
@@ -149,29 +143,21 @@ export default function Home() {
       location: "Westside Center",
       details: "Donate clothes for those in need and volunteer.",
     },
+  ];
+
+  // Calendar-only events (appear in popup but NOT in Upcoming Events)
+  const calendarEvents = [
     {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer.",
+      title: "Holiday Market",
+      dateString: "2025-12-23T12:00:00",
+      location: "Main Street Plaza",
+      details: "Shop local vendors and enjoy festive treats.",
     },
     {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer.",
-    },
-    {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer.",
-    },
-    {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer.",
+      title: "Special Workshop",
+      dateString: "2025-12-24T10:00:00",
+      location: "Library Hall",
+      details: "Learn crafts with the community.",
     },
   ];
 
@@ -191,6 +177,13 @@ export default function Home() {
   };
 
   const calendarDays = generateCalendarDays();
+
+  // Picture boxes data
+  const pictureBoxes = [
+    { image: "/images/pic1.jpg", text: "Community Gathering" },
+    { image: "/images/pic2.jpg", text: "Volunteer Day" },
+    { image: "/images/pic3.jpg", text: "Neighborhood Event" },
+  ];
 
   return (
     <motion.div
@@ -254,11 +247,32 @@ export default function Home() {
               ))}
             </ul>
           </motion.div>
+
+          {/* Picture Boxes */}
+          <div className="flex flex-col gap-8 mt-8">
+            {pictureBoxes.map((box, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: i % 2 === 0 ? -100 : 100 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.8 }}
+                className={`bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden flex flex-col ${
+                  i % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+                }`}
+              >
+                <img src={box.image} alt={box.text} className="w-full lg:w-1/2 h-48 object-cover"/>
+                <div className="p-4 flex items-center justify-center text-blue-900 font-semibold text-lg">
+                  {box.text}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </motion.section>
 
         {/* RIGHT COLUMN */}
         <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
-          {/* EVENTS */}
+          {/* UPCOMING EVENTS */}
           <div className="lg:w-1/2 flex flex-col gap-4">
             <motion.div
               variants={cardPop}
@@ -269,7 +283,7 @@ export default function Home() {
               </h2>
             </motion.div>
 
-            {events.map((event, i) => (
+            {upcomingEvents.map((event, i) => (
               <motion.div
                 key={i}
                 variants={cardPop}
@@ -297,7 +311,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* CALENDAR WITH TOGGLE + CLICK-OUTSIDE */}
+          {/* CALENDAR */}
           <motion.div
             ref={calendarRef}
             layout
@@ -337,7 +351,7 @@ export default function Home() {
                 const isToday = date.getTime() === texasToday.getTime();
                 const isSelected = date.getTime() === selectedDate?.getTime();
 
-                const dayEvents = events.filter(event => {
+                const dayEvents = calendarEvents.filter(event => {
                   const eDate = new Date(event.dateString);
                   return (
                     eDate.getFullYear() === date.getFullYear() &&
@@ -400,64 +414,23 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
-      <motion.section
-        initial="hidden"
-        variants={container}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16"
-      >
-        {[
-          {
-            title: "Community Stories",
-            text: "See how neighbors are making a difference together.",
-            href: "/stories",
-            align: "left",
-          },
-          {
-            title: "Local Neighborhoods",
-            text: "Explore different neighborhoods and what they offer.",
-            href: "/neighborhoods",
-            align: "right",
-          },
-          {
-            title: "Get Involved",
-            text: "Find ways to volunteer and support your community.",
-            href: "/volunteer",
-            align: "left",
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            className={`flex ${item.align === "right" ? "justify-end" : "justify-start"}`}
-          >
-            <Link href={item.href} className="block w-full md:w-[48%]">
-              <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer"
-              >
-                <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                  Image Here
-                </div>
-                <div className="p-5 space-y-2">
-                  <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
-                  <p className="text-sm text-blue-700">{item.text}</p>
-                  <span className="inline-block mt-2 text-sm font-semibold text-blue-600">
-                    Learn more →
-                  </span>
-                </div>
-              </motion.div>
-            </Link>
-          </motion.div>
-        ))}
-      </motion.section>
-
       {/* FOOTER */}
-      <footer className="border-t border-blue-200 bg-white">
+      <footer className="border-t border-blue-200 bg-white mt-12">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <p className="font-semibold underline mb-2 text-blue-900">
+            Contact Our Community Staff:
+          </p>
+          <div className="flex flex-col sm:flex-row sm:gap-8 text-sm">
+            <a className="text-blue-700" href="mailto:Gatherly@gmail.com">
+              Gatherly@gmail.com
+            </a>
+            <a className="text-blue-700" href="tel:012-345-6789">
+              012-345-6789
+            </a>
+            <span className="text-blue-700">[enter info]</span>
+          </div>
+        </div>
+
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
           © {year} Gatherly. All rights reserved.
         </div>
