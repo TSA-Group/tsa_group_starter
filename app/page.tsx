@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, Variants, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  Variants,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import Link from "next/link";
 
 // Animation variants
@@ -66,7 +72,6 @@ function QuickActions() {
   );
 }
 
-// Main Home component
 export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -75,18 +80,23 @@ export default function Home() {
   const { scrollY } = useScroll();
   const [scrollRange, setScrollRange] = useState(0);
 
-  // Set scroll range dynamically
   useEffect(() => {
     setScrollRange(document.body.scrollHeight - window.innerHeight);
   }, []);
 
-  // Background color changes gradually as you scroll the whole page
-  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#C3E0FF"]);
+  const background = useTransform(
+    scrollY,
+    [0, scrollRange],
+    ["#ffffff", "#C3E0FF"]
+  );
 
-  // Header text color changes along with scroll
-  const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E40AF"]);
+  const headerColor = useTransform(
+    scrollY,
+    [0, scrollRange],
+    ["#1E3A8A", "#1E40AF"]
+  );
 
-  // Today's date in Texas (Central Time)
+  // Texas date logic
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
@@ -170,24 +180,19 @@ export default function Home() {
       </motion.header>
 
       {/* MAIN GRID */}
-      <motion.main
-        layout
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[150rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10"
-      >
+      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[150rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {/* LEFT COLUMN */}
-        <motion.section layout className="space-y-8 lg:col-span-1">
+        <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
 
           {/* Volunteer Opportunities */}
           <motion.div
-            layout
             variants={cardPop}
             className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
           >
             <h3 className="text-lg font-semibold mb-3 text-blue-900">
               Volunteer Opportunities
             </h3>
-
             <ul className="space-y-4">
               {[
                 { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
@@ -196,164 +201,79 @@ export default function Home() {
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
                 { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
               ].map((item, i) => (
-                <motion.li
-                  layout
+                <li
                   key={i}
-                  className="bg-blue-50 border border-blue-200 rounded-xl p-3 shadow-sm"
+                  className="bg-blue-50 border border-blue-200 rounded-xl p-3"
                 >
-                  <div className="flex justify-between items-center mb-2">
-                    <div>
-                      <div className="text-sm font-semibold">{item.title}</div>
-                      <div className="text-xs text-blue-700">{item.meta}</div>
-                    </div>
-                    <span className="text-xs font-medium text-blue-800">Details</span>
-                  </div>
-
-                  <div className="h-1 w-full bg-blue-200 rounded-full">
-                    <div className="h-1 w-2/3 bg-blue-500 rounded-full" />
-                  </div>
-                </motion.li>
+                  <div className="text-sm font-semibold">{item.title}</div>
+                  <div className="text-xs text-blue-700">{item.meta}</div>
+                </li>
               ))}
             </ul>
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN - Events & Calendar */}
-        <motion.section
-          layout
-          variants={fadeUp}
-          className="lg:col-span-2 flex flex-col lg:flex-row gap-6"
-        >
-          {/* Events */}
+        {/* RIGHT COLUMN */}
+        <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
+          {/* EVENTS */}
           <div className="lg:w-1/2 flex flex-col gap-4">
             <motion.div
-              layout
               variants={cardPop}
-              className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border border-blue-200 ring-1 ring-blue-100 shadow-sm text-center"
+              className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border-blue-200 shadow-sm text-center"
             >
-              <h2 className="text-2xl sm:text-3xl font-semibold text-blue-900">
+              <h2 className="text-2xl font-semibold text-blue-900">
                 Upcoming Events
               </h2>
-              <p className="text-sm text-blue-700 mt-1">
-                Local gatherings & volunteer opportunities
-              </p>
             </motion.div>
 
             {events.map((event, i) => (
               <motion.div
                 key={i}
-                layout
                 variants={cardPop}
-                className="relative bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 cursor-pointer hover:bg-blue-50"
+                className="bg-white rounded-2xl border border-blue-200 p-4 cursor-pointer"
                 onClick={() => setOpenEvent(openEvent === i ? null : i)}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-900">
-                      {event.title}
-                    </h3>
-                    <p className="text-sm text-blue-700">
-                      {event.date} • {event.location}
-                    </p>
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMenuOpenIndex(menuOpenIndex === i ? null : i);
-                      }}
-                      className="text-blue-700 text-xl font-bold px-2 py-1"
-                    >
-                      ⋮
-                    </button>
-
-                    <AnimatePresence>
-                      {menuOpenIndex === i && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          className="absolute right-0 mt-2 w-32 bg-white border border-blue-200 rounded-xl shadow-lg z-10"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <ul className="flex flex-col">
-                            {["Save Event", "Share Event"].map((option) => (
-                              <li
-                                key={option}
-                                className="px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 cursor-pointer"
-                                onClick={() => setMenuOpenIndex(null)}
-                              >
-                                {option}
-                              </li>
-                            ))}
-                          </ul>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
+                <h3 className="font-semibold text-blue-900">{event.title}</h3>
+                <p className="text-sm text-blue-700">
+                  {event.date} • {event.location}
+                </p>
 
                 <AnimatePresence>
                   {openEvent === i && (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto", marginTop: "0.5rem" }}
-                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                      className="text-blue-800 text-sm"
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-blue-800 mt-2"
                     >
                       {event.details}
-                    </motion.div>
+                    </motion.p>
                   )}
                 </AnimatePresence>
               </motion.div>
             ))}
           </div>
 
-          {/* Calendar */}
+          {/* CALENDAR */}
           <motion.div
-            layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2"
+            className="bg-white rounded-2xl border border-blue-200 p-4 lg:w-1/2"
           >
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
-                className="text-blue-700 text-2xl font-bold"
-              >
-                ❮
-              </button>
-
-              <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
-                {monthNames[calMonth]} {calYear}
-              </h3>
-
-              <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
-                className="text-blue-700 text-2xl font-bold"
-              >
-                ❯
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-              {daysOfWeek.map((d) => (
-                <div key={d} className="text-center">{d}</div>
-              ))}
-            </div>
+            <h3 className="text-lg font-semibold text-blue-900 mb-4">
+              {monthNames[calMonth]} {calYear}
+            </h3>
 
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
-                if (!date) return <div key={idx}></div>;
+                if (!date) return <div key={idx} />;
                 const isToday = date.getTime() === texasToday.getTime();
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition ${
+                    className={`h-10 flex items-center justify-center rounded-lg text-sm font-semibold ${
                       isToday
                         ? "bg-blue-600 text-white"
-                        : "bg-blue-50 hover:bg-blue-100 text-blue-900"
+                        : "bg-blue-50 text-blue-900"
                     }`}
                   >
                     {date.getDate()}
@@ -365,23 +285,60 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
+      {/* 🔥 NEW IMAGE + TEXT SECTION */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={container}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              title: "Community Stories",
+              text: "See how neighbors are making a difference together.",
+              href: "/stories",
+            },
+            {
+              title: "Local Neighborhoods",
+              text: "Explore different neighborhoods and what they offer.",
+              href: "/neighborhoods",
+            },
+            {
+              title: "Get Involved",
+              text: "Find ways to volunteer and support your community.",
+              href: "/volunteer",
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              variants={cardPop}
+              whileHover={{ y: -8, scale: 1.02 }}
+            >
+              <Link href={item.href} className="block h-full">
+                <div className="h-full bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden">
+                  <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
+                    Image Here
+                  </div>
+                  <div className="p-5 space-y-2">
+                    <h3 className="text-lg font-semibold text-blue-900">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-blue-700">{item.text}</p>
+                    <span className="text-sm font-semibold text-blue-600">
+                      Learn more →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <p className="font-semibold underline mb-2 text-blue-900">
-            Contact Our Community Staff:
-          </p>
-          <div className="flex flex-col sm:flex-row sm:gap-8 text-sm">
-            <a className="text-blue-700" href="mailto:Gatherly@gmail.com">
-              Gatherly@gmail.com
-            </a>
-            <a className="text-blue-700" href="tel:012-345-6789">
-              012-345-6789
-            </a>
-            <span className="text-blue-700">[enter info]</span>
-          </div>
-        </div>
-
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
           © {year} Gatherly. All rights reserved.
         </div>
