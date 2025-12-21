@@ -180,7 +180,7 @@ export default function Home() {
       </motion.header>
 
       {/* MAIN GRID */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[150rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[60rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {/* LEFT COLUMN */}
         <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
