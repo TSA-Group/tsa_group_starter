@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   motion,
   Variants,
@@ -81,8 +81,26 @@ export default function Home() {
   const [scrollRange, setScrollRange] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+  const calendarRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     setScrollRange(document.body.scrollHeight - window.innerHeight);
+  }, []);
+
+  // Click outside to close calendar popup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node)
+      ) {
+        setSelectedDate(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   // Subtle scroll background & header color
@@ -249,13 +267,13 @@ export default function Home() {
             ))}
           </div>
 
-          {/* CALENDAR WITH TOGGLE */}
+          {/* CALENDAR WITH TOGGLE + CLICK-OUTSIDE */}
           <motion.div
+            ref={calendarRef}
             layout
             variants={cardPop}
             className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
           >
-            {/* Month navigation */}
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
@@ -276,14 +294,12 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Days of week */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map((d) => (
                 <div key={d} className="text-center">{d}</div>
               ))}
             </div>
 
-            {/* Dates */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx} />;
@@ -291,7 +307,6 @@ export default function Home() {
                 const isToday = date.getTime() === texasToday.getTime();
                 const isSelected = date.getTime() === selectedDate?.getTime();
 
-                // Events for this day
                 const dayEvents = events.filter(event => {
                   const eDate = new Date(event.dateString);
                   return (
