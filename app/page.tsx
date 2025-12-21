@@ -79,24 +79,17 @@ export default function Home() {
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
   const { scrollY } = useScroll();
   const [scrollRange, setScrollRange] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     setScrollRange(document.body.scrollHeight - window.innerHeight);
   }, []);
 
-  const background = useTransform(
-    scrollY,
-    [0, scrollRange],
-    ["#ffffff", "#C3E0FF"]
-  );
+  // Subtle scroll background & header color
+  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
+  const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E3F8A"]);
 
-  const headerColor = useTransform(
-    scrollY,
-    [0, scrollRange],
-    ["#1E3A8A", "#1E40AF"]
-  );
-
-  // Texas date logic
+  // Texas time today
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
@@ -112,27 +105,29 @@ export default function Home() {
     "July","August","September","October","November","December"
   ];
 
+  // Events with dateString for calendar
   const events = [
     {
       title: "Neighborhood Meetup",
-      date: "Sat • 2:00 PM",
+      dateString: "2025-12-21T14:00:00",
       location: "Community Park",
       details: "Meet local residents and join community discussions.",
     },
     {
       title: "Community Dinner",
-      date: "Sat • 6:00 PM",
+      dateString: "2025-12-21T18:00:00",
       location: "Downtown Church",
       details: "Enjoy a free meal and fellowship with neighbors.",
     },
     {
       title: "Clothing Drive",
-      date: "Sun • 10:00 AM",
+      dateString: "2025-12-22T10:00:00",
       location: "Westside Center",
       details: "Donate clothes for those in need and volunteer.",
     },
   ];
 
+  // Generate calendar days
   const generateCalendarDays = () => {
     const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -180,7 +175,7 @@ export default function Home() {
       </motion.header>
 
       {/* MAIN GRID */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-[30rem] grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {/* LEFT COLUMN */}
         <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
@@ -235,7 +230,7 @@ export default function Home() {
               >
                 <h3 className="font-semibold text-blue-900">{event.title}</h3>
                 <p className="text-sm text-blue-700">
-                  {event.date} • {event.location}
+                  {new Date(event.dateString).toLocaleString()} • {event.location}
                 </p>
 
                 <AnimatePresence>
@@ -254,29 +249,100 @@ export default function Home() {
             ))}
           </div>
 
-          {/* CALENDAR */}
+          {/* CALENDAR WITH EVENTS */}
           <motion.div
+            layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 p-4 lg:w-1/2"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
           >
-            <h3 className="text-lg font-semibold text-blue-900 mb-4">
-              {monthNames[calMonth]} {calYear}
-            </h3>
+            {/* Month navigation */}
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+                className="text-blue-700 text-2xl font-bold"
+              >
+                ❮
+              </button>
 
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+                {monthNames[calMonth]} {calYear}
+              </h3>
+
+              <button
+                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+                className="text-blue-700 text-2xl font-bold"
+              >
+                ❯
+              </button>
+            </div>
+
+            {/* Days of week */}
+            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
+              {daysOfWeek.map((d) => (
+                <div key={d} className="text-center">{d}</div>
+              ))}
+            </div>
+
+            {/* Dates */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx} />;
+
                 const isToday = date.getTime() === texasToday.getTime();
+                const isSelected = date.getTime() === selectedDate?.getTime();
+
+                // Events for this day
+                const dayEvents = events.filter(event => {
+                  const eDate = new Date(event.dateString);
+                  return (
+                    eDate.getFullYear() === date.getFullYear() &&
+                    eDate.getMonth() === date.getMonth() &&
+                    eDate.getDate() === date.getDate()
+                  );
+                });
+
                 return (
                   <div
                     key={idx}
-                    className={`h-10 flex items-center justify-center rounded-lg text-sm font-semibold ${
-                      isToday
+                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
+                      isSelected
+                        ? "bg-blue-400 text-white"
+                        : isToday
                         ? "bg-blue-600 text-white"
-                        : "bg-blue-50 text-blue-900"
+                        : "bg-blue-50 hover:bg-blue-100 text-blue-900"
                     }`}
+                    onClick={() => setSelectedDate(date)}
                   >
                     {date.getDate()}
+
+                    <AnimatePresence>
+                      {isSelected && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10 w-60 bg-white border border-blue-200 rounded-lg shadow-lg p-3 text-sm text-blue-900"
+                        >
+                          <p className="font-semibold mb-1">
+                            {monthNames[date.getMonth()]} {date.getDate()}, {date.getFullYear()}
+                          </p>
+
+                          {dayEvents.length > 0 ? (
+                            <ul className="space-y-2">
+                              {dayEvents.map((event, i) => (
+                                <li key={i} className="border-l-4 border-blue-500 pl-2">
+                                  <p className="font-semibold text-blue-800">{event.title}</p>
+                                  <p className="text-xs text-blue-700">{event.location}</p>
+                                  <p className="text-xs text-blue-700">{event.details}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-blue-700">No events for this day</p>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}
@@ -285,56 +351,62 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* 🔥 NEW IMAGE + TEXT SECTION */}
+      {/* IMAGE + TEXT BOXES (ALTERNATING) */}
       <motion.section
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-100px" }}
         variants={container}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              title: "Community Stories",
-              text: "See how neighbors are making a difference together.",
-              href: "/stories",
-            },
-            {
-              title: "Local Neighborhoods",
-              text: "Explore different neighborhoods and what they offer.",
-              href: "/neighborhoods",
-            },
-            {
-              title: "Get Involved",
-              text: "Find ways to volunteer and support your community.",
-              href: "/volunteer",
-            },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              variants={cardPop}
-              whileHover={{ y: -8, scale: 1.02 }}
-            >
-              <Link href={item.href} className="block h-full">
-                <div className="h-full bg-white rounded-2xl border border-blue-200 shadow-sm overflow-hidden">
-                  <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                    Image Here
-                  </div>
-                  <div className="p-5 space-y-2">
-                    <h3 className="text-lg font-semibold text-blue-900">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-blue-700">{item.text}</p>
-                    <span className="text-sm font-semibold text-blue-600">
-                      Learn more →
-                    </span>
-                  </div>
+        {[
+          {
+            title: "Community Stories",
+            text: "See how neighbors are making a difference together.",
+            href: "/stories",
+            align: "left",
+          },
+          {
+            title: "Local Neighborhoods",
+            text: "Explore different neighborhoods and what they offer.",
+            href: "/neighborhoods",
+            align: "right",
+          },
+          {
+            title: "Get Involved",
+            text: "Find ways to volunteer and support your community.",
+            href: "/volunteer",
+            align: "left",
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            variants={cardPop}
+            className={`flex ${item.align === "right" ? "justify-end" : "justify-start"}`}
+          >
+            <Link href={item.href} className="block w-full md:w-[48%]">
+              <motion.div
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer"
+              >
+                {/* Image */}
+                <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
+                  Image Here
                 </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+
+                {/* Text */}
+                <div className="p-5 space-y-2">
+                  <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
+                  <p className="text-sm text-blue-700">{item.text}</p>
+                  <span className="inline-block mt-2 text-sm font-semibold text-blue-600">
+                    Learn more →
+                  </span>
+                </div>
+              </motion.div>
+            </Link>
+          </motion.div>
+        ))}
       </motion.section>
 
       {/* FOOTER */}
