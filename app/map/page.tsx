@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -79,7 +80,7 @@ const ALL_LOCATIONS: LocationItem[] = [
     id: "loc-2",
     title: "Sugar Land Memorial Park — Neighborhood Meetup",
     address: "15300 University Blvd, Sugar Land, TX 77479",
-    position: { lat: 29.5747, lng: -95.6510 },
+    position: { lat: 29.5747, lng: -95.651 },
     eventType: "Neighborhood Meetup",
     activities: ["Outdoors", "Family"],
     when: "Sat • 2:00 PM",
@@ -89,7 +90,7 @@ const ALL_LOCATIONS: LocationItem[] = [
     id: "loc-3",
     title: "Fort Bend County Libraries (Sugar Land) — Warm Clothing Drive",
     address: "550 Eldridge Rd, Sugar Land, TX 77478",
-    position: { lat: 29.5602, lng: -95.6580 },
+    position: { lat: 29.5602, lng: -95.658 },
     eventType: "Clothing Drive",
     activities: ["Donations", "Volunteering"],
     when: "Sun • 10:00 AM",
@@ -109,7 +110,7 @@ const ALL_LOCATIONS: LocationItem[] = [
     id: "loc-5",
     title: "First Colony Mall Area — Food Pantry Pickup",
     address: "16535 Southwest Fwy, Sugar Land, TX 77479",
-    position: { lat: 29.5955, lng: -95.6200 },
+    position: { lat: 29.5955, lng: -95.62 },
     eventType: "Food Pantry",
     activities: ["Food", "Family"],
     when: "Wed • 4:00 PM",
@@ -126,7 +127,6 @@ const ALL_LOCATIONS: LocationItem[] = [
     host: "Sugar Land Parks & Recreation",
   },
 ];
-
 
 const EVENT_OPTIONS: EventType[] = [
   "Community Dinner",
@@ -149,15 +149,19 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
 /** ---------- Page ---------- */
 export default function Page() {
   const [center, setCenter] = useState<LatLng>({
-  lat: 29.5959,
-  lng: -95.6221,
-});
+    lat: 29.5959,
+    lng: -95.6221,
+  });
 
+  // Google Places Autocomplete state (MAP SEARCH)
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
+
+  // Directory search (RESOURCE SEARCH)
+  const [directoryQuery, setDirectoryQuery] = useState("");
 
   // Theme tracking (works with your ThemeToggle)
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -232,6 +236,23 @@ export default function Page() {
   const [radiusMode, setRadiusMode] = useState<"All" | "Near Center">("All");
 
   const filteredLocations = useMemo(() => {
+    const q = directoryQuery.trim().toLowerCase();
+
+    const passQuery = (loc: LocationItem) => {
+      if (!q) return true;
+      const haystack = [
+        loc.title,
+        loc.address,
+        loc.eventType,
+        loc.when,
+        loc.host ?? "",
+        ...loc.activities,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    };
+
     const passEvent = (loc: LocationItem) =>
       eventFilters.length === 0 || eventFilters.includes(loc.eventType);
 
@@ -248,10 +269,17 @@ export default function Page() {
       return dist < 0.08; // ~ “nearby”
     };
 
-    return ALL_LOCATIONS.filter((loc) => passEvent(loc) && passActivity(loc) && passRadius(loc));
-  }, [eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
+    return ALL_LOCATIONS.filter(
+      (loc) =>
+        passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
+    );
+  }, [directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
 
-  const activeCount = eventFilters.length + activityFilters.length + (radiusMode === "Near Center" ? 1 : 0);
+  const activeCount =
+    eventFilters.length +
+    activityFilters.length +
+    (radiusMode === "Near Center" ? 1 : 0) +
+    (directoryQuery.trim() ? 1 : 0);
 
   const handleMarkerClick = (loc: LocationItem) => {
     setSelectedPlace(loc.position);
@@ -276,7 +304,8 @@ export default function Page() {
                   Resources Map
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Find community events and resources — filter by activity, event type, or what’s near you.
+                  Find community events and resources — filter by activity, event
+                  type, directory search, or what’s near you.
                 </p>
               </div>
 
@@ -312,6 +341,7 @@ export default function Page() {
                   setEventFilters([]);
                   setActivityFilters([]);
                   setRadiusMode("All");
+                  setDirectoryQuery("");
                 }}
               />
             </motion.aside>
@@ -319,8 +349,11 @@ export default function Page() {
             {/* Right: Map + Search + Results */}
             <div className="lg:col-span-8 space-y-6">
               {/* Map Card */}
-              <motion.section variants={fadeUp} className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
-                                                          dark:bg-[#0f1a2e] dark:border-blue-900/60">
+              <motion.section
+                variants={fadeUp}
+                className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
+                           dark:bg-[#0f1a2e] dark:border-blue-900/60"
+              >
                 <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div>
@@ -328,7 +361,7 @@ export default function Page() {
                         Explore the map
                       </h2>
                       <p className="text-sm text-slate-600 dark:text-slate-300">
-                        Search a place, then filter what shows up.
+                        Search the directory (resources) or search the map (places).
                       </p>
                     </div>
 
@@ -337,14 +370,17 @@ export default function Page() {
                       className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-800
                                  dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
                     >
-                      Showing {filteredLocations.length} location{filteredLocations.length === 1 ? "" : "s"}
+                      Showing {filteredLocations.length} location
+                      {filteredLocations.length === 1 ? "" : "s"}
                     </motion.div>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-5">
-                  <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-2xl border border-blue-200 overflow-hidden
-                                  dark:border-blue-900/60">
+                  <div
+                    className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-2xl border border-blue-200 overflow-hidden
+                               dark:border-blue-900/60"
+                  >
                     <Map
                       key={theme}
                       defaultZoom={12}
@@ -363,7 +399,7 @@ export default function Page() {
                         />
                       ))}
 
-                      {/* Selected marker (from search) */}
+                      {/* Selected marker (from map search or clicking a card) */}
                       {selectedPlace && <Marker position={selectedPlace} />}
                     </Map>
                   </div>
@@ -371,6 +407,15 @@ export default function Page() {
                   {/* Search */}
                   <div className="mt-4">
                     <SearchBox
+                      // Directory search
+                      directoryQuery={directoryQuery}
+                      setDirectoryQuery={setDirectoryQuery}
+                      directoryResults={ALL_LOCATIONS}
+                      onDirectoryPick={(loc) => {
+                        setCenter(loc.position);
+                        setSelectedPlace(loc.position);
+                      }}
+                      // Places search
                       input={input}
                       setInput={setInput}
                       predictions={predictions}
@@ -407,7 +452,7 @@ export default function Page() {
                         className="rounded-2xl border border-blue-200 bg-blue-50 p-5 text-blue-900
                                    dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
                       >
-                        No matches. Try removing a filter or searching a different area.
+                        No matches. Try removing a filter or changing your search.
                       </motion.div>
                     ) : (
                       <motion.div
@@ -438,8 +483,10 @@ export default function Page() {
                                 </div>
                               </div>
 
-                              <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-800
-                                               dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100">
+                              <span
+                                className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-800
+                                           dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
+                              >
                                 {loc.when}
                               </span>
                             </div>
@@ -495,11 +542,16 @@ function FilterBox({
   const toggle = <T,>(arr: T[], val: T) =>
     arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val];
 
-  const hasAny = eventFilters.length > 0 || activityFilters.length > 0 || radiusMode === "Near Center";
+  const hasAny =
+    eventFilters.length > 0 ||
+    activityFilters.length > 0 ||
+    radiusMode === "Near Center";
 
   return (
-    <div className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
-                    dark:bg-[#0f1a2e] dark:border-blue-900/60">
+    <div
+      className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
+                 dark:bg-[#0f1a2e] dark:border-blue-900/60"
+    >
       <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -613,7 +665,8 @@ function FilterBox({
           </div>
 
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Tip: Selecting multiple activities means a location must match <span className="font-semibold">all</span> of them.
+            Tip: Selecting multiple activities means a location must match{" "}
+            <span className="font-semibold">all</span> of them.
           </p>
         </div>
       </div>
@@ -621,8 +674,15 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (fixed dropdown positioning + theme) ---------- */
+/** ---------- SearchBox (Directory + Places, keeps theme + motion) ---------- */
 function SearchBox({
+  // Directory search
+  directoryQuery,
+  setDirectoryQuery,
+  directoryResults,
+  onDirectoryPick,
+
+  // Places search
   input,
   setInput,
   predictions,
@@ -630,6 +690,11 @@ function SearchBox({
   setCenter,
   setSelectedPlace,
 }: {
+  directoryQuery: string;
+  setDirectoryQuery: (val: string) => void;
+  directoryResults: LocationItem[];
+  onDirectoryPick: (loc: LocationItem) => void;
+
   input: string;
   setInput: (val: string) => void;
   predictions: google.maps.places.AutocompletePrediction[];
@@ -642,14 +707,18 @@ function SearchBox({
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"directory" | "places">("directory");
 
+  // Places: init service
   useEffect(() => {
     if (placesLib && !serviceRef.current) {
       serviceRef.current = new placesLib.AutocompleteService();
     }
   }, [placesLib]);
 
+  // Places: fetch predictions
   useEffect(() => {
+    if (mode !== "places") return;
     if (!serviceRef.current || !input || !open) {
       setPredictions([]);
       return;
@@ -657,7 +726,7 @@ function SearchBox({
     serviceRef.current.getPlacePredictions({ input }, (res) => {
       setPredictions(res || []);
     });
-  }, [input, open, setPredictions]);
+  }, [mode, input, open, setPredictions]);
 
   // Close on outside click
   useEffect(() => {
@@ -670,7 +739,28 @@ function SearchBox({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleSelect = (placeId: string) => {
+  // Directory: compute results
+  const dirMatches = useMemo(() => {
+    const q = directoryQuery.trim().toLowerCase();
+    if (!q) return [];
+    return directoryResults
+      .filter((loc) => {
+        const haystack = [
+          loc.title,
+          loc.address,
+          loc.eventType,
+          loc.when,
+          loc.host ?? "",
+          ...loc.activities,
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(q);
+      })
+      .slice(0, 6);
+  }, [directoryQuery, directoryResults]);
+
+  const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
 
     const detailsService = new placesLib.PlacesService(
@@ -692,34 +782,70 @@ function SearchBox({
     });
   };
 
+  const currentValue = mode === "directory" ? directoryQuery : input;
+
   return (
-    // IMPORTANT: relative wrapper so dropdown anchors correctly
     <div
       ref={boxRef}
       className="relative rounded-2xl border border-blue-200 bg-white shadow-sm p-3
                  dark:bg-[#0b1220] dark:border-blue-900/60"
     >
+      {/* Mode toggle */}
+      <div className="flex gap-2 mb-3">
+        {(["directory", "places"] as const).map((m) => {
+          const active = mode === m;
+          return (
+            <motion.button
+              key={m}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setMode(m);
+                setOpen(true);
+                setPredictions([]);
+              }}
+              className={`px-3 py-2 rounded-xl border text-sm transition
+                ${
+                  active
+                    ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                    : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50 dark:border-blue-900/60 dark:bg-transparent dark:text-slate-200 dark:hover:bg-blue-950/30"
+                }`}
+            >
+              {m === "directory" ? "Search directory" : "Search map"}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Input */}
       <div className="relative">
         <input
           type="text"
-          value={input}
+          value={currentValue}
           onFocus={() => setOpen(true)}
           onChange={(e) => {
-            setInput(e.target.value);
+            const v = e.target.value;
+            if (mode === "directory") setDirectoryQuery(v);
+            else setInput(v);
             setOpen(true);
           }}
-          placeholder="Search for a place..."
+          placeholder={
+            mode === "directory"
+              ? "Search resources (food, tutoring, cleanup, park...)"
+              : "Search a place to move the map..."
+          }
           className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 pr-12 text-slate-900
                      placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300
                      dark:bg-transparent dark:text-slate-100 dark:border-blue-900/60 dark:focus:ring-blue-900/40"
         />
 
-        {input.trim().length > 0 && (
+        {currentValue.trim().length > 0 && (
           <motion.button
             type="button"
             aria-label="Clear search"
             onClick={() => {
-              setInput("");
+              if (mode === "directory") setDirectoryQuery("");
+              else setInput("");
               setOpen(false);
               setPredictions([]);
               setSelectedPlace(null);
@@ -737,8 +863,41 @@ function SearchBox({
         )}
       </div>
 
+      {/* Dropdown */}
       <AnimatePresence>
-        {open && predictions.length > 0 && (
+        {open && mode === "directory" && dirMatches.length > 0 && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.99 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden
+                       border border-blue-200 bg-white shadow-lg z-20
+                       dark:bg-[#0f1a2e] dark:border-blue-900/60"
+          >
+            {dirMatches.map((loc, idx) => (
+              <li
+                key={loc.id}
+                onClick={() => {
+                  onDirectoryPick(loc);
+                  setOpen(false);
+                }}
+                className={`px-4 py-3 cursor-pointer text-sm
+                            hover:bg-blue-50 dark:hover:bg-blue-950/40
+                            ${idx !== 0 ? "border-t border-blue-100 dark:border-blue-900/40" : ""}`}
+              >
+                <div className="font-semibold text-slate-900 dark:text-slate-50">
+                  {loc.title}
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-300">
+                  {loc.eventType} • {loc.when} • {loc.address}
+                </div>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+
+        {open && mode === "places" && predictions.length > 0 && (
           <motion.ul
             initial={{ opacity: 0, y: -6, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -751,7 +910,7 @@ function SearchBox({
             {predictions.slice(0, 5).map((p, idx) => (
               <li
                 key={p.place_id}
-                onClick={() => handleSelect(p.place_id)}
+                onClick={() => handleSelectPlace(p.place_id)}
                 className={`px-4 py-3 cursor-pointer text-sm
                             hover:bg-blue-50 dark:hover:bg-blue-950/40
                             ${idx !== 0 ? "border-t border-blue-100 dark:border-blue-900/40" : ""}`}
@@ -765,3 +924,4 @@ function SearchBox({
     </div>
   );
 }
+```
