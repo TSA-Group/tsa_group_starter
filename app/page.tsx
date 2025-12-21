@@ -127,7 +127,7 @@ export default function Home() {
   const events = [
     {
       title: "Neighborhood Meetup",
-      dateString: "2025-12-21T14:00:00",
+      dateString: "2026-02-03T14:00:00",
       location: "Community Park",
       details: "Meet local residents and join community discussions.",
     },
