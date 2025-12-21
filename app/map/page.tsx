@@ -3,12 +3,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import {
-  APIProvider,
-  Map,
-  Marker,
-  useMapsLibrary,
-} from "@vis.gl/react-google-maps";
+import { APIProvider, Map, Marker, useMapsLibrary } from "@vis.gl/react-google-maps";
 
 /** ---------- Types ---------- */
 interface LatLng {
@@ -183,51 +178,15 @@ export default function Page() {
     { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
     { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
     { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#212121" }],
-    },
-    {
-      featureType: "road",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#8a8a8a" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#000000" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#3d3d3d" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [{ color: "#181818" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#616161" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.stroke",
-      stylers: [{ color: "#1b1b1b" }],
-    },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212121" }] },
+    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a8a8a" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#000000" }] },
+    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3d3d3d" }] },
+    { featureType: "poi", elementType: "geometry", stylers: [{ color: "#2c2c2c" }] },
+    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#181818" }] },
+    { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#616161" }] },
+    { featureType: "poi.park", elementType: "labels.text.stroke", stylers: [{ color: "#1b1b1b" }] },
   ];
 
   /** ---------- Filters ---------- */
@@ -262,16 +221,14 @@ export default function Page() {
 
     const passRadius = (loc: LocationItem) => {
       if (radiusMode === "All") return true;
-      // quick + simple “near center” filter (no geometry lib needed)
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      return dist < 0.08; // ~ “nearby”
+      return dist < 0.08;
     };
 
     return ALL_LOCATIONS.filter(
-      (loc) =>
-        passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
+      (loc) => passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
     );
   }, [directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
 
@@ -287,8 +244,10 @@ export default function Page() {
   };
 
   return (
-    <APIProvider apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM" libraries={["places"]}>
-      {/* Page Shell (matches your home: clean, soft blue accents) */}
+    <APIProvider
+      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"}
+      libraries={["places"]}
+    >
       <div className="min-h-screen bg-white text-slate-900 dark:bg-[#0b1220] dark:text-slate-100">
         <motion.div
           variants={container}
@@ -296,7 +255,6 @@ export default function Page() {
           animate="show"
           className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 py-8 sm:py-10"
         >
-          {/* Title / Header */}
           <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
@@ -304,8 +262,7 @@ export default function Page() {
                   Resources Map
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Find community events and resources — filter by activity, event
-                  type, directory search, or what’s near you.
+                  Find community events and resources — filter by activity, event type, directory search, or what’s near you.
                 </p>
               </div>
 
@@ -326,9 +283,7 @@ export default function Page() {
             </div>
           </motion.div>
 
-          {/* Responsive Grid: Filters + Map + List */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left: Filters */}
             <motion.aside variants={fadeUp} className="lg:col-span-4">
               <FilterBox
                 eventFilters={eventFilters}
@@ -346,12 +301,10 @@ export default function Page() {
               />
             </motion.aside>
 
-            {/* Right: Map + Search + Results */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Map Card */}
               <motion.section
                 variants={fadeUp}
-                className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
+                className="rounded-2xl border border-blue-200 bg-white shadow-sm
                            dark:bg-[#0f1a2e] dark:border-blue-900/60"
               >
                 <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
@@ -370,13 +323,13 @@ export default function Page() {
                       className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-800
                                  dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
                     >
-                      Showing {filteredLocations.length} location
-                      {filteredLocations.length === 1 ? "" : "s"}
+                      Showing {filteredLocations.length} location{filteredLocations.length === 1 ? "" : "s"}
                     </motion.div>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-5">
+                  {/* Keep map clipped, not the whole card */}
                   <div
                     className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-2xl border border-blue-200 overflow-hidden
                                dark:border-blue-900/60"
@@ -390,7 +343,6 @@ export default function Page() {
                       gestureHandling="greedy"
                       disableDefaultUI={false}
                     >
-                      {/* Filtered Markers */}
                       {filteredLocations.map((loc) => (
                         <Marker
                           key={loc.id}
@@ -398,16 +350,12 @@ export default function Page() {
                           onClick={() => handleMarkerClick(loc)}
                         />
                       ))}
-
-                      {/* Selected marker (from map search or clicking a card) */}
                       {selectedPlace && <Marker position={selectedPlace} />}
                     </Map>
                   </div>
 
-                  {/* Search */}
                   <div className="mt-4">
                     <SearchBox
-                      // Directory search
                       directoryQuery={directoryQuery}
                       setDirectoryQuery={setDirectoryQuery}
                       directoryResults={ALL_LOCATIONS}
@@ -415,7 +363,6 @@ export default function Page() {
                         setCenter(loc.position);
                         setSelectedPlace(loc.position);
                       }}
-                      // Places search
                       input={input}
                       setInput={setInput}
                       predictions={predictions}
@@ -427,7 +374,6 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Results List */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-2xl border border-blue-200 bg-white shadow-sm
@@ -455,10 +401,7 @@ export default function Page() {
                         No matches. Try removing a filter or changing your search.
                       </motion.div>
                     ) : (
-                      <motion.div
-                        layout
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                      >
+                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {filteredLocations.map((loc) => (
                           <motion.button
                             key={loc.id}
@@ -483,10 +426,8 @@ export default function Page() {
                                 </div>
                               </div>
 
-                              <span
-                                className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-800
-                                           dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
-                              >
+                              <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-800
+                                               dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100">
                                 {loc.when}
                               </span>
                             </div>
@@ -548,10 +489,8 @@ function FilterBox({
     radiusMode === "Near Center";
 
   return (
-    <div
-      className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
-                 dark:bg-[#0f1a2e] dark:border-blue-900/60"
-    >
+    <div className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
+                    dark:bg-[#0f1a2e] dark:border-blue-900/60">
       <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
         <div className="flex items-center justify-between gap-3">
           <div>
@@ -581,7 +520,6 @@ function FilterBox({
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
-        {/* Radius */}
         <div>
           <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Area
@@ -609,7 +547,6 @@ function FilterBox({
           </div>
         </div>
 
-        {/* Event Type */}
         <div>
           <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Event type
@@ -637,7 +574,6 @@ function FilterBox({
           </div>
         </div>
 
-        {/* Activities */}
         <div>
           <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Activities
@@ -674,15 +610,12 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (Directory + Places, keeps theme + motion) ---------- */
+/** ---------- SearchBox (Directory + Places, dropdown fully opens) ---------- */
 function SearchBox({
-  // Directory search
   directoryQuery,
   setDirectoryQuery,
   directoryResults,
   onDirectoryPick,
-
-  // Places search
   input,
   setInput,
   predictions,
@@ -709,14 +642,12 @@ function SearchBox({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"directory" | "places">("directory");
 
-  // Places: init service
   useEffect(() => {
     if (placesLib && !serviceRef.current) {
       serviceRef.current = new placesLib.AutocompleteService();
     }
   }, [placesLib]);
 
-  // Places: fetch predictions
   useEffect(() => {
     if (mode !== "places") return;
     if (!serviceRef.current || !input || !open) {
@@ -728,7 +659,6 @@ function SearchBox({
     });
   }, [mode, input, open, setPredictions]);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
@@ -739,7 +669,6 @@ function SearchBox({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Directory: compute results
   const dirMatches = useMemo(() => {
     const q = directoryQuery.trim().toLowerCase();
     if (!q) return [];
@@ -757,22 +686,16 @@ function SearchBox({
           .toLowerCase();
         return haystack.includes(q);
       })
-      .slice(0, 6);
+      .slice(0, 8);
   }, [directoryQuery, directoryResults]);
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
 
-    const detailsService = new placesLib.PlacesService(
-      document.createElement("div"),
-    );
-
+    const detailsService = new placesLib.PlacesService(document.createElement("div"));
     detailsService.getDetails({ placeId }, (place) => {
       if (place?.geometry?.location) {
-        const loc = {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-        };
+        const loc = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
         setCenter(loc);
         setSelectedPlace(loc);
         setInput(place.formatted_address || "");
@@ -790,7 +713,6 @@ function SearchBox({
       className="relative rounded-2xl border border-blue-200 bg-white shadow-sm p-3
                  dark:bg-[#0b1220] dark:border-blue-900/60"
     >
-      {/* Mode toggle */}
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
           const active = mode === m;
@@ -817,7 +739,6 @@ function SearchBox({
         })}
       </div>
 
-      {/* Input */}
       <div className="relative">
         <input
           type="text"
@@ -863,16 +784,15 @@ function SearchBox({
         )}
       </div>
 
-      {/* Dropdown */}
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
-            initial={{ opacity: 0, y: -6, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.99 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
             className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden
-                       border border-blue-200 bg-white shadow-lg z-20
+                       border border-blue-200 bg-white shadow-lg z-50
                        dark:bg-[#0f1a2e] dark:border-blue-900/60"
           >
             {dirMatches.map((loc, idx) => (
@@ -886,9 +806,7 @@ function SearchBox({
                             hover:bg-blue-50 dark:hover:bg-blue-950/40
                             ${idx !== 0 ? "border-t border-blue-100 dark:border-blue-900/40" : ""}`}
               >
-                <div className="font-semibold text-slate-900 dark:text-slate-50">
-                  {loc.title}
-                </div>
+                <div className="font-semibold text-slate-900 dark:text-slate-50">{loc.title}</div>
                 <div className="text-xs text-slate-600 dark:text-slate-300">
                   {loc.eventType} • {loc.when} • {loc.address}
                 </div>
@@ -899,15 +817,15 @@ function SearchBox({
 
         {open && mode === "places" && predictions.length > 0 && (
           <motion.ul
-            initial={{ opacity: 0, y: -6, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.99 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
             className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden
-                       border border-blue-200 bg-white shadow-lg z-20
+                       border border-blue-200 bg-white shadow-lg z-50
                        dark:bg-[#0f1a2e] dark:border-blue-900/60"
           >
-            {predictions.slice(0, 5).map((p, idx) => (
+            {predictions.slice(0, 6).map((p, idx) => (
               <li
                 key={p.place_id}
                 onClick={() => handleSelectPlace(p.place_id)}
@@ -924,3 +842,4 @@ function SearchBox({
     </div>
   );
 }
+
