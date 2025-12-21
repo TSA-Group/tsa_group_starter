@@ -924,4 +924,3 @@ function SearchBox({
     </div>
   );
 }
-```
