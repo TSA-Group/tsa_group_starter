@@ -133,9 +133,39 @@ export default function Home() {
     },
     {
       title: "Community Dinner",
-      dateString: "2025-12-21T18:00:00",
+      dateString: "2026-02-01T18:00:00",
       location: "Downtown Church",
-      details: "Enjoy a free meal and fellowship with neighbors.",
+      details: "Enjoy a free meal and meet with neighbors.",
+    },
+    {
+      title: "Clothing Drive",
+      dateString: "2026-01-31T10:00:00",
+      location: "Westside Center",
+      details: "Donate clothes for those in need (volunteers needed.)",
+    },
+    {
+      title: "Clothing Drive",
+      dateString: "2025-12-22T10:00:00",
+      location: "Westside Center",
+      details: "Donate clothes for those in need and volunteer.",
+    },
+    {
+      title: "Clothing Drive",
+      dateString: "2025-12-22T10:00:00",
+      location: "Westside Center",
+      details: "Donate clothes for those in need and volunteer.",
+    },
+    {
+      title: "Clothing Drive",
+      dateString: "2025-12-22T10:00:00",
+      location: "Westside Center",
+      details: "Donate clothes for those in need and volunteer.",
+    },
+    {
+      title: "Clothing Drive",
+      dateString: "2025-12-22T10:00:00",
+      location: "Westside Center",
+      details: "Donate clothes for those in need and volunteer.",
     },
     {
       title: "Clothing Drive",
