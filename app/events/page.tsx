@@ -1,5 +1,6 @@
 'use client';
 
+import Head from 'next/head';
 import { useMemo, useState } from 'react';
 
 /* =====================
@@ -23,12 +24,6 @@ type Event = {
 /* =====================
    Small UI pieces
 ===================== */
-const Icon = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-block mr-2 text-indigo-300" aria-hidden>
-    {children}
-  </span>
-);
-
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/6 text-slate-200">
     {children}
@@ -105,144 +100,160 @@ export default function EventsPage() {
   const toggleActivity = (id: string) =>
     setSelectedActivities(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
 
-  /* =====================
-     Render
-  ====================== */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
-      {/* Decorative translucent bubbles */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div
-          className="absolute -left-28 -top-28 w-80 h-80 rounded-full blur-3xl animate-blob"
-          style={{
-            background: 'rgba(255,99,132,0.10)',
-            boxShadow: '0 30px 60px rgba(255,99,132,0.06)'
-          }}
+    <>
+      <Head>
+        {/* Google Fonts: Poppins (headings) + Inter (body) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@500;600;700&display=swap"
+          rel="stylesheet"
         />
-        <div
-          className="absolute right-8 top-36 w-64 h-64 rounded-full blur-2xl animate-blob animation-delay-2000"
-          style={{
-            background: 'rgba(255,184,77,0.08)',
-            boxShadow: '0 20px 40px rgba(255,184,77,0.04)'
-          }}
-        />
-        <div
-          className="absolute left-1/2 -bottom-20 w-72 h-72 rounded-full blur-3xl animate-blob animation-delay-1000"
-          style={{
-            background: 'rgba(56,189,248,0.06)',
-            boxShadow: '0 25px 50px rgba(56,189,248,0.03)',
-            transform: 'translateX(-50%)'
-          }}
-        />
-      </div>
+      </Head>
 
-      <style jsx>{`
-        .animate-blob {
-          animation: blob 10s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-1000 {
-          animation-delay: 1s;
-        }
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(18px, -12px) scale(1.04); }
-          66% { transform: translate(-12px, 18px) scale(0.98); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-      `}</style>
+      <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
+        {/* Refined translucent bubbles */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div
+            className="absolute -left-36 -top-36 w-[520px] h-[520px] rounded-full blur-[72px] animate-blob-slow"
+            style={{
+              background: 'radial-gradient(closest-side, rgba(255,99,132,0.12), rgba(255,99,132,0.04))',
+              mixBlendMode: 'screen',
+              opacity: 0.95
+            }}
+          />
+          <div
+            className="absolute right-12 top-40 w-[360px] h-[360px] rounded-full blur-[56px] animate-blob-slower"
+            style={{
+              background: 'radial-gradient(closest-side, rgba(255,184,77,0.10), rgba(255,184,77,0.03))',
+              mixBlendMode: 'screen',
+              opacity: 0.95
+            }}
+          />
+          <div
+            className="absolute left-1/2 -bottom-28 w-[420px] h-[420px] rounded-full blur-[64px] animate-blob-slower"
+            style={{
+              background: 'radial-gradient(closest-side, rgba(56,189,248,0.08), rgba(56,189,248,0.02))',
+              mixBlendMode: 'screen',
+              transform: 'translateX(-50%)',
+              opacity: 0.95
+            }}
+          />
+        </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-indigo-300">Gatherly — Community Events</h1>
-          <p className="mt-2 text-slate-400 max-w-2xl">
-            Discover local volunteering opportunities and community events. Filter by type, activity, or search directly.
-          </p>
-        </header>
+        <style jsx>{`
+          :global(html, body, #__next) {
+            height: 100%;
+          }
+          /* Apply fonts */
+          :global(body) {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          /* Headings use Poppins for that crisp geometric look */
+          :global(h1, h2, h3, h4, h5, h6) {
+            font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            letter-spacing: -0.01em;
+          }
+          .animate-blob-slow {
+            animation: blobSlow 14s infinite;
+          }
+          .animate-blob-slower {
+            animation: blobSlower 18s infinite;
+          }
+          @keyframes blobSlow {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(24px, -18px) scale(1.03); }
+            66% { transform: translate(-18px, 24px) scale(0.98); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+          @keyframes blobSlower {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(-20px, 14px) scale(1.02); }
+            66% { transform: translate(16px, -20px) scale(0.99); }
+            100% { transform: translate(0px, 0px) scale(1); }
+          }
+        `}</style>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filters (left column) */}
-          <aside className="lg:col-span-1 bg-white/4 backdrop-blur-sm border border-white/6 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-slate-100">Filters</h2>
-              <div className="text-sm text-slate-400">{filtered.length} results</div>
-            </div>
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          {/* Header */}
+          <header className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-indigo-300">Gatherly — Community Events</h1>
+            <p className="mt-2 text-slate-400 max-w-2xl">
+              Discover local volunteering opportunities and community events. Use the filters above to narrow results.
+            </p>
+          </header>
 
-            <div className="mb-4">
-              <div className="text-sm text-slate-300 mb-2">Event type</div>
-              <div className="flex flex-wrap gap-2">
-                {categories.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCategory(c.id)}
-                    className={`px-3 py-2 rounded-full text-sm transition ${selectedCategory === c.id ? 'bg-indigo-500 text-white shadow' : 'bg-white/6 text-slate-300 hover:bg-white/10'}`}
-                    aria-pressed={selectedCategory === c.id}
-                  >
-                    {c.name}
-                  </button>
-                ))}
+          {/* Top filters */}
+          <div className="bg-white/4 backdrop-blur-sm border border-white/6 rounded-2xl p-4 mb-8">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="flex-1">
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCategory(c.id)}
+                      className={`px-3 py-2 rounded-full text-sm transition ${selectedCategory === c.id ? 'bg-indigo-500 text-white shadow' : 'bg-white/6 text-slate-300 hover:bg-white/10'}`}
+                      aria-pressed={selectedCategory === c.id}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <div className="flex flex-wrap gap-2 justify-start lg:justify-center">
+                  {activities.map(a => (
+                    <button
+                      key={a.id}
+                      onClick={() => toggleActivity(a.id)}
+                      className={`px-3 py-2 rounded-full text-sm transition ${selectedActivities.includes(a.id) ? 'bg-indigo-500 text-white shadow' : 'bg-white/6 text-slate-300 hover:bg-white/10'}`}
+                      aria-pressed={selectedActivities.includes(a.id)}
+                    >
+                      {a.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3 items-center justify-end">
+                <div className="relative w-64">
+                  <input
+                    value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    placeholder="Search title, location, or description"
+                    className="w-full bg-transparent placeholder:text-slate-400 text-slate-100 px-4 py-2 rounded-2xl border border-white/6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Search events"
+                  />
+                </div>
+
+                <select
+                  value={sortBy}
+                  onChange={e => setSortBy(e.target.value as any)}
+                  className="bg-white/6 text-slate-200 px-3 py-2 rounded-lg border border-white/8 focus:outline-none"
+                  aria-label="Sort events"
+                >
+                  <option value="upcoming">Upcoming</option>
+                  <option value="popular">Most popular</option>
+                </select>
+
+                <button
+                  onClick={() => { setSelectedCategory('all'); setSelectedActivities([]); setQuery(''); setSortBy('upcoming'); }}
+                  className="bg-transparent border border-white/6 text-slate-200 px-3 py-2 rounded-lg hover:bg-white/6 transition"
+                >
+                  Clear
+                </button>
               </div>
             </div>
 
-            <div className="mb-4">
-              <div className="text-sm text-slate-300 mb-2">Activities</div>
-              <div className="flex flex-wrap gap-2">
-                {activities.map(a => (
-                  <button
-                    key={a.id}
-                    onClick={() => toggleActivity(a.id)}
-                    className={`px-3 py-2 rounded-full text-sm transition ${selectedActivities.includes(a.id) ? 'bg-indigo-500 text-white shadow' : 'bg-white/6 text-slate-300 hover:bg-white/10'}`}
-                    aria-pressed={selectedActivities.includes(a.id)}
-                  >
-                    {a.name}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-2 text-xs text-slate-400">Tip: selecting multiple activities requires a match for all of them.</p>
-            </div>
+            <p className="mt-3 text-xs text-slate-400">Tip: selecting multiple activities requires a match for all of them.</p>
+          </div>
 
-            <div className="mb-4">
-              <label className="block text-sm text-slate-300 mb-2">Search</label>
-              <div className="relative">
-                <input
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  placeholder="Search title, location, or description"
-                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-100 px-4 py-3 rounded-2xl border border-white/6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  aria-label="Search events"
-                />
-                <span className="absolute right-3 top-3 text-slate-400">🔎</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mt-2">
-              <div className="text-sm text-slate-300">Sort</div>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value as any)}
-                className="bg-white/6 text-slate-200 px-3 py-2 rounded-lg border border-white/8 focus:outline-none"
-                aria-label="Sort events"
-              >
-                <option value="upcoming">Upcoming</option>
-                <option value="popular">Most popular</option>
-              </select>
-            </div>
-
-            <div className="mt-6">
-              <button
-                onClick={() => { setSelectedCategory('all'); setSelectedActivities([]); setQuery(''); setSortBy('upcoming'); }}
-                className="w-full bg-transparent border border-white/6 text-slate-200 py-2 rounded-xl hover:bg-white/6 transition"
-              >
-                Clear filters
-              </button>
-            </div>
-          </aside>
-
-          {/* Events list (main area) */}
-          <main className="lg:col-span-3">
+          {/* Events list */}
+          <main>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm text-slate-400">Showing <span className="text-indigo-300">{filtered.length}</span> events</div>
               <div className="text-xs text-slate-400">Minimal, focused layout</div>
@@ -300,6 +311,6 @@ export default function EventsPage() {
           </main>
         </div>
       </div>
-    </div>
+    </>
   );
 }
