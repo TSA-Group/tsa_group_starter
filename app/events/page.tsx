@@ -2,8 +2,6 @@
 
 import Head from 'next/head';
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
 
 /* =====================
    Types
@@ -36,8 +34,6 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
    Component
 ===================== */
 export default function EventsPage() {
-  const pathname = usePathname(); // 👈 required for page transitions
-
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [query, setQuery] = useState('');
@@ -91,9 +87,7 @@ export default function EventsPage() {
       : events.filter(e => e.category === selectedCategory);
 
     if (selectedActivities.length > 0) {
-      list = list.filter(e =>
-        selectedActivities.every(a => e.activities.includes(a))
-      );
+      list = list.filter(e => selectedActivities.every(a => e.activities.includes(a)));
     }
 
     if (q) {
@@ -102,11 +96,15 @@ export default function EventsPage() {
       );
     }
 
-    return sortBy === 'popular'
-      ? [...list].sort((a, b) => b.attendees - a.attendees)
-      : [...list].sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        );
+    if (sortBy === 'popular') {
+      list = [...list].sort((a, b) => b.attendees - a.attendees);
+    } else {
+      list = [...list].sort((a, b) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+    }
+
+    return list;
   }, [events, selectedCategory, selectedActivities, query, sortBy]);
 
   const toggleActivity = (id: string) =>
@@ -115,19 +113,184 @@ export default function EventsPage() {
     );
 
   return (
-    <motion.div
-      key={pathname}
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased"
-    >
-      <Head />
+    <>
+      <Head>
+        {/* Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </Head>
 
-      {/* EVERYTHING ELSE BELOW IS YOUR ORIGINAL UI */}
-      {/* (unchanged — filters, cards, layout, etc.) */}
-      {/* Your UI continues here exactly as before */}
-    </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
+
+        {/* Translucent bubbles */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div
+            className="absolute -left-36 -top-36 w-[520px] h-[520px] rounded-full blur-[72px]"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,99,132,0.14), rgba(255,99,132,0.04))',
+              mixBlendMode: 'screen'
+            }}
+          />
+          <div
+            className="absolute right-12 top-40 w-[360px] h-[360px] rounded-full blur-[56px]"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,184,77,0.12), rgba(255,184,77,0.03))',
+              mixBlendMode: 'screen'
+            }}
+          />
+          <div
+            className="absolute left-1/2 -bottom-28 w-[420px] h-[420px] rounded-full blur-[64px]"
+            style={{
+              background: 'radial-gradient(circle, rgba(56,189,248,0.10), rgba(56,189,248,0.03))',
+              mixBlendMode: 'screen',
+              transform: 'translateX(-50%)'
+            }}
+          />
+        </div>
+
+        <style jsx>{`
+          :global(body) {
+            font-family: 'Inter', sans-serif;
+          }
+          :global(h1,h2,h3,h4,h5,h6) {
+            font-family: 'Poppins', sans-serif;
+          }
+        `}</style>
+
+        <div className="max-w-7xl mx-auto px-6 py-10">
+
+          {/* Header */}
+          <header className="mb-8">
+            <h1 className="text-4xl font-semibold text-indigo-300">Gatherly — Community Events</h1>
+            <p className="mt-2 text-slate-400 max-w-2xl">
+              Discover local volunteering opportunities and community events.
+            </p>
+          </header>
+
+          {/* Filters + Sorting */}
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-10">
+
+            {/* Category buttons */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {categories.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCategory(c.id)}
+                  className={`px-4 py-2 rounded-full text-sm transition ${
+                    selectedCategory === c.id
+                      ? 'bg-indigo-500 text-white'
+                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Activities */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {activities.map(a => (
+                <button
+                  key={a.id}
+                  onClick={() => toggleActivity(a.id)}
+                  className={`px-4 py-2 rounded-full text-sm transition ${
+                    selectedActivities.includes(a.id)
+                      ? 'bg-indigo-500 text-white'
+                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                  }`}
+                >
+                  {a.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Search + Sorting */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+              {/* Search */}
+              <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search events..."
+                className="flex-1 bg-white/5 placeholder:text-slate-400 text-slate-100 px-4 py-2 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+
+              {/* Sorting — clean segmented control */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-300">Sort:</span>
+                <div className="inline-flex rounded-full bg-white/10 p-1 border border-white/10">
+                  {['upcoming', 'popular'].map(option => (
+                    <button
+                      key={option}
+                      onClick={() => setSortBy(option as 'upcoming' | 'popular')}
+                      className={`px-4 py-1 text-sm rounded-full transition ${
+                        sortBy === option
+                          ? 'bg-indigo-500 text-white'
+                          : 'text-slate-200 hover:bg-white/10'
+                      }`}
+                    >
+                      {option === 'upcoming' ? 'Upcoming' : 'Popular'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Events list */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filtered.map(ev => {
+              const percent = Math.round((ev.attendees / ev.spots) * 100);
+              const spotsLeft = ev.spots - ev.attendees;
+
+              return (
+                <article
+                  key={ev.id}
+                  className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:border-indigo-400/40 hover:shadow-xl transition"
+                >
+                  <h3 className="text-xl font-semibold mb-1">{ev.title}</h3>
+                  <p className="text-slate-400 text-sm">{ev.location}</p>
+                  <p className="text-slate-300 text-sm mt-1">{ev.date} • {ev.time}</p>
+
+                  <p className="text-slate-300 text-sm mt-3">{ev.description}</p>
+
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {ev.activities.map(a => <Chip key={a}>{a}</Chip>)}
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 to-blue-500"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-400 mt-1">
+                      <span>{percent}% filled</span>
+                      <span>{spotsLeft} spots left</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 mt-5">
+                    <button className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl">
+                      Register
+                    </button>
+                    <button className="flex-1 bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10">
+                      Details
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+        </div>
+      </div>
+    </>
   );
 }
