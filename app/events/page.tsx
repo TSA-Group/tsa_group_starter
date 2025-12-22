@@ -37,7 +37,8 @@ export default function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [query, setQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'upcoming' | 'popular'>('upcoming');
+  const [sortPrimary, setSortPrimary] = useState<'upcoming' | 'popular'>('upcoming');
+  const [sortSecondary, setSortSecondary] = useState<'asc' | 'desc'>('asc');
 
   const categories: Category[] = [
     { id: 'all', name: 'All' },
@@ -88,14 +89,20 @@ export default function EventsPage() {
       list = list.filter(e => `${e.title} ${e.description} ${e.location}`.toLowerCase().includes(q));
     }
 
-    if (sortBy === 'popular') {
+    // Primary sort
+    if (sortPrimary === 'popular') {
       list = [...list].sort((a, b) => b.attendees - a.attendees);
     } else {
       list = [...list].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     }
 
+    // Secondary sort (asc/desc) applied to date or attendees depending on primary
+    if (sortSecondary === 'desc') {
+      list = list.reverse();
+    }
+
     return list;
-  }, [events, selectedCategory, selectedActivities, query, sortBy]);
+  }, [events, selectedCategory, selectedActivities, query, sortPrimary, sortSecondary]);
 
   const toggleActivity = (id: string) =>
     setSelectedActivities(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
@@ -103,7 +110,6 @@ export default function EventsPage() {
   return (
     <>
       <Head>
-        {/* Google Fonts: Poppins (headings) + Inter (body) */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -113,7 +119,7 @@ export default function EventsPage() {
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
-        {/* Refined translucent bubbles */}
+        {/* Translucent bubbles */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <div
             className="absolute -left-36 -top-36 w-[520px] h-[520px] rounded-full blur-[72px] animate-blob-slow"
@@ -143,26 +149,17 @@ export default function EventsPage() {
         </div>
 
         <style jsx>{`
-          :global(html, body, #__next) {
-            height: 100%;
-          }
-          /* Apply fonts */
           :global(body) {
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
           }
-          /* Headings use Poppins for that crisp geometric look */
-          :global(h1, h2, h3, h4, h5, h6) {
+          :global(h1,h2,h3,h4,h5,h6) {
             font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
             letter-spacing: -0.01em;
           }
-          .animate-blob-slow {
-            animation: blobSlow 14s infinite;
-          }
-          .animate-blob-slower {
-            animation: blobSlower 18s infinite;
-          }
+          .animate-blob-slow { animation: blobSlow 14s infinite; }
+          .animate-blob-slower { animation: blobSlower 18s infinite; }
           @keyframes blobSlow {
             0% { transform: translate(0px, 0px) scale(1); }
             33% { transform: translate(24px, -18px) scale(1.03); }
@@ -219,29 +216,43 @@ export default function EventsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 items-center justify-end">
-                <div className="relative w-64">
-                  <input
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    placeholder="Search title, location, or description"
-                    className="w-full bg-transparent placeholder:text-slate-400 text-slate-100 px-4 py-2 rounded-2xl border border-white/6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    aria-label="Search events"
-                  />
+              {/* Professional sorting control */}
+              <div className="flex items-center gap-3 justify-end">
+                {/* segmented primary sort */}
+                <div className="inline-flex rounded-lg bg-white/6 p-1 border border-white/8">
+                  <button
+                    onClick={() => setSortPrimary('upcoming')}
+                    className={`px-3 py-1 text-sm rounded-md transition ${sortPrimary === 'upcoming' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-200 hover:bg-white/10'}`}
+                    aria-pressed={sortPrimary === 'upcoming'}
+                  >
+                    Upcoming
+                  </button>
+                  <button
+                    onClick={() => setSortPrimary('popular')}
+                    className={`px-3 py-1 text-sm rounded-md transition ${sortPrimary === 'popular' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-200 hover:bg-white/10'}`}
+                    aria-pressed={sortPrimary === 'popular'}
+                  >
+                    Popular
+                  </button>
                 </div>
 
-                <select
-                  value={sortBy}
-                  onChange={e => setSortBy(e.target.value as any)}
-                  className="bg-white/6 text-slate-200 px-3 py-2 rounded-lg border border-white/8 focus:outline-none"
-                  aria-label="Sort events"
-                >
-                  <option value="upcoming">Upcoming</option>
-                  <option value="popular">Most popular</option>
-                </select>
+                {/* secondary sort dropdown */}
+                <div className="relative">
+                  <label htmlFor="secondary-sort" className="sr-only">Order</label>
+                  <select
+                    id="secondary-sort"
+                    value={sortSecondary}
+                    onChange={e => setSortSecondary(e.target.value as any)}
+                    className="bg-white/6 text-slate-200 px-3 py-2 rounded-lg border border-white/8 focus:outline-none"
+                    aria-label="Secondary sort order"
+                  >
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                  </select>
+                </div>
 
                 <button
-                  onClick={() => { setSelectedCategory('all'); setSelectedActivities([]); setQuery(''); setSortBy('upcoming'); }}
+                  onClick={() => { setSelectedCategory('all'); setSelectedActivities([]); setQuery(''); setSortPrimary('upcoming'); setSortSecondary('asc'); }}
                   className="bg-transparent border border-white/6 text-slate-200 px-3 py-2 rounded-lg hover:bg-white/6 transition"
                 >
                   Clear
@@ -249,7 +260,19 @@ export default function EventsPage() {
               </div>
             </div>
 
-            <p className="mt-3 text-xs text-slate-400">Tip: selecting multiple activities requires a match for all of them.</p>
+            <div className="mt-3 flex items-center justify-between gap-4">
+              <div className="relative w-full max-w-md">
+                <input
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Search title, location, or description"
+                  className="w-full bg-transparent placeholder:text-slate-400 text-slate-100 px-4 py-2 rounded-2xl border border-white/6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Search events"
+                />
+              </div>
+
+              <div className="text-xs text-slate-400">Tip: selecting multiple activities requires a match for all of them.</div>
+            </div>
           </div>
 
           {/* Events list */}
