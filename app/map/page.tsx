@@ -1,3 +1,4 @@
+console.log("MAP KEY:", process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
 
 "use client";
 
