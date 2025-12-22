@@ -1,4 +1,3 @@
-console.log(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -162,6 +161,7 @@ export default function Page() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   useEffect(() => {
     const current = document.documentElement.getAttribute("data-theme");
+    console.log(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
     setTheme(current === "dark" ? "dark" : "light");
 
     const handler = (e: Event) => {
