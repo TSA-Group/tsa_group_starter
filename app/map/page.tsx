@@ -246,7 +246,7 @@ export default function Page() {
 
   return (
     <APIProvider
-      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"}
+      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??}
       libraries={["places"]}
     >
       <div className="min-h-screen bg-white text-slate-900 dark:bg-[#0b1220] dark:text-slate-100">
