@@ -4,9 +4,7 @@ import React from "react";
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 
-/* =====================
-   Animations
-===================== */
+
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
@@ -37,7 +35,7 @@ export default function ContactPage() {
       variants={container}
       className="min-h-screen bg-gradient-to-br from-[#070c1f] via-[#0b1224] to-[#020617] text-white"
     >
-      {/* Background bubbles */}
+      { }
       <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[520px] h-[520px] bg-indigo-500/10 rounded-full blur-[90px]" />
         <div className="absolute top-40 right-10 w-[360px] h-[360px] bg-blue-400/10 rounded-full blur-[80px]" />
@@ -45,7 +43,7 @@ export default function ContactPage() {
       </div>
 
       <main className="mx-auto w-full max-w-7xl px-6 py-12">
-        {/* Header */}
+        { }
         <motion.div variants={fadeUp} className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-indigo-300">
             Contact Gatherly
@@ -56,9 +54,9 @@ export default function ContactPage() {
           </p>
         </motion.div>
 
-        {/* Layout */}
+        { }
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Form */}
+           { }
           <motion.section
             variants={pop}
             className="lg:col-span-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md"
@@ -116,7 +114,7 @@ export default function ContactPage() {
             </motion.form>
           </motion.section>
 
-          {/* Info */}
+          {} 
           <motion.aside
             variants={pop}
             className="lg:col-span-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md"
@@ -146,7 +144,7 @@ export default function ContactPage() {
         </div>
       </main>
 
-      {/* Footer */}
+      { }
       <footer className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col sm:flex-row justify-between gap-3">
           <motion.small variants={fadeUp} className="text-slate-400">
@@ -163,9 +161,7 @@ export default function ContactPage() {
   );
 }
 
-/* =====================
-   Components
-===================== */
+
 function Input({
   label,
   placeholder,
