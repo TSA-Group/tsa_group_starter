@@ -438,7 +438,7 @@ export default function Home() {
           variants={fadeUp}
           className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-8"
         >
-          Website History
+          Our Story
         </motion.h2>
       
         <motion.div
