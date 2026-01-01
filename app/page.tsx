@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import Link from "next/link";
 
+
 // Animation variants
 const container: Variants = {
   hidden: {},
