@@ -432,73 +432,51 @@ export default function Home() {
         whileInView="show"
         viewport={{ once: true, margin: "-100px" }}
         variants={container}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-40 mb-56 space-y-16"
+        className="w-full mt-40 mb-40 px-6"
       >
-        {/* WEBSITE HISTORY SECTION */}
-        <motion.section
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={container}
-          className="max-w-7xl mx-auto px-6 mt-40 mb-56 space-y-16"
+        <motion.h2
+          variants={fadeUp}
+          className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12"
         >
-          <motion.h2
-            variants={fadeUp}
-            className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center"
-          >
-            Website History
-          </motion.h2>
-        
-          <motion.section
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={container}
-            className="w-full mt-40 mb-40 space-y-16 px-6"
-          >
-            <motion.h2
-              variants={fadeUp}
-              className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center"
+          Website History
+        </motion.h2>
+      
+        <div className="flex justify-center gap-8 flex-wrap">
+          {[
+            {
+              year: "2023",
+              title: "The Idea",
+              text: "The initial concept for Gatherly was formed to give communities a single place to connect."
+            },
+            {
+              year: "2024",
+              title: "Building the Platform",
+              text: "Core layouts, animations, and interactive features were developed."
+            },
+            {
+              year: "2025",
+              title: "Public Launch",
+              text: "Gatherly launched with events, calendars, and community tools."
+            },
+            {
+              year: "Looking Ahead",
+              title: "Future Plans",
+              text: "Expanding neighborhoods, stories, and ways for people to get involved."
+            }
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              variants={cardPop}
+              whileHover={{ y: -6 }}
+              className="w-[45%] bg-white rounded-2xl border border-blue-200 shadow-lg p-8"
             >
-              Website History
-            </motion.h2>
-          
-            <div className="flex justify-center gap-8 flex-wrap">
-              {[
-                {
-                  year: "2023",
-                  title: "The Idea",
-                  text: "The initial concept for Gatherly was formed to give communities a single place to connect."
-                },
-                {
-                  year: "2024",
-                  title: "Building the Platform",
-                  text: "Core layouts, animations, and interactive features were developed."
-                },
-                {
-                  year: "2025",
-                  title: "Public Launch",
-                  text: "Gatherly launched with events, calendars, and community tools."
-                },
-                {
-                  year: "Looking Ahead",
-                  title: "Future Plans",
-                  text: "Expanding neighborhoods, stories, and ways for people to get involved."
-                }
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  variants={cardPop}
-                  whileHover={{ y: -6 }}
-                  className="w-[45%] bg-white rounded-2xl border border-blue-200 shadow-lg p-8"
-                >
-                  <p className="text-sm font-semibold text-blue-700">{item.year}</p>
-                  <h3 className="text-2xl font-bold text-blue-900 mt-2">{item.title}</h3>
-                  <p className="text-base text-blue-700 mt-4">{item.text}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
+              <p className="text-sm font-semibold text-blue-700">{item.year}</p>
+              <h3 className="text-2xl font-bold text-blue-900 mt-2">{item.title}</h3>
+              <p className="text-base text-blue-700 mt-4">{item.text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
