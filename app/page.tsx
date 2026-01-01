@@ -429,6 +429,8 @@ export default function Home() {
       {/* WEBSITE HISTORY SECTION */}
       <motion.section
         initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-100px" }}
         variants={container}
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-40 mb-56 space-y-16"
       >
