@@ -426,6 +426,65 @@ export default function Home() {
           </motion.div>
         ))}
       </motion.section>
+      {/* WEBSITE HISTORY SECTION */}
+      <motion.section
+        initial="hidden"
+        variants={container}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-40 mb-56 space-y-16"
+      >
+        {/* Title */}
+        <motion.h2
+          variants={fadeUp}
+          className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center"
+        >
+          Website History
+        </motion.h2>
+      
+        {/* History Boxes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {[
+            {
+              year: "2023",
+              title: "Concept & Vision",
+              text: "Gatherly was envisioned as a digital space to help neighbors connect, share events, and build stronger communities."
+            },
+            {
+              year: "2024",
+              title: "Design & Prototyping",
+              text: "Layouts, animations, and core components were designed with accessibility and clarity in mind."
+            },
+            {
+              year: "Early 2025",
+              title: "Feature Expansion",
+              text: "Calendars, events, volunteer listings, and interactive elements were added."
+            },
+            {
+              year: "Present",
+              title: "Community Growth",
+              text: "Gatherly continues to evolve based on real community needs and feedback."
+            }
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              variants={cardPop}
+              whileHover={{ y: -6 }}
+              transition={{ type: "spring", stiffness: 240, damping: 18 }}
+              className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6"
+            >
+              <p className="text-sm font-semibold text-blue-700">{item.year}</p>
+              <h3 className="text-xl font-semibold text-blue-900 mt-1">
+                {item.title}
+              </h3>
+              <p className="text-sm text-blue-700 mt-3">
+                {item.text}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      
+        {/* Extra Length Spacer */}
+        <div className="h-40" />
+      </motion.section>
 
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
