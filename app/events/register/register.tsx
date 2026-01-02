@@ -2,32 +2,21 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { EventItem } from "./events"; // make sure path is correct
 
-export type EventItem = {
-  id: number;
-  title: string;
-  category: string;
-  activities: string[];
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  spots: number;
-  description: string;
-};
-
-export default function RegisterClient({ events }: { events: EventItem[] }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const idParam = searchParams.get("id");
-  const eventId = Number(idParam);
-
-  const event = useMemo(() => {
-    if (!idParam || Number.isNaN(eventId)) return null;
-    return events.find((e) => e.id === eventId) ?? null;
-  }, [events, idParam, eventId]);
+export default function RegisterClient({
+  events,
+  eventId,
+  onClose,
+}: {
+  events: EventItem[];
+  eventId: number;
+  onClose: () => void;
+}) {
+  const event = useMemo(
+    () => events.find((e) => e.id === eventId) ?? null,
+    [events, eventId]
+  );
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,10 +27,6 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const [note, setNote] = useState("");
   const [agree, setAgree] = useState(false);
 
-  // If no ?id=, don't show the register UI (so /events stays normal)
-  if (!idParam) return null;
-
-  // If invalid id, show friendly box
   if (!event) {
     return (
       <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
@@ -49,10 +34,10 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
           Event not found
         </h2>
         <p className="text-slate-300 mt-2">
-          That registration link is missing a valid event id.
+          That registration link is invalid.
         </p>
         <button
-          onClick={() => router.push("/events")}
+          onClick={onClose}
           className="mt-5 px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600"
         >
           Back to Events
@@ -88,7 +73,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
           </div>
 
           <button
-            onClick={() => router.push("/events")}
+            onClick={onClose}
             className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15"
           >
             ✕ Close
@@ -212,7 +197,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
 
                     <button
                       type="button"
-                      onClick={() => router.push("/events")}
+                      onClick={onClose}
                       className="flex-1 bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10"
                     >
                       Cancel
@@ -244,7 +229,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
 
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={() => router.push("/events")}
+                    onClick={onClose}
                     className="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
                   >
                     Back to Events
@@ -259,11 +244,6 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
               </div>
             )}
           </section>
-        </div>
-
-        <div className="mt-4 text-xs text-slate-500">
-          Tip: This page uses <code>?id=</code> in the URL. Example:{" "}
-          <code>/events?id=1</code>
         </div>
       </div>
     </div>
