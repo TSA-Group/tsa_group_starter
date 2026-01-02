@@ -96,6 +96,12 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
                 <span>{spotsLeft} spots left</span>
               </div>
             </div>
+
+            <div className="mt-5 text-sm text-slate-300 space-y-1">
+              <p><span className="text-slate-400">Location:</span> {event.location}</p>
+              <p><span className="text-slate-400">Date:</span> {event.date}</p>
+              <p><span className="text-slate-400">Time:</span> {event.time}</p>
+            </div>
           </section>
 
           <section className="lg:col-span-7 bg-white/5 border border-white/10 rounded-2xl p-5">
@@ -178,12 +184,9 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
               </form>
             ) : (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <h3 className="text-xl font-semibold text-indigo-300">
-                  You’re registered ✅
-                </h3>
+                <h3 className="text-xl font-semibold text-indigo-300">You’re registered ✅</h3>
                 <p className="text-slate-300 mt-2">
-                  Thanks, {first}! Your spot is saved for{" "}
-                  <span className="text-white font-semibold">{event.title}</span>.
+                  Thanks, {first}! Your spot is saved for <span className="text-white font-semibold">{event.title}</span>.
                 </p>
 
                 <div className="flex gap-3 mt-6">
