@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EventItem } from "./events"; // make sure path is correct
 
+
 export default function RegisterClient({
   events,
   eventId,
