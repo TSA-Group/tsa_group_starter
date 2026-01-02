@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export type EventItem = {
@@ -21,14 +21,17 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const idParam = searchParams.get("id");
-  const eventId = Number(idParam);
+  // ⚡ Safe handling: check for null / undefined
+  const idParam = searchParams?.get("id");
+  const eventId = idParam ? Number(idParam) : null;
 
+  // Only try to find event if eventId is valid
   const event = useMemo(() => {
-    if (!idParam || Number.isNaN(eventId)) return null;
+    if (!eventId || Number.isNaN(eventId)) return null;
     return events.find((e) => e.id === eventId) ?? null;
-  }, [events, idParam, eventId]);
+  }, [events, eventId]);
 
+  // Form state
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -38,10 +41,10 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const [note, setNote] = useState("");
   const [agree, setAgree] = useState(false);
 
-  // If no ?id=, don't show the register UI (so /events stays normal)
+  // If no ?id= in URL, don’t render registration UI
   if (!idParam) return null;
 
-  // If invalid id, show friendly box
+  // If invalid id, show friendly error
   if (!event) {
     return (
       <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
@@ -69,7 +72,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
     if (!agree) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 650)); // demo “API call”
+    await new Promise((r) => setTimeout(r, 650)); // demo API call
     setLoading(false);
     setSubmitted(true);
   };
@@ -77,6 +80,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   return (
     <div className="mt-10">
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+        {/* Header */}
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <h2 className="text-2xl font-semibold text-indigo-300">
@@ -95,8 +99,9 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
           </button>
         </div>
 
+        {/* Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-          {/* Left: Summary */}
+          {/* Left: Event summary */}
           <section className="lg:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-5">
             <h3 className="text-lg font-semibold mb-2">Event details</h3>
             <p className="text-slate-300 text-sm">{event.description}</p>
