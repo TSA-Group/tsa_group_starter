@@ -17,14 +17,14 @@ type Event = {
   description: string;
 };
 
-export default function RegisterPage() {
+export default function RegisterClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const idParam = searchParams.get("id");
   const eventId = Number(idParam);
 
-  // ✅ Same event list here (no imports, no shared files)
+  // ✅ Event list lives here (NO imports from page.tsx)
   const EVENTS: Event[] = [
     {
       id: 1,
@@ -183,7 +183,7 @@ export default function RegisterPage() {
 
   const event = useMemo(
     () => EVENTS.find((e) => e.id === eventId),
-    [EVENTS, eventId],
+    [eventId],
   );
 
   const [submitted, setSubmitted] = useState(false);
@@ -203,7 +203,7 @@ export default function RegisterPage() {
             Event not found
           </h1>
           <p className="text-slate-300 mt-2">
-            The registration link is missing an event id.
+            This registration link is missing a valid event id.
           </p>
           <Link
             href="/events"
@@ -283,7 +283,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-6 text-xs text-slate-400">
-              Demo registration form (you can connect this to a database later).
+              Demo form for your TSA project (connect to DB later).
             </div>
           </section>
 
@@ -311,9 +311,7 @@ export default function RegisterPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-300">
-                        Last name
-                      </label>
+                      <label className="text-xs text-slate-300">Last name</label>
                       <input
                         value={last}
                         onChange={(e) => setLast(e.target.value)}
@@ -321,109 +319,3 @@ export default function RegisterPage() {
                         className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Doe"
                       />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-300">Email</label>
-                    <input
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      type="email"
-                      className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="jane@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-300">
-                      Notes (optional)
-                    </label>
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
-                      placeholder="Anything we should know?"
-                    />
-                  </div>
-
-                  <label className="flex items-start gap-3 text-sm text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={agree}
-                      onChange={(e) => setAgree(e.target.checked)}
-                      className="mt-1"
-                      required
-                    />
-                    <span>
-                      I understand this is a community event and I will follow
-                      the guidelines and code of conduct.
-                    </span>
-                  </label>
-
-                  <div className="flex gap-3 mt-2">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="flex-1 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-70 text-white py-2 rounded-xl"
-                    >
-                      {loading ? "Submitting..." : "Submit Registration"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => router.push("/events")}
-                      className="flex-1 bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                <h2 className="text-2xl font-semibold text-indigo-300">
-                  You’re registered ✅
-                </h2>
-                <p className="text-slate-300 mt-2">
-                  Thanks, {first}! Your spot is saved for{" "}
-                  <span className="text-white font-semibold">{event.title}</span>.
-                </p>
-
-                <div className="mt-4 text-sm text-slate-300 space-y-1">
-                  <p>
-                    <span className="text-slate-400">When:</span> {event.date} •{" "}
-                    {event.time}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Where:</span>{" "}
-                    {event.location}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Email:</span> {email}
-                  </p>
-                </div>
-
-                <div className="flex gap-3 mt-6">
-                  <Link
-                    href="/events"
-                    className="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
-                  >
-                    Back to Events
-                  </Link>
-                  <Link
-                    href="/map"
-                    className="flex-1 text-center bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10"
-                  >
-                    View Map
-                  </Link>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-      </div>
-    </div>
-  );
-}
