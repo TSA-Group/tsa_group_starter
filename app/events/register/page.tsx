@@ -3,46 +3,23 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import RegisterClient, { EventItem } from "./register";
 
-/* =====================
-   Types
-===================== */
 type Category = { id: string; name: string };
 type Activity = { id: string; name: string };
-type Event = {
-  id: number;
-  title: string;
-  category: string;
-  activities: string[];
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  spots: number;
-  description: string;
-};
 
-/* =====================
-   Small UI pieces
-===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-slate-200">
     {children}
   </span>
 );
 
-/* =====================
-   Page
-===================== */
 export default function EventsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
 
-  /* =====================
-     Data
-  ====================== */
   const categories: Category[] = [
     { id: "all", name: "All" },
     { id: "community", name: "Community Dinner" },
@@ -62,7 +39,7 @@ export default function EventsPage() {
     { id: "family", name: "Family" },
   ];
 
-  const events: Event[] = [
+  const EVENTS: EventItem[] = [
     {
       id: 1,
       title: "Community Dinner Night",
@@ -218,16 +195,13 @@ export default function EventsPage() {
     },
   ];
 
-  /* =====================
-     Filtering & sorting
-  ====================== */
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
 
     let list =
       selectedCategory === "all"
-        ? events
-        : events.filter((e) => e.category === selectedCategory);
+        ? EVENTS
+        : EVENTS.filter((e) => e.category === selectedCategory);
 
     if (selectedActivities.length > 0) {
       list = list.filter((e) =>
@@ -250,7 +224,7 @@ export default function EventsPage() {
     }
 
     return list;
-  }, [events, selectedCategory, selectedActivities, query, sortBy]);
+  }, [selectedCategory, selectedActivities, query, sortBy]);
 
   const toggleActivity = (id: string) =>
     setSelectedActivities((prev) =>
@@ -260,7 +234,6 @@ export default function EventsPage() {
   return (
     <>
       <Head>
-        {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -270,35 +243,6 @@ export default function EventsPage() {
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
-        {/* Bubbles */}
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div
-            className="absolute -left-36 -top-36 w-[520px] h-[520px] rounded-full blur-[72px]"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,99,132,0.14), rgba(255,99,132,0.04))",
-              mixBlendMode: "screen",
-            }}
-          />
-          <div
-            className="absolute right-12 top-40 w-[360px] h-[360px] rounded-full blur-[56px]"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,184,77,0.12), rgba(255,184,77,0.03))",
-              mixBlendMode: "screen",
-            }}
-          />
-          <div
-            className="absolute left-1/2 -bottom-28 w-[420px] h-[420px] rounded-full blur-[64px]"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(56,189,248,0.10), rgba(56,189,248,0.03))",
-              mixBlendMode: "screen",
-              transform: "translateX(-50%)",
-            }}
-          />
-        </div>
-
         <style jsx>{`
           :global(body) {
             font-family: "Inter", sans-serif;
@@ -309,7 +253,6 @@ export default function EventsPage() {
         `}</style>
 
         <div className="max-w-7xl mx-auto px-6 py-10">
-          {/* Header */}
           <header className="mb-8">
             <h1 className="text-4xl font-semibold text-indigo-300">
               Gatherly — Community Events
@@ -319,9 +262,7 @@ export default function EventsPage() {
             </p>
           </header>
 
-          {/* Filters */}
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-10">
-            {/* Category */}
             <div className="flex flex-wrap gap-2 mb-4">
               {categories.map((c) => (
                 <button
@@ -338,7 +279,6 @@ export default function EventsPage() {
               ))}
             </div>
 
-            {/* Activities */}
             <div className="flex flex-wrap gap-2 mb-4">
               {activities.map((a) => (
                 <button
@@ -355,7 +295,6 @@ export default function EventsPage() {
               ))}
             </div>
 
-            {/* Search + Sort */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <input
                 value={query}
@@ -387,7 +326,7 @@ export default function EventsPage() {
             </div>
           </div>
 
-          {/* Events */}
+          {/* Events list */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filtered.map((ev) => {
               const percent = Math.round((ev.attendees / ev.spots) * 100);
@@ -426,10 +365,10 @@ export default function EventsPage() {
                   </div>
 
                   <div className="flex gap-2 mt-5">
-                    {/* ✅ goes to app/events/register/page.tsx with the event id */}
+                    {/* ✅ Register goes to SAME /events page but with ?id= */}
                     <Link
-                      href={`/events/register?id=${ev.id}`}
-                      className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl text-center"
+                      href={`/events?id=${ev.id}`}
+                      className="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
                     >
                       Register
                     </Link>
@@ -442,6 +381,9 @@ export default function EventsPage() {
               );
             })}
           </div>
+
+          {/* ✅ Registration UI appears when URL has ?id= */}
+          <RegisterClient events={EVENTS} />
         </div>
       </div>
     </>
