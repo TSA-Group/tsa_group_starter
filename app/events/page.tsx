@@ -3,11 +3,187 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import RegisterClient, { EventItem } from "./register";
 
+/* =====================
+   Types
+===================== */
 type Category = { id: string; name: string };
 type Activity = { id: string; name: string };
 
+type Event = {
+  id: number;
+  title: string;
+  category: string;
+  activities: string[];
+  date: string;
+  time: string;
+  location: string;
+  attendees: number;
+  spots: number;
+  description: string;
+};
+
+/* =====================
+   Data (single source of truth)
+===================== */
+const EVENTS: Event[] = [
+  {
+    id: 1,
+    title: "Community Dinner Night",
+    category: "community",
+    activities: ["food", "family"],
+    date: "Dec 28, 2025",
+    time: "6:00 PM – 8:00 PM",
+    location: "Highland Park Community Center",
+    attendees: 42,
+    spots: 60,
+    description:
+      "A welcoming dinner bringing neighbors together for conversation and connection.",
+  },
+  {
+    id: 2,
+    title: "Literacy Tutoring Session",
+    category: "tutoring",
+    activities: ["education"],
+    date: "Dec 25, 2025",
+    time: "4:00 PM – 6:00 PM",
+    location: "Westbury Library",
+    attendees: 14,
+    spots: 20,
+    description:
+      "Volunteer to help young students improve reading and writing skills.",
+  },
+  {
+    id: 3,
+    title: "Food Pantry Distribution",
+    category: "pantry",
+    activities: ["food", "donations"],
+    date: "Dec 26, 2025",
+    time: "9:00 AM – 1:00 PM",
+    location: "Houston Food Bank",
+    attendees: 88,
+    spots: 110,
+    description: "Help organize and distribute food to families in need.",
+  },
+  {
+    id: 4,
+    title: "River Cleanup Day",
+    category: "cleanup",
+    activities: ["outdoors", "volunteering"],
+    date: "Dec 29, 2025",
+    time: "8:00 AM – 12:00 PM",
+    location: "Brazos River Park",
+    attendees: 31,
+    spots: 50,
+    description:
+      "Protect local wildlife by helping clean up river trails and banks.",
+  },
+  {
+    id: 5,
+    title: "Holiday Clothing Drive",
+    category: "clothing",
+    activities: ["donations", "family"],
+    date: "Dec 27, 2025",
+    time: "10:00 AM – 4:00 PM",
+    location: "Richmond Community Hub",
+    attendees: 27,
+    spots: 40,
+    description:
+      "Sort and organize donated winter clothing for families in need.",
+  },
+  {
+    id: 6,
+    title: "Park Tree Planting",
+    category: "cleanup",
+    activities: ["outdoors", "volunteering"],
+    date: "Jan 04, 2026",
+    time: "9:00 AM – 12:00 PM",
+    location: "Meadowbrook Park",
+    attendees: 22,
+    spots: 40,
+    description: "Plant native trees and learn about local ecology.",
+  },
+  {
+    id: 7,
+    title: "Neighborhood Mural Project",
+    category: "meetup",
+    activities: ["volunteering", "family"],
+    date: "Jan 12, 2026",
+    time: "9:00 AM – 5:00 PM",
+    location: "Main St. Alley",
+    attendees: 16,
+    spots: 30,
+    description:
+      "Assist local artists in painting a community mural; no experience required.",
+  },
+  {
+    id: 8,
+    title: "Senior Meal Delivery",
+    category: "community",
+    activities: ["food", "volunteering"],
+    date: "Jan 08, 2026",
+    time: "10:00 AM – 1:00 PM",
+    location: "Fulshear Senior Services",
+    attendees: 12,
+    spots: 20,
+    description: "Deliver warm meals and check in with homebound seniors.",
+  },
+  {
+    id: 9,
+    title: "Community Garden Workshop",
+    category: "meetup",
+    activities: ["outdoors", "education"],
+    date: "Jan 15, 2026",
+    time: "9:00 AM – 11:30 AM",
+    location: "Riverbend Community Garden",
+    attendees: 18,
+    spots: 30,
+    description: "Hands-on workshop about seasonal planting and composting.",
+  },
+  {
+    id: 10,
+    title: "Clothing Repair Pop-up",
+    category: "clothing",
+    activities: ["donations", "education"],
+    date: "Jan 18, 2026",
+    time: "11:00 AM – 3:00 PM",
+    location: "Sugar Land Makerspace",
+    attendees: 9,
+    spots: 20,
+    description:
+      "Learn basic mending skills and repair donated garments for reuse.",
+  },
+  {
+    id: 11,
+    title: "After-school STEM Club",
+    category: "tutoring",
+    activities: ["education", "family"],
+    date: "Jan 20, 2026",
+    time: "3:30 PM – 5:30 PM",
+    location: "Lakeside Middle School",
+    attendees: 26,
+    spots: 30,
+    description:
+      "Volunteer mentors lead hands-on STEM projects for middle schoolers.",
+  },
+  {
+    id: 12,
+    title: "Neighborhood Watch Meeting",
+    category: "meetup",
+    activities: ["volunteering", "family"],
+    date: "Jan 22, 2026",
+    time: "7:00 PM – 8:30 PM",
+    location: "Sugar Land Police Substation",
+    attendees: 34,
+    spots: 60,
+    description:
+      "Community safety meeting with local officers and block captains.",
+  },
+];
+
+/* =====================
+   Small UI piece
+===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-slate-200">
     {children}
@@ -37,162 +213,6 @@ export default function EventsPage() {
     { id: "donations", name: "Donations" },
     { id: "outdoors", name: "Outdoors" },
     { id: "family", name: "Family" },
-  ];
-
-  const EVENTS: EventItem[] = [
-    {
-      id: 1,
-      title: "Community Dinner Night",
-      category: "community",
-      activities: ["food", "family"],
-      date: "Dec 28, 2025",
-      time: "6:00 PM – 8:00 PM",
-      location: "Highland Park Community Center",
-      attendees: 42,
-      spots: 60,
-      description:
-        "A welcoming dinner bringing neighbors together for conversation and connection.",
-    },
-    {
-      id: 2,
-      title: "Literacy Tutoring Session",
-      category: "tutoring",
-      activities: ["education"],
-      date: "Dec 25, 2025",
-      time: "4:00 PM – 6:00 PM",
-      location: "Westbury Library",
-      attendees: 14,
-      spots: 20,
-      description:
-        "Volunteer to help young students improve reading and writing skills.",
-    },
-    {
-      id: 3,
-      title: "Food Pantry Distribution",
-      category: "pantry",
-      activities: ["food", "donations"],
-      date: "Dec 26, 2025",
-      time: "9:00 AM – 1:00 PM",
-      location: "Houston Food Bank",
-      attendees: 88,
-      spots: 110,
-      description: "Help organize and distribute food to families in need.",
-    },
-    {
-      id: 4,
-      title: "River Cleanup Day",
-      category: "cleanup",
-      activities: ["outdoors", "volunteering"],
-      date: "Dec 29, 2025",
-      time: "8:00 AM – 12:00 PM",
-      location: "Brazos River Park",
-      attendees: 31,
-      spots: 50,
-      description:
-        "Protect local wildlife by helping clean up river trails and banks.",
-    },
-    {
-      id: 5,
-      title: "Holiday Clothing Drive",
-      category: "clothing",
-      activities: ["donations", "family"],
-      date: "Dec 27, 2025",
-      time: "10:00 AM – 4:00 PM",
-      location: "Richmond Community Hub",
-      attendees: 27,
-      spots: 40,
-      description:
-        "Sort and organize donated winter clothing for families in need.",
-    },
-    {
-      id: 6,
-      title: "Park Tree Planting",
-      category: "cleanup",
-      activities: ["outdoors", "volunteering"],
-      date: "Jan 04, 2026",
-      time: "9:00 AM – 12:00 PM",
-      location: "Meadowbrook Park",
-      attendees: 22,
-      spots: 40,
-      description: "Plant native trees and learn about local ecology.",
-    },
-    {
-      id: 7,
-      title: "Neighborhood Mural Project",
-      category: "meetup",
-      activities: ["volunteering", "family"],
-      date: "Jan 12, 2026",
-      time: "9:00 AM – 5:00 PM",
-      location: "Main St. Alley",
-      attendees: 16,
-      spots: 30,
-      description:
-        "Assist local artists in painting a community mural; no experience required.",
-    },
-    {
-      id: 8,
-      title: "Senior Meal Delivery",
-      category: "community",
-      activities: ["food", "volunteering"],
-      date: "Jan 08, 2026",
-      time: "10:00 AM – 1:00 PM",
-      location: "Fulshear Senior Services",
-      attendees: 12,
-      spots: 20,
-      description: "Deliver warm meals and check in with homebound seniors.",
-    },
-    {
-      id: 9,
-      title: "Community Garden Workshop",
-      category: "meetup",
-      activities: ["outdoors", "education"],
-      date: "Jan 15, 2026",
-      time: "9:00 AM – 11:30 AM",
-      location: "Riverbend Community Garden",
-      attendees: 18,
-      spots: 30,
-      description:
-        "Hands-on workshop about seasonal planting and composting.",
-    },
-    {
-      id: 10,
-      title: "Clothing Repair Pop-up",
-      category: "clothing",
-      activities: ["donations", "education"],
-      date: "Jan 18, 2026",
-      time: "11:00 AM – 3:00 PM",
-      location: "Sugar Land Makerspace",
-      attendees: 9,
-      spots: 20,
-      description:
-        "Learn basic mending skills and repair donated garments for reuse.",
-    },
-    {
-      id: 11,
-      title: "After-school STEM Club",
-      category: "tutoring",
-      activities: ["education", "family"],
-      date: "Jan 20, 2026",
-      time: "3:30 PM – 5:30 PM",
-      location: "Lakeside Middle School",
-      attendees: 26,
-      spots: 30,
-      description:
-        "Volunteer mentors lead hands-on STEM projects for middle schoolers.",
-    },
-    {
-      id: 12,
-      title: "Neighborhood Watch Meeting",
-      category: "meetup",
-      activities: ["volunteering", "family"],
-      date: "Jan 22, 2026",
-      time: "7:00 PM – 8:30 PM",
-      location: "Sugar Land Police Substation",
-      attendees: 34,
-      spots: 60,
-      description:
-        "Community safety meeting with local officers and block captains.",
-    },
   ];
 
   const filtered = useMemo(() => {
@@ -262,7 +282,9 @@ export default function EventsPage() {
             </p>
           </header>
 
+          {/* Filters */}
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-10">
+            {/* Categories */}
             <div className="flex flex-wrap gap-2 mb-4">
               {categories.map((c) => (
                 <button
@@ -279,6 +301,7 @@ export default function EventsPage() {
               ))}
             </div>
 
+            {/* Activities */}
             <div className="flex flex-wrap gap-2 mb-4">
               {activities.map((a) => (
                 <button
@@ -295,6 +318,7 @@ export default function EventsPage() {
               ))}
             </div>
 
+            {/* Search + Sort */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <input
                 value={query}
@@ -326,7 +350,7 @@ export default function EventsPage() {
             </div>
           </div>
 
-          {/* Events list */}
+          {/* Events */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filtered.map((ev) => {
               const percent = Math.round((ev.attendees / ev.spots) * 100);
@@ -364,15 +388,14 @@ export default function EventsPage() {
                     </div>
                   </div>
 
+                  {/* ✅ Register redirects to /events/register?id=... */}
                   <div className="flex gap-2 mt-5">
-                    {/* ✅ Register goes to SAME /events page but with ?id= */}
                     <Link
-                      href={`/events?id=${ev.id}`}
+                      href={`/events/register?id=${ev.id}`}
                       className="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
                     >
                       Register
                     </Link>
-
                     <button className="flex-1 bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10">
                       Details
                     </button>
@@ -381,9 +404,6 @@ export default function EventsPage() {
               );
             })}
           </div>
-
-          {/* ✅ Registration UI appears when URL has ?id= */}
-          <RegisterClient events={EVENTS} />
         </div>
       </div>
     </>
