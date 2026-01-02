@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export type EventItem = {
@@ -21,18 +21,14 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ Mounted flag to prevent SSR/hydration mismatch
-  const [mounted, setMounted] = useState(false);
-  const [eventId, setEventId] = useState<number | null>(null);
+  const idParam = searchParams.get("id");
+  const eventId = Number(idParam);
 
-  useEffect(() => {
-    setMounted(true); // client-only now
-    const idParam = searchParams?.get("id");
-    const parsed = idParam ? Number(idParam) : null;
-    if (parsed && !Number.isNaN(parsed)) setEventId(parsed);
-  }, [searchParams]);
+  const event = useMemo(() => {
+    if (!idParam || Number.isNaN(eventId)) return null;
+    return events.find((e) => e.id === eventId) ?? null;
+  }, [events, idParam, eventId]);
 
-  // Form states
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -42,17 +38,10 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const [note, setNote] = useState("");
   const [agree, setAgree] = useState(false);
 
-  // ❌ Don't render anything until mounted
-  if (!mounted) return null;
+  // If no ?id=, don't show the register UI (so /events stays normal)
+  if (!idParam) return null;
 
-  // ❌ If no valid id, return null
-  if (!eventId) return null;
-
-  // ✅ Find the event after mounted
-  const event = useMemo(() => {
-    return events.find((e) => e.id === eventId) ?? null;
-  }, [events, eventId]);
-
+  // If invalid id, show friendly box
   if (!event) {
     return (
       <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
@@ -80,7 +69,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
     if (!agree) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 650)); // demo API call
+    await new Promise((r) => setTimeout(r, 650)); // demo “API call”
     setLoading(false);
     setSubmitted(true);
   };
@@ -280,4 +269,3 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
     </div>
   );
 }
-
