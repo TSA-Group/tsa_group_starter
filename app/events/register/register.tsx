@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export type EventItem = {
@@ -21,36 +21,44 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ State to hold eventId safely after client hydration
+  // ✅ Mounted flag to prevent SSR/hydration mismatch
+  const [mounted, setMounted] = useState(false);
   const [eventId, setEventId] = useState<number | null>(null);
 
   useEffect(() => {
+    setMounted(true); // client-only now
     const idParam = searchParams?.get("id");
     const parsed = idParam ? Number(idParam) : null;
-    if (parsed && !Number.isNaN(parsed)) {
-      setEventId(parsed);
-    }
+    if (parsed && !Number.isNaN(parsed)) setEventId(parsed);
   }, [searchParams]);
 
-  // Look up the event once eventId is set
-  const event = eventId ? events.find((e) => e.id === eventId) ?? null : null;
-
+  // Form states
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [agree, setAgree] = useState(false);
 
-  // Wait until client hydration sets eventId
+  // ❌ Don't render anything until mounted
+  if (!mounted) return null;
+
+  // ❌ If no valid id, return null
   if (!eventId) return null;
 
-  // Handle invalid eventId
+  // ✅ Find the event after mounted
+  const event = useMemo(() => {
+    return events.find((e) => e.id === eventId) ?? null;
+  }, [events, eventId]);
+
   if (!event) {
     return (
       <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-indigo-300">Event not found</h2>
+        <h2 className="text-xl font-semibold text-indigo-300">
+          Event not found
+        </h2>
         <p className="text-slate-300 mt-2">
           That registration link is missing a valid event id.
         </p>
@@ -72,7 +80,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
     if (!agree) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 650)); // simulate API call
+    await new Promise((r) => setTimeout(r, 650)); // demo API call
     setLoading(false);
     setSubmitted(true);
   };
@@ -265,9 +273,11 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
         </div>
 
         <div className="mt-4 text-xs text-slate-500">
-          Tip: This page uses <code>?id=</code> in the URL. Example: <code>/events?id=1</code>
+          Tip: This page uses <code>?id=</code> in the URL. Example:{" "}
+          <code>/events?id=1</code>
         </div>
       </div>
     </div>
   );
 }
+
