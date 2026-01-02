@@ -1,9 +1,7 @@
 "use client";
 
 import Head from "next/head";
-import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import RegisterClient, { EventItem } from "./register";
 
 type Category = { id: string; name: string };
@@ -16,16 +14,13 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function EventsPage() {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
-  // Only render RegisterClient after mount (useSearchParams works properly)
-  useEffect(() => setMounted(true), []);
-
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
+
+  // NEW: state for currently registering event
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
   const categories: Category[] = [
     { id: "all", name: "All" },
@@ -73,32 +68,7 @@ export default function EventsPage() {
       description:
         "Volunteer to help young students improve reading and writing skills.",
     },
-    {
-      id: 3,
-      title: "Food Pantry Distribution",
-      category: "pantry",
-      activities: ["food", "donations"],
-      date: "Dec 26, 2025",
-      time: "9:00 AM – 1:00 PM",
-      location: "Houston Food Bank",
-      attendees: 88,
-      spots: 110,
-      description: "Help organize and distribute food to families in need.",
-    },
-    {
-      id: 4,
-      title: "River Cleanup Day",
-      category: "cleanup",
-      activities: ["outdoors", "volunteering"],
-      date: "Dec 29, 2025",
-      time: "8:00 AM – 12:00 PM",
-      location: "Brazos River Park",
-      attendees: 31,
-      spots: 50,
-      description:
-        "Protect local wildlife by helping clean up river trails and banks.",
-    },
-    // ... add remaining events here
+    // ... add remaining events
   ];
 
   const filtered = useMemo(() => {
@@ -149,15 +119,6 @@ export default function EventsPage() {
       </Head>
 
       <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
-        <style jsx>{`
-          :global(body) {
-            font-family: "Inter", sans-serif;
-          }
-          :global(h1, h2, h3, h4, h5, h6) {
-            font-family: "Poppins", sans-serif;
-          }
-        `}</style>
-
         <div className="max-w-7xl mx-auto px-6 py-10">
           <header className="mb-8">
             <h1 className="text-4xl font-semibold text-indigo-300">
@@ -216,9 +177,7 @@ export default function EventsPage() {
                   {["upcoming", "popular"].map((option) => (
                     <button
                       key={option}
-                      onClick={() =>
-                        setSortBy(option as "upcoming" | "popular")
-                      }
+                      onClick={() => setSortBy(option as "upcoming" | "popular")}
                       className={`px-4 py-1 text-sm rounded-full transition ${
                         sortBy === option
                           ? "bg-indigo-500 text-white"
@@ -233,7 +192,7 @@ export default function EventsPage() {
             </div>
           </div>
 
-          {/* Events List */}
+          {/* Events list */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filtered.map((ev) => {
               const percent = Math.round((ev.attendees / ev.spots) * 100);
@@ -273,11 +232,7 @@ export default function EventsPage() {
 
                   <div className="flex gap-2 mt-5">
                     <button
-                      onClick={() =>
-                        router.push(`/events?id=${ev.id}`, undefined, {
-                          scroll: false,
-                        })
-                      }
+                      onClick={() => setSelectedEventId(ev.id)}
                       className="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
                     >
                       Register
@@ -292,11 +247,15 @@ export default function EventsPage() {
             })}
           </div>
 
-          {/* RegisterClient only after mount */}
-          {mounted && <RegisterClient events={EVENTS} />}
+          {/* Show RegisterClient only if an event is selected */}
+          {selectedEventId && (
+            <RegisterClient
+              events={EVENTS}
+              key={selectedEventId} // force re-mount
+            />
+          )}
         </div>
       </div>
     </>
   );
 }
-
