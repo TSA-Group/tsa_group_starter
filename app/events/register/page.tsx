@@ -6,7 +6,6 @@ import RegisterClient, { EventItem } from "./register";
 
 type Category = { id: string; name: string };
 type Activity = { id: string; name: string };
-
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-slate-200">
     {children}
