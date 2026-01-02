@@ -427,39 +427,28 @@ export default function Home() {
         ))}
       </motion.section>
       {/* WEBSITE HISTORY SECTION */}
-      <motion.section
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={container}
-        className="w-full mt-40 mb-40 px-6"
-      >
-        <motion.h2
-          variants={fadeUp}
-          className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-8"
-        >
-          Our Story
-        </motion.h2>
+      <section className="w-full mt-40 mb-40 px-6">
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
+          Website History
+        </h2>
       
-        <motion.div
-          variants={cardPop}
-          whileHover={{ y: -4 }}
-          className="w-full bg-white rounded-2xl border border-blue-200 shadow-lg p-10 max-w-4xl mx-auto text-blue-900"
-        >
-          <p className="text-base mb-4">
-            <span className="font-semibold">2023 – The Idea:</span> The initial concept for Gatherly was formed to give communities a single place to connect.
+        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900 
+                        bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200">
+          <p className="mb-6">
+            <span className="font-bold text-blue-700">2023 – The Idea:</span> The initial concept for Gatherly was formed to give communities a single place to connect.
           </p>
-          <p className="text-base mb-4">
-            <span className="font-semibold">2024 – Building the Platform:</span> Core layouts, animations, and interactive features were developed.
+          <p className="mb-6">
+            <span className="font-bold text-blue-700">2024 – Building the Platform:</span> Core layouts, animations, and interactive features were developed.
           </p>
-          <p className="text-base mb-4">
-            <span className="font-semibold">2025 – Public Launch:</span> Gatherly launched with events, calendars, and community tools.
+          <p className="mb-6">
+            <span className="font-bold text-blue-700">2025 – Public Launch:</span> Gatherly launched with events, calendars, and community tools.
           </p>
-          <p className="text-base">
-            <span className="font-semibold">Looking Ahead:</span> Expanding neighborhoods, stories, and ways for people to get involved.
+          <p>
+            <span className="font-bold text-blue-700">Looking Ahead:</span> Expanding neighborhoods, stories, and ways for people to get involved.
           </p>
-        </motion.div>
-      </motion.section>
+        </div>
+      </section>
+      
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
