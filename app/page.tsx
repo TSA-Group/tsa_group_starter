@@ -430,7 +430,7 @@ export default function Home() {
       {/* WEBSITE HISTORY SECTION */}
       <section className="w-full mt-40 mb-40 px-6">
         <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
-          Website History
+          Our Story!
         </h2>
       
         <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900 
