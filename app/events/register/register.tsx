@@ -1,21 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
-export type EventItem = {
-  id: number;
-  title: string;
-  category: string;
-  activities: string[];
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  spots: number;
-  description: string;
-};
+import { useMemo, useState } from "react";
+import { EventItem } from "./page";
 
 export default function RegisterClient({ events }: { events: EventItem[] }) {
   const router = useRouter();
@@ -38,16 +26,12 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
   const [note, setNote] = useState("");
   const [agree, setAgree] = useState(false);
 
-  // If no ?id=, don't show the register UI (so /events stays normal)
   if (!idParam) return null;
 
-  // If invalid id, show friendly box
   if (!event) {
     return (
       <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-indigo-300">
-          Event not found
-        </h2>
+        <h2 className="text-xl font-semibold text-indigo-300">Event not found</h2>
         <p className="text-slate-300 mt-2">
           That registration link is missing a valid event id.
         </p>
@@ -69,7 +53,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
     if (!agree) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 650)); // demo “API call”
+    await new Promise((r) => setTimeout(r, 650));
     setLoading(false);
     setSubmitted(true);
   };
@@ -96,7 +80,6 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-          {/* Left: Summary */}
           <section className="lg:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-5">
             <h3 className="text-lg font-semibold mb-2">Event details</h3>
             <p className="text-slate-300 text-sm">{event.description}</p>
@@ -113,113 +96,86 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
                 <span>{spotsLeft} spots left</span>
               </div>
             </div>
-
-            <div className="mt-5 text-sm text-slate-300 space-y-1">
-              <p>
-                <span className="text-slate-400">Location:</span> {event.location}
-              </p>
-              <p>
-                <span className="text-slate-400">Date:</span> {event.date}
-              </p>
-              <p>
-                <span className="text-slate-400">Time:</span> {event.time}
-              </p>
-            </div>
-
-            <div className="mt-5 text-xs text-slate-400">
-              Demo registration form for your TSA project (connect to DB later).
-            </div>
           </section>
 
-          {/* Right: Form */}
           <section className="lg:col-span-7 bg-white/5 border border-white/10 rounded-2xl p-5">
             {!submitted ? (
-              <>
-                <h3 className="text-lg font-semibold mb-2">Your info</h3>
-                <p className="text-slate-400 text-sm mb-4">
-                  Fill this out to reserve a spot.
-                </p>
-
-                <form onSubmit={onSubmit} className="grid gap-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs text-slate-300">First name</label>
-                      <input
-                        value={first}
-                        onChange={(e) => setFirst(e.target.value)}
-                        required
-                        className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Jane"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs text-slate-300">Last name</label>
-                      <input
-                        value={last}
-                        onChange={(e) => setLast(e.target.value)}
-                        required
-                        className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Doe"
-                      />
-                    </div>
-                  </div>
-
+              <form onSubmit={onSubmit} className="grid gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-slate-300">Email</label>
+                    <label className="text-xs text-slate-300">First name</label>
                     <input
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={first}
+                      onChange={(e) => setFirst(e.target.value)}
                       required
-                      type="email"
                       className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="jane@example.com"
+                      placeholder="Jane"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs text-slate-300">Notes (optional)</label>
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500 min-h-[90px]"
-                      placeholder="Anything we should know?"
-                    />
-                  </div>
-
-                  <label className="flex items-start gap-3 text-sm text-slate-300">
+                    <label className="text-xs text-slate-300">Last name</label>
                     <input
-                      type="checkbox"
-                      checked={agree}
-                      onChange={(e) => setAgree(e.target.checked)}
-                      className="mt-1"
+                      value={last}
+                      onChange={(e) => setLast(e.target.value)}
                       required
+                      className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Doe"
                     />
-                    <span>
-                      I understand this is a community event and I will follow the code
-                      of conduct.
-                    </span>
-                  </label>
-
-                  <div className="flex gap-3 mt-2">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="flex-1 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-70 text-white py-2 rounded-xl"
-                    >
-                      {loading ? "Submitting..." : "Submit Registration"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => router.push("/events")}
-                      className="flex-1 bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10"
-                    >
-                      Cancel
-                    </button>
                   </div>
-                </form>
-              </>
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-300">Email</label>
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    type="email"
+                    className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="jane@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-300">Notes (optional)</label>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    className="mt-1 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500 min-h-[90px]"
+                    placeholder="Anything we should know?"
+                  />
+                </div>
+
+                <label className="flex items-start gap-3 text-sm text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={agree}
+                    onChange={(e) => setAgree(e.target.checked)}
+                    className="mt-1"
+                    required
+                  />
+                  <span>I agree to follow the community code of conduct.</span>
+                </label>
+
+                <div className="flex gap-3 mt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 bg-indigo-500 hover:bg-indigo-600 disabled:opacity-70 text-white py-2 rounded-xl"
+                  >
+                    {loading ? "Submitting..." : "Submit Registration"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => router.push("/events")}
+                    className="flex-1 bg-transparent border border-white/10 text-slate-200 py-2 rounded-xl hover:bg-white/10"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             ) : (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                 <h3 className="text-xl font-semibold text-indigo-300">
@@ -229,18 +185,6 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
                   Thanks, {first}! Your spot is saved for{" "}
                   <span className="text-white font-semibold">{event.title}</span>.
                 </p>
-
-                <div className="mt-4 text-sm text-slate-300 space-y-1">
-                  <p>
-                    <span className="text-slate-400">When:</span> {event.date} • {event.time}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Where:</span> {event.location}
-                  </p>
-                  <p>
-                    <span className="text-slate-400">Email:</span> {email}
-                  </p>
-                </div>
 
                 <div className="flex gap-3 mt-6">
                   <button
@@ -262,8 +206,7 @@ export default function RegisterClient({ events }: { events: EventItem[] }) {
         </div>
 
         <div className="mt-4 text-xs text-slate-500">
-          Tip: This page uses <code>?id=</code> in the URL. Example:{" "}
-          <code>/events?id=1</code>
+          Tip: This page uses <code>?id=</code> in the URL. Example: <code>/events?id=1</code>
         </div>
       </div>
     </div>
