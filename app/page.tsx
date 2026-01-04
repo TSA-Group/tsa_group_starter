@@ -98,7 +98,6 @@ export default function HomePage() {
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-  // Click outside to close popup
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
@@ -130,9 +129,9 @@ export default function HomePage() {
   today.setHours(0,0,0,0);
 
   const categoryColors: Record<string, string> = {
-    meetup: "bg-green-100 hover:bg-green-200",
-    community: "bg-blue-100 hover:bg-blue-200",
-    clothing: "bg-indigo-200 hover:bg-indigo-300",
+    meetup: "bg-green-400",
+    community: "bg-indigo-400",
+    clothing: "bg-indigo-400",
   };
 
   const year = new Date().getFullYear();
@@ -176,11 +175,13 @@ export default function HomePage() {
               Volunteer Opportunities
             </h3>
             <ul className="space-y-4">
-              {[{ title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
+              {[
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
                 { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
-                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" }].map((item, i) => (
+                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
+              ].map((item, i) => (
                 <li key={i} className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                   <div className="text-sm font-semibold">{item.title}</div>
                   <div className="text-xs text-blue-700">{item.meta}</div>
@@ -237,8 +238,9 @@ export default function HomePage() {
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
           >
+            {/* HEADER */}
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setCalendarDate(getCentralDate(new Date(calYear, calMonth - 1, 1)))}
@@ -255,10 +257,12 @@ export default function HomePage() {
               >❯</button>
             </div>
 
+            {/* DAYS OF WEEK */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map(d => <div key={d} className="text-center">{d}</div>)}
             </div>
 
+            {/* CALENDAR DAYS */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx} />;
@@ -274,39 +278,16 @@ export default function HomePage() {
                   );
                 });
 
-                const getDayClasses = () => {
-                  const colors: Record<string, string> = {
-                    meetup: "bg-green-200 hover:bg-green-300",
-                    community: "bg-blue-200 hover:bg-blue-300",
-                    clothing: "bg-orange-200 hover:bg-orange-300",
-                  };
-
-                  if (isSelected) return "bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold shadow-lg";
-                  if (isToday) return "bg-gradient-to-br from-yellow-400 to-orange-400 text-white font-bold shadow-lg";
-                  if (dayEvents.length > 0) return `${colors[dayEvents[0].category]} text-blue-900`;
-                  if (date.getDay() === 0 || date.getDay() === 6) return "bg-purple-50 hover:bg-purple-200 text-blue-900";
-                  return "bg-blue-50 hover:bg-blue-100 text-blue-900";
-                };
-
-                const getHoverGradient = () => {
-                  if (isSelected || isToday) return "";
-                  if (dayEvents.length > 0) {
-                    const cat = dayEvents[0].category;
-                    const hoverGrad: Record<string, string> = {
-                      meetup: "hover:bg-gradient-to-br hover:from-green-100 hover:to-green-300",
-                      community: "hover:bg-gradient-to-br hover:from-blue-100 hover:to-blue-300",
-                      clothing: "hover:bg-gradient-to-br hover:from-orange-100 hover:to-orange-300",
-                    };
-                    return hoverGrad[cat];
-                  }
-                  if (date.getDay() === 0 || date.getDay() === 6) return "hover:bg-gradient-to-br hover:from-purple-100 hover:to-purple-200";
-                  return "hover:bg-gradient-to-br hover:from-blue-100 hover:to-blue-200";
+                const dayClasses = () => {
+                  if (isSelected) return "bg-gradient-to-br from-indigo-400 to-indigo-600 text-white font-bold";
+                  if (isToday) return "bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold";
+                  return "bg-white hover:bg-blue-50 text-blue-900";
                 };
 
                 return (
                   <div
                     key={idx}
-                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-all duration-300 ${getDayClasses()} ${getHoverGradient()}`}
+                    className={`relative flex flex-col items-center justify-center h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${dayClasses()}`}
                     onClick={() =>
                       setSelectedDate(prev =>
                         prev && prev.getTime() === date.getTime() ? null : date
@@ -315,6 +296,14 @@ export default function HomePage() {
                   >
                     {date.getDate()}
 
+                    {/* EVENT DOT */}
+                    {dayEvents.length > 0 && (
+                      <span
+                        className={`mt-1 h-2 w-2 rounded-full ${categoryColors[dayEvents[0].category]}`}
+                      />
+                    )}
+
+                    {/* POPUP FOR SELECTED DAY */}
                     <AnimatePresence>
                       {isSelected && (
                         <motion.div
@@ -347,11 +336,10 @@ export default function HomePage() {
               })}
             </div>
           </motion.div>
-
         </motion.section>
       </motion.main>
 
-      {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
+      {/* IMAGE + TEXT BOXES */}
       <motion.section
         initial="hidden"
         variants={container}
@@ -403,7 +391,7 @@ export default function HomePage() {
         ))}
       </motion.section>
 
-      {/* WEBSITE HISTORY SECTION */}
+      {/* STORY SECTION */}
       <section className="relative w-full mt-40 mb-32 px-6">
         <div className="absolute inset-0 -z-10 flex justify-center">
           <div className="h-80 w-80 rounded-full bg-blue-300/20 blur-3xl" />
@@ -413,100 +401,38 @@ export default function HomePage() {
           Our Story
         </h2>
 
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl
-                        bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50
-                        border border-blue-200">
-
-          <div className="relative pl-8 border-l-2 border-blue-300 mb-10">
-            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500" />
-            <p className="text-lg text-blue-900">
-              <span className="font-bold text-blue-700">2023 — The Idea:</span>{" "}
-              Gatherly began as a simple idea to give communities one shared place to connect.
-            </p>
-          </div>
-
-          <div className="relative pl-8 border-l-2 border-blue-300 mb-10">
-            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500" />
-            <p className="text-lg text-blue-900">
-              <span className="font-bold text-blue-700">2024 — Building the Platform:</span>{" "}
-              Layouts, animations, and interactive tools were designed to feel modern and welcoming.
-            </p>
-          </div>
-
-          <div className="relative pl-8 border-l-2 border-blue-300 mb-10">
-            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500" />
-            <p className="text-lg text-blue-900">
-              <span className="font-bold text-blue-700">2025 — Public Launch:</span>{" "}
-              Gatherly launched with events, calendars, and community-driven features.
-            </p>
-          </div>
-
-          <div className="relative pl-8 border-l-2 border-blue-300">
-            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-indigo-500" />
-            <p className="text-lg text-blue-900">
-              <span className="font-bold text-indigo-700">Looking Ahead:</span>{" "}
-              We’re expanding neighborhoods, stories, and opportunities for people to get involved.
-            </p>
-          </div>
+        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200">
+          {/* Timeline items */}
+          {[
+            { year: "2023", title: "The Idea", text: "Gatherly began as a simple idea to give communities one shared place to connect." },
+            { year: "2024", title: "Building the Platform", text: "Layouts, animations, and interactive tools were designed to feel modern and welcoming." },
+            { year: "2025", title: "Public Launch", text: "Gatherly launched with events, calendars, and community-driven features." },
+            { year: "Looking Ahead", title: "Future", text: "We’re expanding neighborhoods, stories, and opportunities for people to get involved." },
+          ].map((item, i) => (
+            <div key={i} className="relative pl-8 border-l-2 border-blue-300 mb-10 last:mb-0">
+              <span className="absolute -left-[9px] top-1 h-5 w-5 rounded-full bg-blue-400" />
+              <h3 className="text-lg font-semibold text-blue-900">{item.year} — {item.title}</h3>
+              <p className="text-blue-700 text-sm mt-1">{item.text}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* SPACER */}
-      <div className="flex justify-center my-28">
-        <div className="h-px w-40 bg-gradient-to-r from-transparent via-indigo-400 to-transparent" />
-      </div>
-
-      {/* OUR MISSION SECTION */}
-      <section className="relative w-full mb-40 px-6">
-        <div className="absolute inset-0 -z-10 flex justify-center">
-          <div className="h-80 w-80 rounded-full bg-indigo-300/20 blur-3xl" />
-        </div>
-
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">
-          Our Mission
-        </h2>
-
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl
-                        bg-gradient-to-br from-indigo-50 via-indigo-100 to-indigo-50
-                        border border-indigo-200">
-
-          <p className="text-lg text-center text-slate-700 mb-12 max-w-3xl mx-auto">
-            Our mission is to strengthen communities by making it easy for people to
-            connect, discover local events, and feel a true sense of belonging.
+      {/* MISSION SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-32">
+        <div className="bg-indigo-50 rounded-2xl p-10 shadow-lg border border-indigo-200">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-indigo-900 mb-4">Our Mission</h2>
+          <p className="text-indigo-700 text-lg">
+            We believe strong communities make the world a better place. Gatherly brings neighbors together by sharing events, stories, and volunteer opportunities.
           </p>
-
-          <div className="grid gap-10 sm:grid-cols-3 text-center">
-            <div>
-              <h3 className="text-xl font-bold text-indigo-700 mb-2">Connect</h3>
-              <p className="text-slate-700">
-                Bringing neighbors together through shared experiences.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-indigo-700 mb-2">Discover</h3>
-              <p className="text-slate-700">
-                Making local events simple to find and join.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-indigo-700 mb-2">Belong</h3>
-              <p className="text-slate-700">
-                Creating welcoming spaces where everyone feels included.
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-blue-200 bg-white">
-        <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
-          © {year} Gatherly. All rights reserved.
-        </div>
+      <footer className="text-center py-10 text-blue-700 text-sm">
+        &copy; {year} Gatherly. All rights reserved.
       </footer>
+
     </motion.div>
   );
 }
-
