@@ -157,6 +157,8 @@ export default function Page() {
   >([]);
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
 
   // Directory search (RESOURCE SEARCH)
   const [directoryQuery, setDirectoryQuery] = useState("");
@@ -227,6 +229,15 @@ export default function Page() {
       stylers: [{ color: "#1b1b1b" }],
     },
   ];
+  const handleCenter = (loc: LocationItem) => {
+    setActiveId(loc.id);
+    setCenter(loc.position);
+
+    if (mapRef.current) {
+      mapRef.current.panTo(loc.position);
+      mapRef.current.setZoom(14);
+    }
+  };
 
   /** ---------- Filters ---------- */
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
@@ -394,11 +405,18 @@ export default function Page() {
                       center={center}
                       defaultZoom={12}
                       gestureHandling="greedy"
+                      onLoad={(map) => (mapRef.current = map)}
                       onClick={() => setActiveId(null)}
+                      className="w-full h-[420px]"
                     >
                       {filteredLocations.map((loc) => (
                         <AdvancedMarker key={loc.id} position={loc.position}>
-                          <HoverMarker location={loc} />
+                          <HoverMarker
+                            location={loc}
+                            activeId={activeId}
+                            setActiveId={setActiveId}
+                            onCenter={handleCenter}
+                          />
                         </AdvancedMarker>
                       ))}
                     </Map>
@@ -469,7 +487,7 @@ export default function Page() {
                             exit={{ opacity: 0, y: 10 }}
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.99 }}
-                            onClick={() => handleMarkerClick(loc)}
+                            onClick={() => handleCenter(loc)}
                             className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm
                                        hover:shadow-md transition-shadow
                                        dark:bg-[#0b1220] dark:border-blue-900/60"
@@ -927,35 +945,65 @@ function SearchBox({
     </div>
   );
 }
-function HoverMarker({ location }: { location: LocationItem }) {
+function HoverMarker({
+  location,
+  activeId,
+  setActiveId,
+  onCenter,
+}: {
+  location: LocationItem;
+  activeId: string | null;
+  setActiveId: (id: string | null) => void;
+  onCenter: (loc: LocationItem) => void;
+}) {
   const [hovered, setHovered] = useState(false);
+
+  const isActive = activeId === location.id;
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => {
+        setHovered(true);
+        setActiveId(location.id);
+      }}
+      onMouseLeave={() => {
+        setHovered(false);
+        setActiveId(null);
+      }}
+      onClick={() => onCenter(location)}
       style={{
-        transform: "translate(-50%, -100%)",
         position: "relative",
-        zIndex: hovered ? 10 : 1,
+        transform: "translate(-50%, -100%)",
+        zIndex: hovered || isActive ? 1000 : 1,
+        cursor: "pointer",
       }}
     >
       {/* 🔁 Spinning marker image */}
       <motion.img
-        src="/marker.png"
+        src="/marker.png" // make sure this exists in /public
         alt="Marker"
         className="w-8 h-8 drop-shadow-md"
-        animate={{ rotate: 360 }}
+        animate={{
+          rotate: 360,
+          scale: isActive ? 1.25 : 1,
+        }}
         transition={{
-          repeat: Infinity,
-          duration: 6,
-          ease: "linear",
+          rotate: {
+            repeat: Infinity,
+            duration: 6,
+            ease: "linear",
+          },
+          scale: {
+            type: "spring",
+            stiffness: 260,
+            damping: 20,
+          },
         }}
       />
 
       {/* 💬 Hover info box */}
       <AnimatePresence>
-        {hovered && (
+        {(hovered || isActive) && (
           <motion.div
             initial={{ opacity: 0, y: 6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -966,12 +1014,13 @@ function HoverMarker({ location }: { location: LocationItem }) {
               -translate-x-1/2
               bg-blue-600 text-white text-xs
               rounded-xl px-3 py-2
-              shadow-lg pointer-events-none
+              shadow-lg
               w-56
+              pointer-events-none
             "
           >
-            <div className="font-semibold">{location.title}</div>
-            <div className="opacity-90">{location.when}</div>
+            <div className="font-semibold leading-tight">{location.title}</div>
+            <div className="mt-0.5 opacity-90">{location.when}</div>
             <div className="opacity-80">{location.eventType}</div>
           </motion.div>
         )}
