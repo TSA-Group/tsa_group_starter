@@ -72,9 +72,15 @@ function QuickActions() {
   );
 }
 
-// Main Home component
-export default function Home() {
-  const [calendarDate, setCalendarDate] = useState(new Date());
+// Helper to convert any Date to Central Time
+const getCentralDate = (date: Date) => {
+  const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+  const centralOffset = -6 * 60; // UTC-6 for Central Standard Time
+  return new Date(utc + centralOffset * 60000);
+};
+
+export default function HomePage() {
+  const [calendarDate, setCalendarDate] = useState(getCentralDate(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -84,16 +90,13 @@ export default function Home() {
   const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
 
   const events = [
-    { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", category: "meetup", location: "Community Hall", details: "Join us for games and networking!" },
-    { title: "Community Dinner", dateString: "2025-12-21T18:00:00", category: "community", location: "Downtown Church", details: "Enjoy a warm meal with neighbors." },
-    { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", category: "clothing", location: "Westside Center", details: "Donate clothes for those in need." },
+    { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", category: "meetup", location: "Community Hall", details: "Join neighbors for a friendly meetup." },
+    { title: "Community Dinner", dateString: "2025-12-21T18:00:00", category: "community", location: "Downtown Church", details: "Enjoy a meal with friends." },
+    { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", category: "clothing", location: "Westside Center", details: "Donate gently used clothes." },
   ];
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-  const today = new Date();
-  today.setHours(0,0,0,0);
 
   // Click outside to close popup
   useEffect(() => {
@@ -115,31 +118,43 @@ export default function Home() {
     const days: (Date | null)[] = [];
     for (let i = 0; i < firstDay; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(calYear, calMonth, i);
+      const d = getCentralDate(new Date(calYear, calMonth, i));
       d.setHours(0, 0, 0, 0);
       days.push(d);
     }
     return days;
   };
-
   const calendarDays = generateCalendarDays();
 
+  const today = getCentralDate(new Date());
+  today.setHours(0,0,0,0);
+
   const categoryColors: Record<string, string> = {
-    meetup: "bg-green-400",
-    community: "bg-blue-500",
-    clothing: "bg-orange-400",
+    meetup: "bg-green-100 hover:bg-green-200",
+    community: "bg-blue-100 hover:bg-blue-200",
+    clothing: "bg-orange-100 hover:bg-orange-200",
+  };
+
+  const dayClasses = (date: Date, isToday: boolean, isSelected: boolean, dayEvents: typeof events) => {
+    if (isSelected) return "bg-gradient-to-br from-indigo-400 to-indigo-600 text-white font-bold";
+    if (isToday) return "bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold";
+    if (dayEvents.length > 0) return `${categoryColors[dayEvents[0].category]} text-blue-900`;
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    if (isWeekend) return "bg-purple-50 hover:bg-purple-200 text-blue-900";
+    return "bg-blue-50 hover:bg-blue-100 text-blue-900";
   };
 
   const year = new Date().getFullYear();
-  const headerColor = "#1E40AF";
+  const headerColor = "#1E40AF"; // Indigo-900
 
   return (
-    <motion.div style={{ background }}>
+    <motion.div style={{ background }} className="min-h-screen px-4 sm:px-6 lg:px-8 pb-32">
+
       {/* HEADER */}
       <motion.header
         layout
         variants={fadeUp}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10"
+        className="max-w-7xl mx-auto pt-12 pb-10 text-center"
       >
         <motion.h1
           layout
@@ -150,19 +165,18 @@ export default function Home() {
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
           style={{ color: headerColor, fontFamily: "TAN Buster, sans-serif" }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left"
+          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold leading-none"
         >
           GATHERLY
         </motion.h1>
       </motion.header>
 
       {/* MAIN GRID */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      <motion.main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+
         {/* LEFT COLUMN */}
         <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
-
-          {/* Volunteer Opportunities */}
           <motion.div
             variants={cardPop}
             className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
@@ -178,10 +192,7 @@ export default function Home() {
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
                 { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
               ].map((item, i) => (
-                <li
-                  key={i}
-                  className="bg-blue-50 border border-blue-200 rounded-xl p-3"
-                >
+                <li key={i} className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                   <div className="text-sm font-semibold">{item.title}</div>
                   <div className="text-xs text-blue-700">{item.meta}</div>
                 </li>
@@ -192,6 +203,7 @@ export default function Home() {
 
         {/* RIGHT COLUMN */}
         <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
+
           {/* EVENTS */}
           <div className="lg:w-1/2 flex flex-col gap-4">
             <motion.div
@@ -240,28 +252,22 @@ export default function Home() {
           >
             <div className="flex items-center justify-between mb-4">
               <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+                onClick={() => setCalendarDate(getCentralDate(new Date(calYear, calMonth - 1, 1)))}
                 className="text-blue-700 text-2xl font-bold"
-              >
-                ❮
-              </button>
+              >❮</button>
 
               <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                 {monthNames[calMonth]} {calYear}
               </h3>
 
               <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+                onClick={() => setCalendarDate(getCentralDate(new Date(calYear, calMonth + 1, 1)))}
                 className="text-blue-700 text-2xl font-bold"
-              >
-                ❯
-              </button>
+              >❯</button>
             </div>
 
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-              {daysOfWeek.map((d) => (
-                <div key={d} className="text-center">{d}</div>
-              ))}
+              {daysOfWeek.map(d => <div key={d} className="text-center">{d}</div>)}
             </div>
 
             <div className="grid grid-cols-7 gap-1">
@@ -270,20 +276,19 @@ export default function Home() {
 
                 const isToday = date.getTime() === today.getTime();
                 const isSelected = date.getTime() === selectedDate?.getTime();
-                const dayEvents = events.filter(
-                  (event) => new Date(event.dateString).toDateString() === date.toDateString()
-                );
-                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-
-                let bgClass = "bg-white hover:bg-blue-50 text-blue-900";
-                if (isToday) bgClass = "bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold";
-                else if (isSelected) bgClass = "bg-gradient-to-br from-indigo-400 to-indigo-600 text-white font-bold";
-                else if (isWeekend) bgClass = "bg-blue-100 hover:bg-blue-200 text-blue-900";
+                const dayEvents = events.filter(event => {
+                  const eDate = getCentralDate(new Date(event.dateString));
+                  return (
+                    eDate.getFullYear() === date.getFullYear() &&
+                    eDate.getMonth() === date.getMonth() &&
+                    eDate.getDate() === date.getDate()
+                  );
+                });
 
                 return (
                   <div
                     key={idx}
-                    className={`relative flex flex-col items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${bgClass}`}
+                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${dayClasses(date, isToday, isSelected, dayEvents)}`}
                     onClick={() =>
                       setSelectedDate(prev =>
                         prev && prev.getTime() === date.getTime() ? null : date
@@ -291,15 +296,6 @@ export default function Home() {
                     }
                   >
                     {date.getDate()}
-
-                    <div className="flex flex-col -mt-1">
-                      {dayEvents.map((e, i) => (
-                        <span
-                          key={i}
-                          className={`w-2 h-2 rounded-full ${categoryColors[e.category]} mx-auto mt-0.5`}
-                        ></span>
-                      ))}
-                    </div>
 
                     <AnimatePresence>
                       {isSelected && (
@@ -333,8 +329,13 @@ export default function Home() {
               })}
             </div>
           </motion.div>
+
         </motion.section>
       </motion.main>
+    </motion.div>
+  );
+}
+
 
       {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
       <motion.section
