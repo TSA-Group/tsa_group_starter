@@ -6,6 +6,7 @@ import {
   Map,
   AdvancedMarker,
   useMapsLibrary,
+  useMap,
 } from "@vis.gl/react-google-maps";
 
 /** ---------- Types ---------- */
@@ -158,7 +159,7 @@ export default function Page() {
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const map = useMap();
 
   // Directory search (RESOURCE SEARCH)
   const [directoryQuery, setDirectoryQuery] = useState("");
@@ -233,9 +234,9 @@ export default function Page() {
     setActiveId(loc.id);
     setCenter(loc.position);
 
-    if (mapRef.current) {
-      mapRef.current.panTo(loc.position);
-      mapRef.current.setZoom(14);
+    if (map) {
+      map.panTo(loc.position);
+      map.setZoom(14);
     }
   };
 
@@ -405,7 +406,6 @@ export default function Page() {
                       center={center}
                       defaultZoom={12}
                       gestureHandling="greedy"
-                      onLoad={(map) => (mapRef.current = map)}
                       onClick={() => setActiveId(null)}
                       className="w-full h-[420px]"
                     >
