@@ -89,90 +89,129 @@ export default function Home() {
     setScrollRange(document.body.scrollHeight - window.innerHeight);
   }, []);
 
-  // Click outside to close calendar popup
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const monthNames = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
+];
+
+export default function CommunityCalendar() {
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const { scrollY } = useScroll();
+  const scrollRange = 300;
+  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
+
+  // Example events
+  const events = [
+    { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", category: "meetup" },
+    { title: "Community Dinner", dateString: "2025-12-21T18:00:00", category: "community" },
+    { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", category: "clothing" },
+  ];
+
+  // Click outside to close popup
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node)
-      ) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
         setSelectedDate(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Subtle scroll background & header color
-  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
-  const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E3F8A"]);
-
-  // Texas time today
-  const now = new Date();
-  const texasToday = new Date(
-    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
-  );
-  texasToday.setHours(0, 0, 0, 0);
 
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-
-  // Events with dateString for calendar
-  const events = [
-    {
-      title: "Neighborhood Meetup",
-      dateString: "2025-12-21T14:00:00",
-      location: "Community Park",
-      details: "Meet local residents and join community discussions.",
-    },
-    {
-      title: "Community Dinner",
-      dateString: "2025-12-21T18:00:00",
-      location: "Downtown Church",
-      details: "Enjoy a free meal and fellowship with neighbors.",
-    },
-    {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer.",
-    },
-  ];
-
   // Generate calendar days
   const generateCalendarDays = () => {
-    const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const daysArray: (Date | null)[] = [];
+    const days: (Date | null)[] = [];
 
-    for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
+    for (let i = 0; i < firstDay; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(calYear, calMonth, i);
-      d.setHours(0, 0, 0, 0);
-      daysArray.push(d);
+      d.setHours(0,0,0,0);
+      days.push(d);
     }
-    return daysArray;
+    return days;
   };
-
   const calendarDays = generateCalendarDays();
 
+  // Map categories to colors
+  const categoryColors: Record<string, string> = {
+    meetup: "bg-green-400",
+    community: "bg-blue-500",
+    clothing: "bg-orange-400",
+  };
+
   return (
-    <motion.div
-      layoutRoot
-      initial="hidden"
-      animate="show"
-      variants={container}
-      style={{ background }}
-      className="min-h-screen overflow-x-hidden text-slate-950"
-    >
+    <motion.div style={{ background }} className="p-6 rounded-2xl border border-gray-200 shadow-lg" ref={calendarRef}>
+      <h2 className="text-2xl font-bold mb-4 text-center">Community Calendar</h2>
+
+      {/* Month Navigation */}
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={() => setCalendarDate(new Date(calYear, calMonth - 1))} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">◀</button>
+        <span className="font-semibold text-lg">{monthNames[calMonth]} {calYear}</span>
+        <button onClick={() => setCalendarDate(new Date(calYear, calMonth + 1))} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">▶</button>
+      </div>
+
+      {/* Days of Week */}
+      <div className="grid grid-cols-7 text-center font-semibold text-gray-700 mb-1">
+        {daysOfWeek.map(day => <div key={day}>{day}</div>)}
+      </div>
+
+      {/* Calendar Days */}
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {calendarDays.map((day, idx) => {
+          if (!day) return <div key={idx} className="h-10" />;
+
+          const isToday = day.toDateString() === new Date().toDateString();
+          const dayEvents = events.filter(e => new Date(e.dateString).toDateString() === day.toDateString());
+
+          return (
+            <div
+              key={idx}
+              onClick={() => setSelectedDate(day)}
+              className={`h-10 flex flex-col justify-center items-center rounded cursor-pointer border transition
+                         ${isToday ? "border-indigo-500 font-bold" : "border-gray-200"}
+                         hover:bg-gray-200`}
+            >
+              <span>{day.getDate()}</span>
+              <div className="flex flex-col -mt-1">
+                {dayEvents.map((e, i) => (
+                  <span key={i} className={`w-2 h-2 rounded-full ${categoryColors[e.category]} mx-auto mt-0.5`}></span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Selected Date Popup */}
+      {selectedDate && (
+        <div className="mt-4 p-4 border border-gray-300 rounded bg-white shadow-md">
+          <h3 className="font-semibold">
+            {selectedDate.toDateString()}
+          </h3>
+          {events.filter(e => new Date(e.dateString).toDateString() === selectedDate.toDateString()).length === 0 ? (
+            <p className="text-gray-500 mt-2">No events scheduled.</p>
+          ) : (
+            <ul className="mt-2 space-y-1">
+              {events.filter(e => new Date(e.dateString).toDateString() === selectedDate.toDateString())
+                .map((e, idx) => (
+                  <li key={idx} className="text-gray-700 text-sm">{e.title}</li>
+                ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
       {/* HEADER */}
       <motion.header
         layout
