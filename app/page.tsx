@@ -428,49 +428,52 @@ export default function Home() {
         ))}
       </motion.section>
       {/* WEBSITE HISTORY SECTION */}
-      <section className="w-full mt-40 mb-40 px-6">
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
-          Our Story!
-        </h2>
-      
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900 
-                        bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200">
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2023 – The Idea:</span> The initial concept for Gatherly was formed to give communities a single place to connect.
-          </p>
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2024 – Building the Platform:</span> Core layouts, animations, and interactive features were developed.
-          </p>
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2025 – Public Launch:</span> Gatherly launched with events, calendars, and community tools.
-          </p>
-          <p>
-            <span className="font-bold text-blue-700">Looking Ahead:</span> Expanding neighborhoods, stories, and ways for people to get involved.
-          </p>
+      <section className="relative w-full mt-40 mb-32 px-6">
+        {/* Glow */}
+        <div className="absolute inset-0 -z-10 flex justify-center">
+          <div className="h-80 w-80 rounded-full bg-blue-300/20 blur-3xl" />
         </div>
-      </section>
-      {/* OUR MISSION SECTION */}
-      <section className="w-full mb-40 px-6">
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
-          Our Mission
+      
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">
+          Our Story
         </h2>
       
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900
-                        bg-gradient-to-br from-indigo-50 via-indigo-100 to-indigo-50
-                        border border-indigo-200">
-          <p className="text-lg leading-relaxed mb-6">
-            Our mission is to strengthen communities by making it easy for people to
-            discover events, share experiences, and build meaningful connections.
-          </p>
+        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl
+                        bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50
+                        border border-blue-200">
       
-          <p className="text-lg leading-relaxed mb-6">
-            Gatherly was created to bring neighborhoods together in a welcoming,
-            organized, and engaging way—both online and in real life.
-          </p>
+          {/* Timeline Item */}
+          <div className="relative pl-8 border-l-2 border-blue-300 mb-10">
+            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500" />
+            <p className="text-lg text-blue-900">
+              <span className="font-bold text-blue-700">2023 — The Idea:</span>{" "}
+              Gatherly began as a simple idea to give communities one shared place to connect.
+            </p>
+          </div>
       
-          <p className="text-lg leading-relaxed font-semibold text-indigo-700">
-            We believe community thrives when everyone feels invited to participate.
-          </p>
+          <div className="relative pl-8 border-l-2 border-blue-300 mb-10">
+            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500" />
+            <p className="text-lg text-blue-900">
+              <span className="font-bold text-blue-700">2024 — Building the Platform:</span>{" "}
+              Layouts, animations, and interactive tools were designed to feel modern and welcoming.
+            </p>
+          </div>
+      
+          <div className="relative pl-8 border-l-2 border-blue-300 mb-10">
+            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500" />
+            <p className="text-lg text-blue-900">
+              <span className="font-bold text-blue-700">2025 — Public Launch:</span>{" "}
+              Gatherly launched with events, calendars, and community-driven features.
+            </p>
+          </div>
+      
+          <div className="relative pl-8 border-l-2 border-blue-300">
+            <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-indigo-500" />
+            <p className="text-lg text-blue-900">
+              <span className="font-bold text-indigo-700">Looking Ahead:</span>{" "}
+              We’re expanding neighborhoods, stories, and opportunities for people to get involved.
+            </p>
+          </div>
         </div>
       </section>
       {/* FOOTER */}
