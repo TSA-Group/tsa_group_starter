@@ -9,6 +9,8 @@ import {
   useTransform,
 } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEventContext } from "../context/EventContext";
 
 // Animation variants
 const container: Variants = {
@@ -67,7 +69,7 @@ function QuickActions() {
 // Helper to convert any Date to Central Time
 const getCentralDate = (date: Date) => {
   const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-  const centralOffset = -6 * 60; // UTC-6 for Central Standard Time
+  const centralOffset = -6 * 60; // UTC-6
   return new Date(utc + centralOffset * 60000);
 };
 
@@ -76,11 +78,14 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [openEvent, setOpenEvent] = useState<number | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
+  const { setSelectedEvent } = useEventContext();
+  const router = useRouter();
 
   const { scrollY } = useScroll();
   const scrollRange = 300;
   const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
 
+  // Events list
   const events = [
     { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", category: "meetup", location: "Community Hall", details: "Join neighbors for a friendly meetup." },
     { title: "Community Dinner", dateString: "2025-12-21T18:00:00", category: "community", location: "Downtown Church", details: "Enjoy a meal with friends." },
@@ -120,14 +125,12 @@ export default function HomePage() {
   today.setHours(0,0,0,0);
 
   const categoryColors: Record<string, string> = {
-    meetup: "#34D399",    // green
-    community: "#818CF8", // indigo
-    clothing: "#A78BFA",  // purple
+    meetup: "#34D399",
+    community: "#818CF8",
+    clothing: "#A78BFA",
   };
 
   const year = new Date().getFullYear();
-  const headerColor = "#1E40AF"; // Indigo-900
-
   const dayClasses = (date: Date, isToday: boolean, isSelected: boolean) => {
     if (isSelected) return "bg-gradient-to-br from-indigo-500 to-indigo-700 text-white font-bold";
     if (isToday) return "bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold";
@@ -144,11 +147,7 @@ export default function HomePage() {
         <motion.h1
           layout
           variants={cardPop}
-          animate={{
-            x: [-20, 0, -20],
-            y: [0, -6, 0],
-            transition: { duration: 2.5, ease: "easeInOut" },
-          }}
+          animate={{ x: [-20, 0, -20], y: [0, -6, 0], transition: { duration: 2.5, ease: "easeInOut" } }}
           style={{ background: "linear-gradient(90deg, #1E3A8A, #60A5FA)", WebkitBackgroundClip: "text", color: "transparent", fontFamily: "TAN Buster, sans-serif" }}
           className="text-6xl sm:text-7xl lg:text-8xl font-extrabold leading-none"
         >
@@ -167,11 +166,13 @@ export default function HomePage() {
           <motion.div variants={cardPop} className="h-[350px] p-4 overflow-y-auto rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm" style={{ background: "linear-gradient(135deg, #DBEAFE, #E0F2FE)" }}>
             <h3 className="text-lg font-semibold mb-3 text-blue-900">Volunteer Opportunities</h3>
             <ul className="space-y-4">
-              {[{ title: "Free community dinner — Sat 6pm", meta: "Downtown Church", color: "#D0F0C0" },
+              {[
+                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church", color: "#D0F0C0" },
                 { title: "Warm clothing drive", meta: "Westside Center", color: "#E0F2FE" },
                 { title: "Volunteer literacy tutors needed", meta: "Library Annex", color: "#F3E8FF" },
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park", color: "#DBF4F8" },
-                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall", color: "#FDE68A" }].map((item,i)=>(
+                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall", color: "#FDE68A" },
+              ].map((item,i)=>(
                 <li key={i} className="border rounded-xl p-3" style={{ backgroundColor: item.color }}>
                   <div className="text-sm font-semibold text-blue-900">{item.title}</div>
                   <div className="text-xs text-blue-700">{item.meta}</div>
@@ -190,7 +191,13 @@ export default function HomePage() {
               <h2 className="text-2xl font-semibold text-blue-900">Upcoming Events</h2>
             </motion.div>
             {events.map((event,i)=>(
-              <motion.div key={i} variants={cardPop} className="rounded-2xl border border-blue-200 p-4 cursor-pointer" style={{ background: "linear-gradient(135deg, #E0F2FE, #DBEAFE)" }} onClick={()=>setOpenEvent(openEvent===i?null:i)}>
+              <motion.div
+                key={i}
+                variants={cardPop}
+                className="rounded-2xl border border-blue-200 p-4 cursor-pointer"
+                style={{ background: "linear-gradient(135deg, #E0F2FE, #DBEAFE)" }}
+                onClick={() => { setSelectedEvent(event); router.push("/events"); }}
+              >
                 <h3 className="font-semibold text-blue-900">{event.title}</h3>
                 <p className="text-sm text-blue-700">{new Date(event.dateString).toLocaleString()} • {event.location}</p>
                 <AnimatePresence>
@@ -208,12 +215,10 @@ export default function HomePage() {
               <button onClick={()=>setCalendarDate(getCentralDate(new Date(calYear, calMonth+1,1)))} className="text-blue-700 text-2xl font-bold">❯</button>
             </div>
 
-            {/* Days of Week */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map(d=><div key={d} className="text-center">{d}</div>)}
             </div>
 
-            {/* Calendar Days */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date,idx)=>{
                 if(!date) return <div key={idx}/>;
@@ -240,64 +245,43 @@ export default function HomePage() {
           </motion.div>
         </motion.section>
       </motion.main>
-    </motion.div>
-  );
-}
+
       {/* IMAGE + TEXT BOXES */}
-      <motion.section
-        initial="hidden"
-        variants={container}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16"
-      >
-        {[
-          {
+      <motion.section initial="hidden" variants={container} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16">
+        {[{
             title: "Community Stories",
             text: "See how neighbors are making a difference together.",
             href: "/stories",
             align: "left",
-          },
-          {
+          },{
             title: "Local Neighborhoods",
             text: "Explore different neighborhoods and what they offer.",
             href: "/neighborhoods",
             align: "right",
-          },
-          {
+          },{
             title: "Get Involved",
             text: "Find ways to volunteer and support your community.",
             href: "/volunteer",
             align: "left",
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            className={`flex ${item.align === "right" ? "justify-end" : "justify-start"}`}
-          >
+          }].map((item,i)=>(
+          <motion.div key={i} variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once:true, margin:"-100px" }} className={`flex ${item.align==="right"?"justify-end":"justify-start"}`}>
             <Link href={item.href} className="block w-full md:w-[48%]">
-              <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer"
-              >
-                <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                  Image Here
-                </div>
+              <motion.div whileHover={{y:-8,scale:1.02}} transition={{type:"spring",stiffness:260,damping:18}} className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer">
+                <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">Image Here</div>
                 <div className="p-5 space-y-2">
                   <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
                   <p className="text-sm text-blue-700">{item.text}</p>
-                  <span className="inline-block mt-2 text-sm font-semibold text-blue-600">
-                    Learn more →
-                  </span>
+                  <span className="inline-block mt-2 text-sm font-semibold text-blue-600">Learn more →</span>
                 </div>
               </motion.div>
             </Link>
           </motion.div>
         ))}
       </motion.section>
+    </motion.div>
+  );
+}
+
 
       {/* WEBSITE HISTORY SECTION */}
       <section className="relative w-full mt-40 mb-32 px-6">
