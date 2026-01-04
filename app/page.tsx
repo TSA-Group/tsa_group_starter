@@ -476,6 +476,54 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* SPACER */}
+      <div className="flex justify-center my-28">
+        <div className="h-px w-40 bg-gradient-to-r from-transparent via-indigo-400 to-transparent" />
+      </div>
+      {/* OUR MISSION SECTION */}
+      <section className="relative w-full mb-40 px-6">
+        {/* Glow */}
+        <div className="absolute inset-0 -z-10 flex justify-center">
+          <div className="h-80 w-80 rounded-full bg-indigo-300/20 blur-3xl" />
+        </div>
+      
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">
+          Our Mission
+        </h2>
+      
+        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl
+                        bg-gradient-to-br from-indigo-50 via-indigo-100 to-indigo-50
+                        border border-indigo-200">
+      
+          <p className="text-lg text-center text-slate-700 mb-12 max-w-3xl mx-auto">
+            Our mission is to strengthen communities by making it easy for people to
+            connect, discover local events, and feel a true sense of belonging.
+          </p>
+      
+          <div className="grid gap-10 sm:grid-cols-3 text-center">
+            <div>
+              <h3 className="text-xl font-bold text-indigo-700 mb-2">Connect</h3>
+              <p className="text-slate-700">
+                Bringing neighbors together through shared experiences.
+              </p>
+            </div>
+      
+            <div>
+              <h3 className="text-xl font-bold text-indigo-700 mb-2">Discover</h3>
+              <p className="text-slate-700">
+                Making local events simple to find and join.
+              </p>
+            </div>
+      
+            <div>
+              <h3 className="text-xl font-bold text-indigo-700 mb-2">Belong</h3>
+              <p className="text-slate-700">
+                Creating welcoming spaces where everyone feels included.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
