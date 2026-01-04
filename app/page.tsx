@@ -132,7 +132,7 @@ export default function HomePage() {
   const categoryColors: Record<string, string> = {
     meetup: "bg-green-100 hover:bg-green-200",
     community: "bg-blue-100 hover:bg-blue-200",
-    clothing: "bg-indigo-100 hover:bg-indigo-200",
+    clothing: "bg-indigo-200 hover:bg-indigo-300",
   };
 
   const year = new Date().getFullYear();
