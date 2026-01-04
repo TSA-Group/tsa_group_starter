@@ -449,7 +449,30 @@ export default function Home() {
           </p>
         </div>
       </section>
+      {/* OUR MISSION SECTION */}
+      <section className="w-full mb-40 px-6">
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
+          Our Mission
+        </h2>
       
+        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900
+                        bg-gradient-to-br from-indigo-50 via-indigo-100 to-indigo-50
+                        border border-indigo-200">
+          <p className="text-lg leading-relaxed mb-6">
+            Our mission is to strengthen communities by making it easy for people to
+            discover events, share experiences, and build meaningful connections.
+          </p>
+      
+          <p className="text-lg leading-relaxed mb-6">
+            Gatherly was created to bring neighborhoods together in a welcoming,
+            organized, and engaging way—both online and in real life.
+          </p>
+      
+          <p className="text-lg leading-relaxed font-semibold text-indigo-700">
+            We believe community thrives when everyone feels invited to participate.
+          </p>
+        </div>
+      </section>
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
