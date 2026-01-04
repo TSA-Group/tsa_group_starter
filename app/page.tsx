@@ -94,6 +94,7 @@ export default function HomePage() {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const year = new Date().getFullYear();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -130,7 +131,6 @@ export default function HomePage() {
     clothing: "#A78BFA",
   };
 
-  const year = new Date().getFullYear();
   const dayClasses = (date: Date, isToday: boolean, isSelected: boolean) => {
     if (isSelected) return "bg-gradient-to-br from-indigo-500 to-indigo-700 text-white font-bold";
     if (isToday) return "bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold";
@@ -161,8 +161,6 @@ export default function HomePage() {
         {/* LEFT COLUMN */}
         <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
-
-          {/* Volunteer Opportunities Box */}
           <motion.div variants={cardPop} className="h-[350px] p-4 overflow-y-auto rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm" style={{ background: "linear-gradient(135deg, #DBEAFE, #E0F2FE)" }}>
             <h3 className="text-lg font-semibold mb-3 text-blue-900">Volunteer Opportunities</h3>
             <ul className="space-y-4">
@@ -253,12 +251,12 @@ export default function HomePage() {
             text: "See how neighbors are making a difference together.",
             href: "/stories",
             align: "left",
-          },{
+          }, {
             title: "Local Neighborhoods",
             text: "Explore different neighborhoods and what they offer.",
             href: "/neighborhoods",
             align: "right",
-          },{
+          }, {
             title: "Get Involved",
             text: "Find ways to volunteer and support your community.",
             href: "/volunteer",
@@ -278,75 +276,50 @@ export default function HomePage() {
           </motion.div>
         ))}
       </motion.section>
-    </motion.div>
-  );
-}
 
-
-      {/* WEBSITE HISTORY SECTION */}
+      {/* WEBSITE HISTORY */}
       <section className="relative w-full mt-40 mb-32 px-6">
         <div className="absolute inset-0 -z-10 flex justify-center">
           <div className="h-80 w-80 rounded-full bg-gradient-to-br from-blue-200/20 to-indigo-200/20 blur-3xl" />
         </div>
-
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">
-          Our Story
-        </h2>
-
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">Our Story</h2>
         <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl border border-blue-200" style={{ background: "linear-gradient(to bottom right, #DBEAFE, #E0F2FE)" }}>
-          {[
-            { year: "2023 — The Idea:", text: "Gatherly began as a simple idea to give communities one shared place to connect.", color: "from-blue-400 to-blue-600" },
+          {[{ year: "2023 — The Idea:", text: "Gatherly began as a simple idea to give communities one shared place to connect.", color: "from-blue-400 to-blue-600" },
             { year: "2024 — Building the Platform:", text: "Layouts, animations, and interactive tools were designed to feel modern and welcoming.", color: "from-indigo-400 to-indigo-600" },
             { year: "2025 — Public Launch:", text: "Gatherly launched with events, calendars, and community-driven features.", color: "from-purple-400 to-purple-600" },
-            { year: "Looking Ahead:", text: "We’re expanding neighborhoods, stories, and opportunities for people to get involved.", color: "from-blue-500 to-indigo-500" },
-          ].map((item, i) => (
+            { year: "Looking Ahead:", text: "We’re expanding neighborhoods, stories, and opportunities for people to get involved.", color: "from-blue-500 to-indigo-500" }].map((item, i) => (
             <div key={i} className="relative pl-8 border-l-2 border-blue-300 mb-10 last:mb-0">
               <span className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gradient-to-br ${item.color}`} />
               <p className="text-lg text-blue-900 font-semibold">
-                <span className="font-bold text-blue-700">{item.year}</span>{" "}{item.text}
+                <span className="font-bold text-blue-700">{item.year}</span> {item.text}
               </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* OUR MISSION SECTION */}
+      {/* OUR MISSION */}
       <section className="relative w-full mb-40 px-6">
         <div className="absolute inset-0 -z-10 flex justify-center">
           <div className="h-80 w-80 rounded-full bg-gradient-to-br from-indigo-300/20 to-blue-200/20 blur-3xl" />
         </div>
-
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">
-          Our Mission
-        </h2>
-
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl border border-indigo-200"
-             style={{ background: "linear-gradient(to bottom right, #E0F2FE, #EEF2FF)" }}>
+        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-16">Our Mission</h2>
+        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-xl border border-indigo-200" style={{ background: "linear-gradient(to bottom right, #E0F2FE, #EEF2FF)" }}>
           <p className="text-lg text-center text-slate-700 mb-12 max-w-3xl mx-auto">
-            Our mission is to strengthen communities by making it easy for people to
-            connect, discover local events, and feel a true sense of belonging.
+            Our mission is to strengthen communities by making it easy for people to connect, discover local events, and feel a true sense of belonging.
           </p>
-
           <div className="grid gap-10 sm:grid-cols-3 text-center">
             <div>
               <h3 className="text-xl font-bold text-indigo-700 mb-2">Connect</h3>
-              <p className="text-slate-700">
-                Bringing neighbors together through shared experiences.
-              </p>
+              <p className="text-slate-700">Bringing neighbors together through shared experiences.</p>
             </div>
-
             <div>
               <h3 className="text-xl font-bold text-indigo-700 mb-2">Discover</h3>
-              <p className="text-slate-700">
-                Making local events simple to find and join.
-              </p>
+              <p className="text-slate-700">Making local events simple to find and join.</p>
             </div>
-
             <div>
               <h3 className="text-xl font-bold text-indigo-700 mb-2">Belong</h3>
-              <p className="text-slate-700">
-                Creating welcoming spaces where everyone feels included.
-              </p>
+              <p className="text-slate-700">Creating welcoming spaces where everyone feels included.</p>
             </div>
           </div>
         </div>
@@ -354,9 +327,12 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer className="border-t border-blue-200">
-        <div className="text-center text-sm text-blue-700 py-4"
-             style={{ background: "linear-gradient(to right, #DBEAFE, #818CF8)" }}>
+        <div className="text-center text-sm text-blue-700 py-4" style={{ background: "linear-gradient(to right, #DBEAFE, #818CF8)" }}>
           © {year} Gatherly. All rights reserved.
         </div>
       </footer>
+
+    </motion.div>
+  );
+}
 
