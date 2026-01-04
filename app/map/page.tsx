@@ -1,12 +1,10 @@
-
 "use client";
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
   APIProvider,
   Map,
-  Marker,
+  AdvancedMarker,
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
 
@@ -271,9 +269,19 @@ export default function Page() {
 
     return ALL_LOCATIONS.filter(
       (loc) =>
-        passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
+        passQuery(loc) &&
+        passEvent(loc) &&
+        passActivity(loc) &&
+        passRadius(loc),
     );
-  }, [directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
+  }, [
+    directoryQuery,
+    eventFilters,
+    activityFilters,
+    radiusMode,
+    center.lat,
+    center.lng,
+  ]);
 
   const activeCount =
     eventFilters.length +
@@ -281,13 +289,12 @@ export default function Page() {
     (radiusMode === "Near Center" ? 1 : 0) +
     (directoryQuery.trim() ? 1 : 0);
 
-  const handleMarkerClick = (loc: LocationItem) => {
-    setSelectedPlace(loc.position);
-    setCenter(loc.position);
-  };
-
   return (
-    <APIProvider apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM" libraries={["places"]}>
+    <APIProvider
+      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
+      libraries={["places"]}
+      version="beta"
+    >
       {/* Page Shell (matches your home: clean, soft blue accents) */}
       <div className="min-h-screen bg-white text-slate-900 dark:bg-[#0b1220] dark:text-slate-100">
         <motion.div
@@ -304,8 +311,8 @@ export default function Page() {
                   Resources Map
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Find community events and resources — filter by activity, event
-                  type, directory search, or what’s near you.
+                  Find community events and resources — filter by activity,
+                  event type, directory search, or what’s near you.
                 </p>
               </div>
 
@@ -361,7 +368,8 @@ export default function Page() {
                         Explore the map
                       </h2>
                       <p className="text-sm text-slate-600 dark:text-slate-300">
-                        Search the directory (resources) or search the map (places).
+                        Search the directory (resources) or search the map
+                        (places).
                       </p>
                     </div>
 
@@ -382,25 +390,17 @@ export default function Page() {
                                dark:border-blue-900/60"
                   >
                     <Map
-                      key={theme}
-                      defaultZoom={12}
+                      mapId="8859a83a13a834f6eeef1c63"
                       center={center}
-                      mapTypeId="roadmap"
-                      styles={theme === "dark" ? darkStyle : []}
+                      defaultZoom={12}
                       gestureHandling="greedy"
-                      disableDefaultUI={false}
+                      onClick={() => setActiveId(null)}
                     >
-                      {/* Filtered Markers */}
                       {filteredLocations.map((loc) => (
-                        <Marker
-                          key={loc.id}
-                          position={loc.position}
-                          onClick={() => handleMarkerClick(loc)}
-                        />
+                        <AdvancedMarker key={loc.id} position={loc.position}>
+                          <HoverMarker location={loc} />
+                        </AdvancedMarker>
                       ))}
-
-                      {/* Selected marker (from map search or clicking a card) */}
-                      {selectedPlace && <Marker position={selectedPlace} />}
                     </Map>
                   </div>
 
@@ -452,7 +452,8 @@ export default function Page() {
                         className="rounded-2xl border border-blue-200 bg-blue-50 p-5 text-blue-900
                                    dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
                       >
-                        No matches. Try removing a filter or changing your search.
+                        No matches. Try removing a filter or changing your
+                        search.
                       </motion.div>
                     ) : (
                       <motion.div
@@ -703,7 +704,9 @@ function SearchBox({
   setSelectedPlace: (loc: LatLng | null) => void;
 }) {
   const placesLib = useMapsLibrary("places");
-  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(
+    null,
+  );
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -919,6 +922,58 @@ function SearchBox({
               </li>
             ))}
           </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+function HoverMarker({ location }: { location: LocationItem }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        transform: "translate(-50%, -100%)",
+        position: "relative",
+        zIndex: hovered ? 10 : 1,
+      }}
+    >
+      {/* 🔁 Spinning marker image */}
+      <motion.img
+        src="/marker.png"
+        alt="Marker"
+        className="w-8 h-8 drop-shadow-md"
+        animate={{ rotate: 360 }}
+        transition={{
+          repeat: Infinity,
+          duration: 6,
+          ease: "linear",
+        }}
+      />
+
+      {/* 💬 Hover info box */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="
+              absolute left-1/2 bottom-full mb-2
+              -translate-x-1/2
+              bg-blue-600 text-white text-xs
+              rounded-xl px-3 py-2
+              shadow-lg pointer-events-none
+              w-56
+            "
+          >
+            <div className="font-semibold">{location.title}</div>
+            <div className="opacity-90">{location.when}</div>
+            <div className="opacity-80">{location.eventType}</div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
