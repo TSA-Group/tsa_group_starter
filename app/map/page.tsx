@@ -42,7 +42,7 @@ type LocationItem = {
   host?: string;
 };
 
-/** ---------- UI Motion ---------- */
+/** ---------- Motion ---------- */
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -63,7 +63,7 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-/** ---------- Sample Data (replace with DB later) ---------- */
+/** ---------- Sample Data (swap with DB later) ---------- */
 const ALL_LOCATIONS: LocationItem[] = [
   {
     id: "loc-1",
@@ -147,8 +147,8 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
 
 /** ---------- Page ---------- */
 export default function Page() {
-  // IMPORTANT: set this env var
-  // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="your_key"
+  // Put your key in .env.local:
+  // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="YOUR_KEY"
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   const [center, setCenter] = useState<LatLng>({
@@ -156,14 +156,14 @@ export default function Page() {
     lng: -95.6221,
   });
 
-  // Places search (top bar)
+  // Places search (always visible top bar)
   const [placeInput, setPlaceInput] = useState("");
   const [placePredictions, setPlacePredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
-  // Directory search (resource list)
+  // Directory search (resources list)
   const [directoryQuery, setDirectoryQuery] = useState("");
 
   /** ---------- Filters ---------- */
@@ -201,7 +201,7 @@ export default function Page() {
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      return dist < 0.08;
+      return dist < 0.08; // quick nearby filter
     };
 
     return ALL_LOCATIONS.filter(
@@ -230,7 +230,6 @@ export default function Page() {
 
   return (
     <APIProvider apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM" libraries={["places"]}>
-      {/* Soft blue/white theme like screenshot */}
       <div className="min-h-screen bg-[#f5f9ff] text-slate-900">
         <motion.div
           variants={container}
@@ -266,7 +265,7 @@ export default function Page() {
             </div>
           </motion.div>
 
-          {/* Big always-visible Places search bar (autocomplete) */}
+          {/* Always-visible Places search bar */}
           <motion.div variants={fadeUp} className="mb-6">
             <PlacesSearchBar
               input={placeInput}
@@ -286,7 +285,6 @@ export default function Page() {
             />
           </motion.div>
 
-          {/* Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Filters */}
             <motion.aside variants={fadeUp} className="lg:col-span-4">
@@ -328,8 +326,9 @@ export default function Page() {
                       whileHover={{ scale: 1.02 }}
                       className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
                     >
-                      Showing {filteredLocations.length} location
-                      {filteredLocations.length === 1 ? "" : "s"}
+                      {`Showing ${filteredLocations.length} location${
+                        filteredLocations.length === 1 ? "" : "s"
+                      }`}
                     </motion.div>
                   </div>
                 </div>
@@ -388,10 +387,14 @@ export default function Page() {
                         exit={{ opacity: 0 }}
                         className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
                       >
-                        No matches. Try removing a filter or changing your search.
+                        No matches. Try removing a filter or changing your
+                        search.
                       </motion.div>
                     ) : (
-                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <motion.div
+                        layout
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                      >
                         {filteredLocations.map((loc) => (
                           <motion.button
                             key={loc.id}
@@ -448,7 +451,7 @@ export default function Page() {
   );
 }
 
-/** ---------- Places Search Bar (always visible, autocomplete while typing) ---------- */
+/** ---------- Places Search Bar (autocomplete while typing) ---------- */
 function PlacesSearchBar({
   input,
   setInput,
@@ -475,7 +478,6 @@ function PlacesSearchBar({
     }
   }, [placesLib]);
 
-  // Fetch predictions as user types
   useEffect(() => {
     const q = input.trim();
     if (!serviceRef.current || q.length < 2) {
@@ -494,7 +496,6 @@ function PlacesSearchBar({
     return () => window.clearTimeout(handle);
   }, [input, setPredictions]);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
@@ -542,8 +543,7 @@ function PlacesSearchBar({
               onFocus={() => setOpen(true)}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type an address, park, library, mall..."
-              className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 pr-12 text-slate-900
-                         placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 pr-12 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
 
             {input.trim().length > 0 && (
@@ -574,15 +574,15 @@ function PlacesSearchBar({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden
-                       border border-blue-200 bg-white shadow-lg z-30"
+            className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden border border-blue-200 bg-white shadow-lg z-30"
           >
             {predictions.slice(0, 6).map((p, idx) => (
               <li
                 key={p.place_id}
                 onClick={() => handleSelectPlace(p.place_id, p.description)}
-                className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50
-                            ${idx !== 0 ? "border-t border-blue-100" : ""}`}
+                className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
+                  idx !== 0 ? "border-t border-blue-100" : ""
+                }`}
               >
                 {p.description}
               </li>
@@ -594,7 +594,7 @@ function PlacesSearchBar({
   );
 }
 
-/** ---------- Directory Search (resources list) ---------- */
+/** ---------- Directory Search ---------- */
 function DirectorySearch({
   value,
   onChange,
@@ -612,8 +612,7 @@ function DirectorySearch({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search resources..."
-        className="mt-3 w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 text-slate-900
-                   placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        className="mt-3 w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
       />
     </div>
   );
@@ -661,12 +660,11 @@ function FilterBox({
             whileTap={{ scale: hasAny ? 0.98 : 1 }}
             onClick={onClear}
             disabled={!hasAny}
-            className={`text-sm px-3 py-2 rounded-xl border transition
-              ${
-                hasAny
-                  ? "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
-                  : "border-slate-200 text-slate-400 cursor-not-allowed bg-white"
-              }`}
+            className={`text-sm px-3 py-2 rounded-xl border transition ${
+              hasAny
+                ? "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
+                : "border-slate-200 text-slate-400 cursor-not-allowed bg-white"
+            }`}
           >
             Clear
           </motion.button>
@@ -686,12 +684,11 @@ function FilterBox({
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setRadiusMode(opt)}
-                  className={`px-3 py-2 rounded-xl border text-sm transition
-                    ${
-                      active
-                        ? "border-blue-400 bg-blue-600 text-white shadow-sm"
-                        : "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
-                    }`}
+                  className={`px-3 py-2 rounded-xl border text-sm transition ${
+                    active
+                      ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                      : "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
+                  }`}
                 >
                   {opt === "All" ? "All" : "Near map center"}
                 </motion.button>
@@ -712,12 +709,11 @@ function FilterBox({
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setEventFilters(toggle(eventFilters, e))}
-                  className={`px-3 py-2 rounded-full border text-sm transition
-                    ${
-                      active
-                        ? "border-blue-400 bg-white text-blue-900 shadow-sm"
-                        : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
-                    }`}
+                  className={`px-3 py-2 rounded-full border text-sm transition ${
+                    active
+                      ? "border-blue-400 bg-white text-blue-900 shadow-sm"
+                      : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
+                  }`}
                 >
                   {e}
                 </motion.button>
@@ -738,12 +734,11 @@ function FilterBox({
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setActivityFilters(toggle(activityFilters, a))}
-                  className={`px-3 py-2 rounded-full border text-sm transition
-                    ${
-                      active
-                        ? "border-blue-400 bg-blue-600 text-white shadow-sm"
-                        : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
-                    }`}
+                  className={`px-3 py-2 rounded-full border text-sm transition ${
+                    active
+                      ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                      : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
+                  }`}
                 >
                   {a}
                 </motion.button>
