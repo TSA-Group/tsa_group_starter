@@ -74,144 +74,113 @@ function QuickActions() {
   );
 }
 
-export default function Home() {
-  const year = new Date().getFullYear();
-  const [calendarDate, setCalendarDate] = useState(new Date());
-  const [openEvent, setOpenEvent] = useState<number | null>(null);
-  const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
-  const { scrollY } = useScroll();
-  const [scrollRange, setScrollRange] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  const calendarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setScrollRange(document.body.scrollHeight - window.innerHeight);
-  }, []);
-
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const monthNames = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December"
-];
-
-export default function CommunityCalendar() {
-  const calendarRef = useRef<HTMLDivElement>(null);
-  const [calendarDate, setCalendarDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  const { scrollY } = useScroll();
-  const scrollRange = 300;
-  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
-
-  // Example events
-  const events = [
-    { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", category: "meetup" },
-    { title: "Community Dinner", dateString: "2025-12-21T18:00:00", category: "community" },
-    { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", category: "clothing" },
-  ];
-
-  // Click outside to close popup
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
-        setSelectedDate(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const calYear = calendarDate.getFullYear();
-  const calMonth = calendarDate.getMonth();
-
-  // Generate calendar days
-  const generateCalendarDays = () => {
-    const firstDay = new Date(calYear, calMonth, 1).getDay();
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const days: (Date | null)[] = [];
-
-    for (let i = 0; i < firstDay; i++) days.push(null);
-    for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(calYear, calMonth, i);
-      d.setHours(0,0,0,0);
-      days.push(d);
-    }
-    return days;
-  };
-  const calendarDays = generateCalendarDays();
-
-  // Map categories to colors
-  const categoryColors: Record<string, string> = {
-    meetup: "bg-green-400",
-    community: "bg-blue-500",
-    clothing: "bg-orange-400",
-  };
-
-  return (
-    <motion.div style={{ background }} className="p-6 rounded-2xl border border-gray-200 shadow-lg" ref={calendarRef}>
-      <h2 className="text-2xl font-bold mb-4 text-center">Community Calendar</h2>
-
-      {/* Month Navigation */}
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={() => setCalendarDate(new Date(calYear, calMonth - 1))} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">◀</button>
-        <span className="font-semibold text-lg">{monthNames[calMonth]} {calYear}</span>
-        <button onClick={() => setCalendarDate(new Date(calYear, calMonth + 1))} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">▶</button>
-      </div>
-
-      {/* Days of Week */}
-      <div className="grid grid-cols-7 text-center font-semibold text-gray-700 mb-1">
-        {daysOfWeek.map(day => <div key={day}>{day}</div>)}
-      </div>
-
-      {/* Calendar Days */}
-      <div className="grid grid-cols-7 gap-1 text-center">
-        {calendarDays.map((day, idx) => {
-          if (!day) return <div key={idx} className="h-10" />;
-
-          const isToday = day.toDateString() === new Date().toDateString();
-          const dayEvents = events.filter(e => new Date(e.dateString).toDateString() === day.toDateString());
-
-          return (
-            <div
-              key={idx}
-              onClick={() => setSelectedDate(day)}
-              className={`h-10 flex flex-col justify-center items-center rounded cursor-pointer border transition
-                         ${isToday ? "border-indigo-500 font-bold" : "border-gray-200"}
-                         hover:bg-gray-200`}
-            >
-              <span>{day.getDate()}</span>
-              <div className="flex flex-col -mt-1">
-                {dayEvents.map((e, i) => (
-                  <span key={i} className={`w-2 h-2 rounded-full ${categoryColors[e.category]} mx-auto mt-0.5`}></span>
-                ))}
-              </div>
+      // Inside Home or a separate file
+      const CommunityCalendar = () => {
+        const [calendarDate, setCalendarDate] = useState(new Date());
+        const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+        const calendarRef = useRef<HTMLDivElement>(null);
+      
+        const { scrollY } = useScroll();
+        const scrollRange = 300;
+        const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
+      
+        const events = [
+          { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", category: "meetup" },
+          { title: "Community Dinner", dateString: "2025-12-21T18:00:00", category: "community" },
+          { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", category: "clothing" },
+        ];
+      
+        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      
+        // Click outside to close popup
+        useEffect(() => {
+          const handleClickOutside = (e: MouseEvent) => {
+            if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
+              setSelectedDate(null);
+            }
+          };
+          document.addEventListener("mousedown", handleClickOutside);
+          return () => document.removeEventListener("mousedown", handleClickOutside);
+        }, []);
+      
+        const calYear = calendarDate.getFullYear();
+        const calMonth = calendarDate.getMonth();
+      
+        const generateCalendarDays = () => {
+          const firstDay = new Date(calYear, calMonth, 1).getDay();
+          const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+          const days: (Date | null)[] = [];
+          for (let i = 0; i < firstDay; i++) days.push(null);
+          for (let i = 1; i <= daysInMonth; i++) {
+            const d = new Date(calYear, calMonth, i);
+            d.setHours(0, 0, 0, 0);
+            days.push(d);
+          }
+          return days;
+        };
+        const calendarDays = generateCalendarDays();
+      
+        const categoryColors: Record<string, string> = {
+          meetup: "bg-green-400",
+          community: "bg-blue-500",
+          clothing: "bg-orange-400",
+        };
+      
+        const today = new Date();
+        today.setHours(0,0,0,0);
+      
+        return (
+          <motion.div style={{ background }} ref={calendarRef} className="p-6 rounded-2xl border border-gray-200 shadow-lg">
+            <h2 className="text-2xl font-bold mb-4 text-center">Community Calendar</h2>
+            {/* Month Navigation */}
+            <div className="flex justify-between items-center mb-4">
+              <button onClick={() => setCalendarDate(new Date(calYear, calMonth - 1))}>◀</button>
+              <span>{monthNames[calMonth]} {calYear}</span>
+              <button onClick={() => setCalendarDate(new Date(calYear, calMonth + 1))}>▶</button>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Selected Date Popup */}
-      {selectedDate && (
-        <div className="mt-4 p-4 border border-gray-300 rounded bg-white shadow-md">
-          <h3 className="font-semibold">
-            {selectedDate.toDateString()}
-          </h3>
-          {events.filter(e => new Date(e.dateString).toDateString() === selectedDate.toDateString()).length === 0 ? (
-            <p className="text-gray-500 mt-2">No events scheduled.</p>
-          ) : (
-            <ul className="mt-2 space-y-1">
-              {events.filter(e => new Date(e.dateString).toDateString() === selectedDate.toDateString())
-                .map((e, idx) => (
-                  <li key={idx} className="text-gray-700 text-sm">{e.title}</li>
-                ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </motion.div>
-  );
-}
+            <div className="grid grid-cols-7 text-center font-semibold text-gray-700 mb-1">
+              {daysOfWeek.map(day => <div key={day}>{day}</div>)}
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {calendarDays.map((day, idx) => {
+                if (!day) return <div key={idx} className="h-10" />;
+      
+                const isToday = day.getTime() === today.getTime();
+                const dayEvents = events.filter(e => new Date(e.dateString).toDateString() === day.toDateString());
+      
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedDate(prev => prev && prev.getTime() === day.getTime() ? null : day)}
+                    className={`h-10 flex flex-col justify-center items-center rounded cursor-pointer border ${isToday ? "border-indigo-500 font-bold" : "border-gray-200"} hover:bg-gray-200`}
+                  >
+                    <span>{day.getDate()}</span>
+                    <div className="flex flex-col -mt-1">
+                      {dayEvents.map((e,i) => <span key={i} className={`w-2 h-2 rounded-full ${categoryColors[e.category]} mx-auto mt-0.5`}></span>)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+      
+            {/* Selected Date Popup */}
+            {selectedDate && (
+              <div className="mt-4 p-4 border border-gray-300 rounded bg-white shadow-md">
+                <h3 className="font-semibold">{selectedDate.toDateString()}</h3>
+                {events.filter(e => new Date(e.dateString).toDateString() === selectedDate.toDateString()).length === 0 ? (
+                  <p className="text-gray-500 mt-2">No events scheduled.</p>
+                ) : (
+                  <ul className="mt-2 space-y-1">
+                    {events.filter(e => new Date(e.dateString).toDateString() === selectedDate.toDateString())
+                      .map((e, idx) => <li key={idx} className="text-gray-700 text-sm">{e.title}</li>)}
+                  </ul>
+                )}
+              </div>
+            )}
+          </motion.div>
+        );
+      };
       {/* HEADER */}
       <motion.header
         layout
