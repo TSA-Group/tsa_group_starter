@@ -135,15 +135,6 @@ export default function HomePage() {
     clothing: "bg-orange-100 hover:bg-orange-200",
   };
 
-  const dayClasses = (date: Date, isToday: boolean, isSelected: boolean, dayEvents: typeof events) => {
-    if (isSelected) return "bg-gradient-to-br from-indigo-400 to-indigo-600 text-white font-bold";
-    if (isToday) return "bg-gradient-to-br from-blue-400 to-blue-600 text-white font-bold";
-    if (dayEvents.length > 0) return `${categoryColors[dayEvents[0].category]} text-blue-900`;
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    if (isWeekend) return "bg-purple-50 hover:bg-purple-200 text-blue-900";
-    return "bg-blue-50 hover:bg-blue-100 text-blue-900";
-  };
-
   const year = new Date().getFullYear();
   const headerColor = "#1E40AF"; // Indigo-900
 
@@ -185,13 +176,11 @@ export default function HomePage() {
               Volunteer Opportunities
             </h3>
             <ul className="space-y-4">
-              {[
-                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
+              {[{ title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
                 { title: "Warm clothing drive", meta: "Westside Center" },
                 { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
                 { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
-                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
-              ].map((item, i) => (
+                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" }].map((item, i) => (
                 <li key={i} className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                   <div className="text-sm font-semibold">{item.title}</div>
                   <div className="text-xs text-blue-700">{item.meta}</div>
@@ -248,7 +237,7 @@ export default function HomePage() {
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
+            className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
           >
             <div className="flex items-center justify-between mb-4">
               <button
@@ -285,10 +274,39 @@ export default function HomePage() {
                   );
                 });
 
+                const getDayClasses = () => {
+                  const colors: Record<string, string> = {
+                    meetup: "bg-green-200 hover:bg-green-300",
+                    community: "bg-blue-200 hover:bg-blue-300",
+                    clothing: "bg-orange-200 hover:bg-orange-300",
+                  };
+
+                  if (isSelected) return "bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-bold shadow-lg";
+                  if (isToday) return "bg-gradient-to-br from-yellow-400 to-orange-400 text-white font-bold shadow-lg";
+                  if (dayEvents.length > 0) return `${colors[dayEvents[0].category]} text-blue-900`;
+                  if (date.getDay() === 0 || date.getDay() === 6) return "bg-purple-50 hover:bg-purple-200 text-blue-900";
+                  return "bg-blue-50 hover:bg-blue-100 text-blue-900";
+                };
+
+                const getHoverGradient = () => {
+                  if (isSelected || isToday) return "";
+                  if (dayEvents.length > 0) {
+                    const cat = dayEvents[0].category;
+                    const hoverGrad: Record<string, string> = {
+                      meetup: "hover:bg-gradient-to-br hover:from-green-100 hover:to-green-300",
+                      community: "hover:bg-gradient-to-br hover:from-blue-100 hover:to-blue-300",
+                      clothing: "hover:bg-gradient-to-br hover:from-orange-100 hover:to-orange-300",
+                    };
+                    return hoverGrad[cat];
+                  }
+                  if (date.getDay() === 0 || date.getDay() === 6) return "hover:bg-gradient-to-br hover:from-purple-100 hover:to-purple-200";
+                  return "hover:bg-gradient-to-br hover:from-blue-100 hover:to-blue-200";
+                };
+
                 return (
                   <div
                     key={idx}
-                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${dayClasses(date, isToday, isSelected, dayEvents)}`}
+                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-all duration-300 ${getDayClasses()} ${getHoverGradient()}`}
                     onClick={() =>
                       setSelectedDate(prev =>
                         prev && prev.getTime() === date.getTime() ? null : date
@@ -332,10 +350,6 @@ export default function HomePage() {
 
         </motion.section>
       </motion.main>
-    </motion.div>
-  );
-}
-
 
       {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
       <motion.section
@@ -495,5 +509,4 @@ export default function HomePage() {
     </motion.div>
   );
 }
-
 
