@@ -430,54 +430,62 @@ export default function Page() {
   </div>
 </motion.section>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Filters */}
-            <motion.aside variants={fadeUp} className="lg:col-span-4">
-              <FilterBox
-                eventFilters={eventFilters}
-                setEventFilters={setEventFilters}
-                activityFilters={activityFilters}
-                setActivityFilters={setActivityFilters}
-                radiusMode={radiusMode}
-                setRadiusMode={setRadiusMode}
-                onClear={() => {
-                  setEventFilters([]);
-                  setActivityFilters([]);
-                  setRadiusMode("All");
-                  setDirectoryQuery("");
-                }}
-              />
-            </motion.aside>
+         {/* Main Grid */}
+<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  {/* Filters */}
+  <motion.aside variants={fadeUp} className="lg:col-span-4">
+    <FilterBox
+      eventFilters={eventFilters}
+      setEventFilters={setEventFilters}
+      activityFilters={activityFilters}
+      setActivityFilters={setActivityFilters}
+      radiusMode={radiusMode}
+      setRadiusMode={setRadiusMode}
+      onClear={() => {
+        setEventFilters([]);
+        setActivityFilters([]);
+        setRadiusMode("All");
+        setDirectoryQuery("");
+      }}
+    />
+  </motion.aside>
 
-            {/* Map + Search + List */}
-            <div className="lg:col-span-8 space-y-6">
-              {/* Map Card — IMPORTANT: overflow-visible so dropdown isn't clipped */}
-              <motion.section
-                variants={fadeUp}
-                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
-              >
-                <div className="p-4 sm:p-5 border-b border-blue-200/60">
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div>
-                      <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-                        Interactive Resource Map
-                      </h2>
-                      <p className="text-sm text-slate-600">
-                        Search the directory or search the map (autocomplete).
-                      </p>
-                    </div>
+  {/* Map + Search + List */}
+  <div className="lg:col-span-8 space-y-6">
+    {/* Map Card — IMPORTANT: z-20 + overflow-visible so dropdown shows on top */}
+    <motion.section
+      variants={fadeUp}
+      className="relative z-20 rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
+    >
+      <div className="p-4 sm:p-5 border-b border-blue-200/60">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+              Interactive Resource Map
+            </h2>
+            <p className="text-sm text-slate-600">
+              Search the directory or search the map (autocomplete).
+            </p>
+          </div>
 
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
-                    >
-                      {`Showing ${filteredLocations.length} location${
-                        filteredLocations.length === 1 ? "" : "s"
-                      }`}
-                    </motion.div>
-                  </div>
-                </div>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
+          >
+            {`Showing ${filteredLocations.length} location${
+              filteredLocations.length === 1 ? "" : "s"
+            }`}
+          </motion.div>
+        </div>
+      </div>
+
+      
+    </motion.section>
+
+    
+  </div>
+</div>
+
 
                 <div className="p-4 sm:p-5">
                   {/* Map container keeps overflow-hidden */}
