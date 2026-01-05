@@ -2,23 +2,31 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 
-const glow = {
+const glow: Variants = {
   initial: { opacity: 0, scale: 0.98 },
   animate: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.55, ease: "easeOut" },
+    transition: {
+      duration: 0.55,
+      ease: [0.16, 1, 0.3, 1], // ✅ was "easeOut"
+    },
   },
 };
 
 const floaty = {
   animate: {
     y: [0, -10, 0],
-    transition: { duration: 5.5, repeat: Infinity, ease: "easeInOut" },
+    transition: {
+      duration: 5.5,
+      repeat: Infinity,
+      ease: [0.65, 0, 0.35, 1], // ✅ was "easeInOut"
+    },
   },
-};
+} as const;
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -30,17 +38,9 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
-    // already logged in? go dashboard
     const authed = localStorage.getItem("admin_authed") === "1";
     if (authed) router.replace("/admin/dashboard");
   }, [router]);
-
-  React.useEffect(() => {
-    // cleanup safety (in case user navigates away mid-timeout)
-    return () => {
-      // nothing here now, but kept for future async cleanup
-    };
-  }, []);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
     const ADMIN_USER = process.env.NEXT_PUBLIC_ADMIN_USER || "admin";
     const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASS || "crosscreek";
 
-    const t = setTimeout(() => {
+    const t = window.setTimeout(() => {
       const ok = user.trim() === ADMIN_USER && pass === ADMIN_PASS;
       setLoading(false);
 
@@ -64,8 +64,7 @@ export default function AdminLoginPage() {
       router.push("/admin/dashboard");
     }, 500);
 
-    // if submit is spammed quickly, prevent multiple timers piling up
-    return () => clearTimeout(t);
+    return () => window.clearTimeout(t);
   };
 
   return (
@@ -101,7 +100,10 @@ export default function AdminLoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, ease: "easeOut" }}
+                transition={{
+                  duration: 0.55,
+                  ease: [0.16, 1, 0.3, 1], // ✅ was "easeOut"
+                }}
               >
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-white/80">
                   Secure Admin Portal
@@ -120,7 +122,6 @@ export default function AdminLoginPage() {
             <form
               onSubmit={(e) => {
                 const cleanup = onSubmit(e);
-                // @ts-ignore (cleanup is optional)
                 if (typeof cleanup === "function") cleanup();
               }}
               className="p-6 sm:p-7 space-y-4"
