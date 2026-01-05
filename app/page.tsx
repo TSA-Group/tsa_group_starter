@@ -294,7 +294,7 @@ export default function Home() {
           return (
             <div
               key={idx}
-              className={`relative flex flex-col items-center justify-start h-16 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
+              className={`relative flex flex-col items-center justify-start h-8 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
                 isSelected
                   ? "bg-blue-400 text-white"
                   : isToday
