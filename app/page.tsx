@@ -176,7 +176,6 @@ export default function Home() {
 
   return (
     <motion.div
-      layoutRoot
       initial="hidden"
       animate="show"
       variants={container}
