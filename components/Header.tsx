@@ -1,3 +1,4 @@
+TypeScript
 "use client";
 
 import { motion } from "framer-motion";
@@ -7,7 +8,7 @@ const navItems = [
   { label: "Resources", href: "/map" },
   { label: "Events", href: "/events" },
   { label: "Contact", href: "/contact" },
-  { label: "Admin", href: "/admin" }
+  { label: "Admin", href: "/admin" },
 ];
 
 export const Header: React.FC = () => {
@@ -16,13 +17,13 @@ export const Header: React.FC = () => {
       initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1, ease: "easeOut" }}
-      className="
+      className={`
         fixed top-0 left-0 w-full z-50
         bg-white/70 backdrop-blur-xl
         border-b border-blue-600/80
         shadow-sm
         text-blue-600/80
-      "
+      `}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* LOGO */}
@@ -43,27 +44,27 @@ export const Header: React.FC = () => {
         {/* NAV */}
         <nav className="flex gap-10 text-base font-medium ml-auto">
           {navItems.map(({ label, href }) => (
-            <motion.a
-              key={label}
-              href={href}
-              whileHover={{ y: -2 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="
-                relative text-blue-600/80
-                hover:text-gray-950
-                transition-colors duration-200
-              "
-            >
-              {label}
+            <Link key={label} href={href} passHref>
+              <motion.a
+                whileHover={{ y: -2 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className={`
+                  relative text-blue-600/80
+                  hover:text-gray-950
+                  transition-colors duration-200
+                `}
+              >
+                {label}
 
-              <span
-                className="
-                  absolute left-0 -bottom-1 h-[2px] w-0
-                  bg-blue-500
-                  transition-all duration-300
-                "
-              />
-            </motion.a>
+                <span
+                  className={`
+                    absolute left-0 -bottom-1 h-[2px] w-0
+                    bg-blue-500
+                    transition-all duration-300
+                  `}
+                />
+              </motion.a>
+            </Link>
           ))}
         </nav>
       </div>
