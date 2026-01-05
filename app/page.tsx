@@ -206,152 +206,136 @@ export default function Home() {
 
       {/* MAIN GRID */}
       <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-        {/* LEFT COLUMN */}
-        <motion.section className="space-y-8 lg:col-span-1">
-          <QuickActions />
+  {/* LEFT COLUMN */}
+  <motion.section className="space-y-8 lg:col-span-1">
+    <QuickActions />
 
-          {/* Volunteer Opportunities */}
-          <motion.div
-            variants={cardPop}
-            className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+    {/* Volunteer Opportunities */}
+    <motion.div
+      variants={cardPop}
+      className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+    >
+      <h3 className="text-lg font-semibold mb-3 text-blue-900">
+        Volunteer Opportunities
+      </h3>
+      <ul className="space-y-4">
+        {[
+          { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
+          { title: "Warm clothing drive", meta: "Westside Center" },
+          { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
+          { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
+          { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
+        ].map((item, i) => (
+          <li
+            key={i}
+            className="bg-blue-50 border border-blue-200 rounded-xl p-3"
           >
-            <h3 className="text-lg font-semibold mb-3 text-blue-900">
-              Volunteer Opportunities
-            </h3>
-            <ul className="space-y-4">
-              {[
-                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
-                { title: "Warm clothing drive", meta: "Westside Center" },
-                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
-                { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
-                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
-              ].map((item, i) => (
-                <li
-                  key={i}
-                  className="bg-blue-50 border border-blue-200 rounded-xl p-3"
-                >
-                  <div className="text-sm font-semibold">{item.title}</div>
-                  <div className="text-xs text-blue-700">{item.meta}</div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </motion.section>
+            <div className="text-sm font-semibold">{item.title}</div>
+            <div className="text-xs text-blue-700">{item.meta}</div>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  </motion.section>
 
-        {/* RIGHT COLUMN */}
-        
-
-          {/* CALENDAR WITH EVENTS POPUP */}
-<motion.div
-  ref={calendarRef}
-  layout
-  variants={cardPop}
-  className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-3/5 relative"
->
-  {/* Calendar Header */}
-  <div className="flex items-center justify-between mb-4">
-    <button
-      onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
-      className="text-blue-700 text-2xl font-bold"
+  {/* RIGHT COLUMN - Calendar + Events */}
+  <motion.section className="lg:col-span-2 flex flex-col gap-4">
+    <motion.div
+      ref={calendarRef}
+      layout
+      variants={cardPop}
+      className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 w-full relative"
     >
-      ❮
-    </button>
-
-    <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
-      {monthNames[calMonth]} {calYear}
-    </h3>
-
-    <button
-      onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
-      className="text-blue-700 text-2xl font-bold"
-    >
-      ❯
-    </button>
-  </div>
-
-  {/* Days of the Week */}
-  <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-    {daysOfWeek.map(d => (
-      <div key={d} className="text-center">{d}</div>
-    ))}
-  </div>
-
-  {/* Calendar Grid */}
-  <div className="grid grid-cols-7 gap-1">
-    {calendarDays.map((date, idx) => {
-      if (!date) return <div key={idx} />;
-
-      const isToday = date.getTime() === texasToday.getTime();
-      const isSelected = date.getTime() === selectedDate?.getTime();
-
-      return (
-        <div
-          key={idx}
-          className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
-            isSelected
-              ? "bg-blue-400 text-white"
-              : isToday
-              ? "bg-blue-600 text-white"
-              : "bg-blue-50 hover:bg-blue-100 text-blue-900"
-          }`}
-          onClick={() =>
-            setSelectedDate(prev =>
-              prev && prev.getTime() === date.getTime() ? null : date
-            )
-          }
+      {/* Calendar Header */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+          className="text-blue-700 text-2xl font-bold"
         >
-          {date.getDate()}
-        </div>
-      );
-    })}
-  </div>
+          ❮
+        </button>
 
-  {/* EVENTS POPUP BELOW CALENDAR */}
-  <AnimatePresence>
-    {selectedDate && (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
-      >
-        <h3 className="font-semibold text-blue-900 mb-2">
-          Events on {selectedDate.toLocaleDateString()}
+        <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+          {monthNames[calMonth]} {calYear}
         </h3>
 
-        {events.filter(event => {
-          const eDate = new Date(event.dateString);
+        <button
+          onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+          className="text-blue-700 text-2xl font-bold"
+        >
+          ❯
+        </button>
+      </div>
+
+      {/* Days of the Week */}
+      <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
+        {daysOfWeek.map(d => (
+          <div key={d} className="text-center">{d}</div>
+        ))}
+      </div>
+
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {calendarDays.map((date, idx) => {
+          if (!date) return <div key={idx} />;
+
+          const isToday = date.getTime() === texasToday.getTime();
+          const isSelected = date.getTime() === selectedDate?.getTime();
+
           return (
-            eDate.getFullYear() === selectedDate.getFullYear() &&
-            eDate.getMonth() === selectedDate.getMonth() &&
-            eDate.getDate() === selectedDate.getDate()
+            <div
+              key={idx}
+              className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
+                isSelected
+                  ? "bg-blue-400 text-white"
+                  : isToday
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-50 hover:bg-blue-100 text-blue-900"
+              }`}
+              onClick={() =>
+                setSelectedDate(prev =>
+                  prev && prev.getTime() === date.getTime() ? null : date
+                )
+              }
+            >
+              {date.getDate()}
+            </div>
           );
-        }).length > 0 ? (
-          <ul className="space-y-3">
-            {events
-              .filter(event => {
-                const eDate = new Date(event.dateString);
-                return (
-                  eDate.getFullYear() === selectedDate.getFullYear() &&
-                  eDate.getMonth() === selectedDate.getMonth() &&
-                  eDate.getDate() === selectedDate.getDate()
-                );
-              })
-              .map((event, i) => (
+        })}
+      </div>
+    </motion.div>
+
+    {/* EVENTS POPUP BELOW CALENDAR */}
+    <AnimatePresence>
+      {selectedDate && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+        >
+          <h3 className="font-semibold text-blue-900 mb-2">
+            Events on {selectedDate.toLocaleDateString()}
+          </h3>
+
+          {filteredEvents.length > 0 ? (
+            <ul className="space-y-3">
+              {filteredEvents.map((event, i) => (
                 <li key={i} className="border-l-4 border-blue-500 pl-3">
                   <p className="font-semibold text-blue-800">{event.title}</p>
                   <p className="text-xs text-blue-700">{event.location}</p>
                   <p className="text-xs text-blue-700">{event.details}</p>
                 </li>
               ))}
-          </ul>
-        ) : (
-          <p className="text-blue-700 text-sm">No events for this day</p>
-        )}
-      </motion.div>
-    )}
-  </AnimatePresence>
-</motion.div>
+            </ul>
+          ) : (
+            <p className="text-blue-700 text-sm">No events for this day</p>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </motion.section>
+</motion.main>
 
 
       {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
