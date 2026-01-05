@@ -190,7 +190,6 @@ export default function Home() {
       >
         <motion.h1
           layout
-          variants={cardPop}
           animate={{
             x: [20, 0, 20],
             y: [0, -6, 0],
@@ -201,6 +200,7 @@ export default function Home() {
         >
           GATHERLY
         </motion.h1>
+
       </motion.header>
 
       {/* MAIN GRID */}
