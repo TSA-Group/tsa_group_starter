@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 const navItems = [
-  { label: "Resources", href: "/map" }, 
+  { label: "Resources", href: "/map" },
   { label: "Events", href: "/events" },
   { label: "Contact", href: "/contact" },
+  { label: "Admin", href: "/admin" }, 
 ];
 
 export const Header: React.FC = () => {
