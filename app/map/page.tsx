@@ -201,7 +201,7 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
 
 /** ---------- Page ---------- */
 export default function Page() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
+  const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
   // Cross Creek Ranch-ish default center
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.9040 });
