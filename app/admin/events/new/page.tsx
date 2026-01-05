@@ -4,11 +4,20 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
-const sectionAnim = {
+const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1], // ✅ fixed (no string easing)
+    },
+  },
 };
 
 const COMMUNITIES = ["Cross Creek Ranch", "Cross Creek West", "Cross Creek"] as const;
@@ -25,14 +34,20 @@ const EVENT_TYPES = [
 export default function AddEventPage() {
   const [sent, setSent] = React.useState(false);
 
-  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>("Cross Creek");
+  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
+    "Cross Creek",
+  );
   const [eventName, setEventName] = React.useState("");
-  const [eventType, setEventType] = React.useState<(typeof EVENT_TYPES)[number]>("Meetup");
+  const [eventType, setEventType] = React.useState<(typeof EVENT_TYPES)[number]>(
+    "Meetup",
+  );
   const [address, setAddress] = React.useState("");
   const [start, setStart] = React.useState("");
   const [end, setEnd] = React.useState("");
   const [contact, setContact] = React.useState("");
-  const [indoorOutdoor, setIndoorOutdoor] = React.useState<"Indoor" | "Outdoor" | "Both">("Both");
+  const [indoorOutdoor, setIndoorOutdoor] = React.useState<
+    "Indoor" | "Outdoor" | "Both"
+  >("Both");
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,15 +71,17 @@ export default function AddEventPage() {
       <motion.div variants={sectionAnim} initial="hidden" animate="show">
         <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.45)] overflow-hidden">
           <div className="p-6 border-b border-white/10">
-            <div className="text-white/80 font-semibold">
-              Subsections
-            </div>
+            <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Events (name, type, address, start/end date&time, contact, indoor/outdoor)
+              Community Name (dropdown) → Events (name, type, address, start/end
+              date&time, contact, indoor/outdoor)
             </div>
           </div>
 
-          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={onSubmit}
+            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
@@ -195,9 +212,7 @@ export default function AddEventPage() {
             </div>
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
-              <div className="text-xs text-white/55">
-                Demo submit only. Later connect to DB.
-              </div>
+              <div className="text-xs text-white/55">Demo submit only. Later connect to DB.</div>
 
               <motion.button
                 whileHover={{ y: -1 }}
