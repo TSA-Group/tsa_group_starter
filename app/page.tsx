@@ -10,7 +10,6 @@ import {
 } from "framer-motion";
 import Link from "next/link";
 
-
 // Animation variants
 const container: Variants = {
   hidden: {},
@@ -55,9 +54,7 @@ function QuickActions() {
           Quick Actions
         </h3>
         <p className="text-sm text-blue-700">
-          <b>
-            Welcome to Cross Creek!
-          </b>
+          <b>Welcome to Cross Creek!</b>
         </p>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -78,12 +75,9 @@ function QuickActions() {
 export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = useState(new Date());
-  const [openEvent, setOpenEvent] = useState<number | null>(null);
-  const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const { scrollY } = useScroll();
   const [scrollRange, setScrollRange] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
   const calendarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,24 +87,19 @@ export default function Home() {
   // Click outside to close calendar popup
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node)
-      ) {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
         setSelectedDate(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Subtle scroll background & header color
+  // Scroll-based background and header colors
   const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
   const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E3F8A"]);
 
-  // Texas time today
+  // Texas today
   const now = new Date();
   const texasToday = new Date(
     now.toLocaleString("en-US", { timeZone: "America/Chicago" })
@@ -126,7 +115,6 @@ export default function Home() {
     "July","August","September","October","November","December"
   ];
 
-  // Events with dateString for calendar
   const events = [
     {
       title: "Neighborhood Meetup",
@@ -147,31 +135,21 @@ export default function Home() {
       details: "Donate clothes for those in need and volunteer.",
     },
   ];
-  const filteredEvents = selectedDate
-  ? events.filter(event => {
-      const e = new Date(event.dateString);
-      return (
-        e.getFullYear() === selectedDate.getFullYear() &&
-        e.getMonth() === selectedDate.getMonth() &&
-        e.getDate() === selectedDate.getDate()
-      );
-    })
-  : events;
+
   // Generate calendar days
   const generateCalendarDays = () => {
-    const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const daysArray: (Date | null)[] = [];
+    const days: (Date | null)[] = [];
 
-    for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
+    for (let i = 0; i < firstDay; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(calYear, calMonth, i);
       d.setHours(0, 0, 0, 0);
-      daysArray.push(d);
+      days.push(d);
     }
-    return daysArray;
+    return days;
   };
-
   const calendarDays = generateCalendarDays();
 
   return (
@@ -193,7 +171,7 @@ export default function Home() {
           layout
           variants={cardPop}
           animate={{
-            x: [-20, 0, -20],
+            x: [20, 0, 20],
             y: [0, -6, 0],
             transition: { duration: 2.5, ease: "easeInOut" },
           }}
@@ -238,54 +216,15 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        {/* RIGHT COLUMN */}
-        <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
-          {/* EVENTS */}
-          <div className="lg:w-2/5 flex flex-col gap-4">
-            <motion.div
-              variants={cardPop}
-              className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border-blue-200 shadow-sm text-center"
-            >
-              <h2 className="text-2xl font-semibold text-blue-900">
-                Upcoming Events
-              </h2>
-            </motion.div>
-
-            {filteredEvents.map((event, i) => (
-              <motion.div
-                key={i}
-                variants={cardPop}
-                className="bg-white rounded-2xl border border-blue-200 p-4 cursor-pointer"
-                onClick={() => setOpenEvent(openEvent === i ? null : i)}
-              >
-                <h3 className="font-semibold text-blue-900">{event.title}</h3>
-                <p className="text-sm text-blue-700">
-                  {new Date(event.dateString).toLocaleString()} • {event.location}
-                </p>
-
-                <AnimatePresence>
-                  {openEvent === i && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="text-sm text-blue-800 mt-2"
-                    >
-                      {event.details}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* CALENDAR WITH TOGGLE + CLICK-OUTSIDE */}
+        {/* RIGHT COLUMN - Calendar */}
+        <motion.section className="lg:col-span-2">
           <motion.div
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-3/5 relative"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 relative max-w-md ml-auto"
           >
+            {/* Calendar Header */}
             <div className="flex items-center justify-between mb-4">
               <button
                 onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
@@ -293,11 +232,9 @@ export default function Home() {
               >
                 ❮
               </button>
-
               <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                 {monthNames[calMonth]} {calYear}
               </h3>
-
               <button
                 onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
                 className="text-blue-700 text-2xl font-bold"
@@ -306,12 +243,14 @@ export default function Home() {
               </button>
             </div>
 
+            {/* Days of the Week */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map((d) => (
                 <div key={d} className="text-center">{d}</div>
               ))}
             </div>
 
+            {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx} />;
@@ -319,7 +258,7 @@ export default function Home() {
                 const isToday = date.getTime() === texasToday.getTime();
                 const isSelected = date.getTime() === selectedDate?.getTime();
 
-                const dayEvents = events.filter(event => {
+                const hasEvent = events.some((event) => {
                   const eDate = new Date(event.dateString);
                   return (
                     eDate.getFullYear() === date.getFullYear() &&
@@ -331,7 +270,7 @@ export default function Home() {
                 return (
                   <div
                     key={idx}
-                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
+                    className={`relative flex flex-col items-center justify-start h-12 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
                       isSelected
                         ? "bg-blue-400 text-white"
                         : isToday
@@ -339,50 +278,70 @@ export default function Home() {
                         : "bg-blue-50 hover:bg-blue-100 text-blue-900"
                     }`}
                     onClick={() =>
-                      setSelectedDate(prev =>
+                      setSelectedDate((prev) =>
                         prev && prev.getTime() === date.getTime() ? null : date
                       )
                     }
                   >
-                    {date.getDate()}
-
-                    <AnimatePresence>
-                      {isSelected && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10 w-60 bg-white border border-blue-200 rounded-lg shadow-lg p-3 text-sm text-blue-900"
-                        >
-                          <p className="font-semibold mb-1">
-                            {monthNames[date.getMonth()]} {date.getDate()}, {date.getFullYear()}
-                          </p>
-
-                          {dayEvents.length > 0 ? (
-                            <ul className="space-y-2">
-                              {dayEvents.map((event, i) => (
-                                <li key={i} className="border-l-4 border-blue-500 pl-2">
-                                  <p className="font-semibold text-blue-800">{event.title}</p>
-                                  <p className="text-xs text-blue-700">{event.location}</p>
-                                  <p className="text-xs text-blue-700">{event.details}</p>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="text-xs text-blue-700">No events for this day</p>
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <span className="block">{date.getDate()}</span>
+                    {hasEvent && (
+                      <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    )}
                   </div>
                 );
               })}
             </div>
+
+            {/* Events Popup */}
+            <AnimatePresence>
+              {selectedDate && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+                >
+                  <h3 className="font-semibold text-blue-900 mb-2">
+                    Events on {selectedDate.toLocaleDateString()}
+                  </h3>
+
+                  {events.filter((event) => {
+                    const eDate = new Date(event.dateString);
+                    return (
+                      eDate.getFullYear() === selectedDate.getFullYear() &&
+                      eDate.getMonth() === selectedDate.getMonth() &&
+                      eDate.getDate() === selectedDate.getDate()
+                    );
+                  }).length > 0 ? (
+                    <ul className="space-y-3">
+                      {events
+                        .filter((event) => {
+                          const eDate = new Date(event.dateString);
+                          return (
+                            eDate.getFullYear() === selectedDate.getFullYear() &&
+                            eDate.getMonth() === selectedDate.getMonth() &&
+                            eDate.getDate() === selectedDate.getDate()
+                          );
+                        })
+                        .map((event, i) => (
+                          <li key={i} className="border-l-4 border-blue-500 pl-3">
+                            <p className="font-semibold text-blue-800">{event.title}</p>
+                            <p className="text-xs text-blue-700">{event.location}</p>
+                            <p className="text-xs text-blue-700">{event.details}</p>
+                          </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <p className="text-blue-700 text-sm">No events for this day</p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.section>
       </motion.main>
 
-      {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
+      {/* IMAGE + TEXT SECTIONS */}
       <motion.section
         initial="hidden"
         variants={container}
@@ -438,12 +397,12 @@ export default function Home() {
         ))}
       </motion.section>
 
-      {/* WEBSITE HISTORY SECTION */}
+      {/* OUR STORY */}
       <section className="w-full mt-40 mb-40 px-6">
         <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
           Our Story!
         </h2>
-      
+
         <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900 
                         bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200">
           <p className="mb-6">
@@ -460,7 +419,7 @@ export default function Home() {
           </p>
         </div>
       </section>
-      
+
       {/* FOOTER */}
       <footer className="border-t border-blue-200 bg-white">
         <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
@@ -470,5 +429,6 @@ export default function Home() {
     </motion.div>
   );
 }
+
 
 
