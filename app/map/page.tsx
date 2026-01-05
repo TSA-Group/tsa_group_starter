@@ -545,24 +545,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Submit new resource form (TSA requirement) */}
-              <motion.section
-                variants={fadeUp}
-                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
-              >
-                <div className="p-4 sm:p-5 border-b border-blue-200/60">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-                    Suggest a New Resource
-                  </h3>
-                  <p className="text-sm text-slate-600">
-                    Submit a resource you think should be added to the hub.
-                  </p>
-                </div>
-                <div className="p-4 sm:p-5">
-                  <SuggestResourceForm />
-                </div>
-              </motion.section>
-
+             
               {/* Extra content (TSA requirement: additional content) */}
               <motion.section
                 variants={fadeUp}
