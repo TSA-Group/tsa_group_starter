@@ -194,7 +194,7 @@ export default function Home() {
             className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
           >
             <h3 className="text-lg font-semibold mb-3 text-blue-900">
-              Volunteer Opportunities
+              Incredible Eats Near You!
             </h3>
             <ul className="space-y-4">
               {[
