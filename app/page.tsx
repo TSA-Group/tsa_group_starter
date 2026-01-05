@@ -148,7 +148,16 @@ export default function Home() {
       details: "Donate clothes for those in need and volunteer.",
     },
   ];
-
+  const filteredEvents = selectedDate
+  ? events.filter(event => {
+      const e = new Date(event.dateString);
+      return (
+        e.getFullYear() === selectedDate.getFullYear() &&
+        e.getMonth() === selectedDate.getMonth() &&
+        e.getDate() === selectedDate.getDate()
+      );
+    })
+  : events;
   // Generate calendar days
   const generateCalendarDays = () => {
     const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
@@ -243,7 +252,7 @@ export default function Home() {
               </h2>
             </motion.div>
 
-            {events.map((event, i) => (
+            {filteredEvents.map((event, i) => (
               <motion.div
                 key={i}
                 variants={cardPop}
