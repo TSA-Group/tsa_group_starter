@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
@@ -6,7 +7,6 @@ import {
   Map,
   AdvancedMarker,
   useMapsLibrary,
-  useMap,
 } from "@vis.gl/react-google-maps";
 
 /** ---------- Types ---------- */
@@ -16,20 +16,24 @@ interface LatLng {
 }
 
 type EventType =
-  | "Community Dinner"
-  | "Neighborhood Meetup"
-  | "Clothing Drive"
-  | "Literacy Tutoring"
+  | "Community Event"
+  | "Park & Trails"
+  | "Fitness"
+  | "Grocery"
+  | "Library"
+  | "Support Services"
   | "Food Pantry"
-  | "Volunteer Cleanup";
+  | "Volunteer Opportunity";
 
 type ActivityType =
-  | "Food"
-  | "Volunteering"
-  | "Education"
-  | "Donations"
+  | "Family"
   | "Outdoors"
-  | "Family";
+  | "Food"
+  | "Education"
+  | "Health"
+  | "Support"
+  | "Volunteering"
+  | "Shopping";
 
 type LocationItem = {
   id: string;
@@ -40,9 +44,11 @@ type LocationItem = {
   activities: ActivityType[];
   when: string;
   host?: string;
+  description?: string;
+  featured?: boolean;
 };
 
-/** ---------- UI Motion ---------- */
+/** ---------- Motion ---------- */
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -63,182 +69,178 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-/** ---------- Sample Data (replace with your DB later) ---------- */
+/** ---------- Cross Creek Area Resources (sample dataset) ----------
+ * NOTE: Coordinates are approximate for Cross Creek Ranch / Fulshear area.
+ * Swap for exact places later if needed.
+ */
 const ALL_LOCATIONS: LocationItem[] = [
   {
-    id: "loc-1",
-    title: "Sugar Land Town Square — Free Community Dinner",
-    address: "Sugar Land Town Square, Sugar Land, TX 77479",
-    position: { lat: 29.5959, lng: -95.6221 },
-    eventType: "Community Dinner",
-    activities: ["Food", "Family", "Volunteering"],
-    when: "Sat • 6:00 PM",
-    host: "Sugar Land Community Partners",
+    id: "cc-1",
+    title: "Cross Creek Ranch Fitness Center",
+    address: "Cross Creek Ranch, Fulshear, TX (Fitness Center)",
+    position: { lat: 29.7008, lng: -95.9082 },
+    eventType: "Fitness",
+    activities: ["Health", "Family"],
+    when: "Daily • 5:00 AM – 10:00 PM",
+    host: "Cross Creek Ranch",
+    description:
+      "Community fitness center with cardio/weights and group-friendly spaces.",
+    featured: true,
   },
   {
-    id: "loc-2",
-    title: "Sugar Land Memorial Park — Neighborhood Meetup",
-    address: "15300 University Blvd, Sugar Land, TX 77479",
-    position: { lat: 29.5747, lng: -95.651 },
-    eventType: "Neighborhood Meetup",
+    id: "cc-2",
+    title: "Flewellen Creek Park & Trails",
+    address: "Flewellen Creek Park, Fulshear, TX",
+    position: { lat: 29.6972, lng: -95.8968 },
+    eventType: "Park & Trails",
     activities: ["Outdoors", "Family"],
-    when: "Sat • 2:00 PM",
-    host: "Sugar Land Neighborhood Association",
+    when: "Daily • Sunrise – Sunset",
+    host: "Community Parks",
+    description:
+      "Neighborhood park area and trails—great for walks, kids, and meetups.",
+    featured: true,
   },
   {
-    id: "loc-3",
-    title: "Fort Bend County Libraries (Sugar Land) — Warm Clothing Drive",
-    address: "550 Eldridge Rd, Sugar Land, TX 77478",
-    position: { lat: 29.5602, lng: -95.658 },
-    eventType: "Clothing Drive",
-    activities: ["Donations", "Volunteering"],
-    when: "Sun • 10:00 AM",
-    host: "Fort Bend County Libraries",
+    id: "cc-3",
+    title: "Cross Creek Ranch Welcome Center",
+    address: "Cross Creek Ranch Welcome Center, Fulshear, TX",
+    position: { lat: 29.6988, lng: -95.9056 },
+    eventType: "Support Services",
+    activities: ["Support", "Family"],
+    when: "Mon–Fri • 9:00 AM – 5:00 PM",
+    host: "Community Staff",
+    description:
+      "Community info hub—questions, community programs, and resident support.",
+    featured: true,
   },
   {
-    id: "loc-4",
-    title: "T.E. Harman Center — Literacy Tutors Needed",
-    address: "3110 University Blvd, Sugar Land, TX 77479",
-    position: { lat: 29.6079, lng: -95.6376 },
-    eventType: "Literacy Tutoring",
-    activities: ["Education", "Volunteering"],
-    when: "Weekdays • Flexible",
-    host: "T.E. Harman Center",
+    id: "cc-4",
+    title: "Cross Creek Ranch Community Pool",
+    address: "Cross Creek Ranch Pool, Fulshear, TX",
+    position: { lat: 29.7034, lng: -95.8994 },
+    eventType: "Community Event",
+    activities: ["Family", "Health"],
+    when: "Seasonal • Check community schedule",
+    host: "Cross Creek Ranch",
+    description:
+      "Pool access and seasonal community programming (family swim, events).",
   },
   {
-    id: "loc-5",
-    title: "First Colony Mall Area — Food Pantry Pickup",
-    address: "16535 Southwest Fwy, Sugar Land, TX 77479",
-    position: { lat: 29.5955, lng: -95.62 },
+    id: "cc-5",
+    title: "HEB (Fulshear / Nearby Grocery)",
+    address: "Fulshear, TX area grocery (HEB)",
+    position: { lat: 29.6912, lng: -95.9185 },
+    eventType: "Grocery",
+    activities: ["Shopping", "Food", "Family"],
+    when: "Daily • 6:00 AM – 11:00 PM",
+    host: "HEB",
+    description:
+      "Nearby grocery option for essentials (food, pharmacy, household items).",
+  },
+  {
+    id: "cc-6",
+    title: "Fulshear Branch Library (Nearby)",
+    address: "Fulshear, TX (Public Library)",
+    position: { lat: 29.6883, lng: -95.9004 },
+    eventType: "Library",
+    activities: ["Education", "Family"],
+    when: "Mon–Sat • Hours vary",
+    host: "Public Library",
+    description:
+      "Books, study spaces, kids programs, and community learning resources.",
+  },
+  {
+    id: "cc-7",
+    title: "Community Food Pantry (Nearby Support)",
+    address: "Fulshear / Katy area food pantry support",
+    position: { lat: 29.6796, lng: -95.9222 },
     eventType: "Food Pantry",
-    activities: ["Food", "Family"],
-    when: "Wed • 4:00 PM",
-    host: "First Colony Community Outreach",
+    activities: ["Food", "Support", "Family"],
+    when: "Weekly • Appointment or walk-in hours",
+    host: "Community Partner",
+    description:
+      "Food assistance support—hours vary (check partner site/call ahead).",
   },
   {
-    id: "loc-6",
-    title: "Constellation Field — Volunteer Cleanup",
-    address: "1 Stadium Dr, Sugar Land, TX 77498",
-    position: { lat: 29.6243, lng: -95.6516 },
-    eventType: "Volunteer Cleanup",
-    activities: ["Outdoors", "Volunteering"],
-    when: "Sun • 9:00 AM",
-    host: "Sugar Land Parks & Recreation",
+    id: "cc-8",
+    title: "Volunteer Cleanup — Trails & Park Day",
+    address: "Cross Creek Trails (meet near main trailhead)",
+    position: { lat: 29.7051, lng: -95.9041 },
+    eventType: "Volunteer Opportunity",
+    activities: ["Volunteering", "Outdoors", "Family"],
+    when: "Sat • 9:00 AM (Monthly)",
+    host: "Resident Volunteers",
+    description:
+      "Monthly volunteer cleanup to keep trails and parks beautiful.",
+  },
+  {
+    id: "cc-9",
+    title: "Neighborhood Meetup — Community Pavilion",
+    address: "Cross Creek Ranch Pavilion / Gathering Spot",
+    position: { lat: 29.6999, lng: -95.8989 },
+    eventType: "Community Event",
+    activities: ["Family", "Support"],
+    when: "Sun • 4:00 PM (Weekly)",
+    host: "Neighborhood Group",
+    description:
+      "Friendly weekly meetup for residents—introductions, announcements, Q&A.",
+  },
+  {
+    id: "cc-10",
+    title: "After-School Study & Tutoring Meetup (Library)",
+    address: "Nearby library study room / community study space",
+    position: { lat: 29.6891, lng: -95.9010 },
+    eventType: "Support Services",
+    activities: ["Education", "Family", "Support"],
+    when: "Tue/Thu • 5:30 PM",
+    host: "Volunteer Tutors",
+    description:
+      "Student support meetup—homework help and study group (community-run).",
   },
 ];
 
 const EVENT_OPTIONS: EventType[] = [
-  "Community Dinner",
-  "Neighborhood Meetup",
-  "Clothing Drive",
-  "Literacy Tutoring",
+  "Community Event",
+  "Park & Trails",
+  "Fitness",
+  "Grocery",
+  "Library",
+  "Support Services",
   "Food Pantry",
-  "Volunteer Cleanup",
+  "Volunteer Opportunity",
 ];
 
 const ACTIVITY_OPTIONS: ActivityType[] = [
-  "Food",
-  "Volunteering",
-  "Education",
-  "Donations",
-  "Outdoors",
   "Family",
+  "Outdoors",
+  "Food",
+  "Education",
+  "Health",
+  "Support",
+  "Volunteering",
+  "Shopping",
 ];
 
 /** ---------- Page ---------- */
 export default function Page() {
-  const [center, setCenter] = useState<LatLng>({
-    lat: 29.5959,
-    lng: -95.6221,
-  });
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
-  // Google Places Autocomplete state (MAP SEARCH)
+  // Cross Creek Ranch-ish default center
+  const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.9040 });
+  const [zoom, setZoom] = useState(13);
+
+  // Places autocomplete (map search)
   const [predictions, setPredictions] = useState<
     google.maps.places.AutocompletePrediction[]
   >([]);
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const map = useMap();
 
-  // Directory search (RESOURCE SEARCH)
+  // Directory search (resource hub search)
   const [directoryQuery, setDirectoryQuery] = useState("");
 
-  // Theme tracking (works with your ThemeToggle)
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  useEffect(() => {
-    const current = document.documentElement.getAttribute("data-theme");
-    setTheme(current === "dark" ? "dark" : "light");
-
-    const handler = (e: Event) => {
-      const custom = e as CustomEvent<"light" | "dark">;
-      setTheme(custom.detail);
-    };
-    window.addEventListener("theme-change", handler);
-    return () => window.removeEventListener("theme-change", handler);
-  }, []);
-
-  // Google Night Mode style JSON
-  const darkStyle: google.maps.MapTypeStyle[] = [
-    { elementType: "geometry", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#212121" }],
-    },
-    {
-      featureType: "road",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#8a8a8a" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#000000" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#3d3d3d" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [{ color: "#181818" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#616161" }],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.stroke",
-      stylers: [{ color: "#1b1b1b" }],
-    },
-  ];
-  const handleCenter = (loc: LocationItem) => {
-    setActiveId(loc.id);
-    setCenter(loc.position);
-
-    if (map) {
-      map.panTo(loc.position);
-      map.setZoom(14);
-    }
-  };
+  // Active marker
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   /** ---------- Filters ---------- */
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
@@ -256,6 +258,7 @@ export default function Page() {
         loc.eventType,
         loc.when,
         loc.host ?? "",
+        loc.description ?? "",
         ...loc.activities,
       ]
         .join(" ")
@@ -272,28 +275,21 @@ export default function Page() {
 
     const passRadius = (loc: LocationItem) => {
       if (radiusMode === "All") return true;
-      // quick + simple “near center” filter (no geometry lib needed)
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      return dist < 0.08; // ~ “nearby”
+      return dist < 0.09; // "nearby"
     };
 
     return ALL_LOCATIONS.filter(
-      (loc) =>
-        passQuery(loc) &&
-        passEvent(loc) &&
-        passActivity(loc) &&
-        passRadius(loc),
+      (loc) => passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
     );
-  }, [
-    directoryQuery,
-    eventFilters,
-    activityFilters,
-    radiusMode,
-    center.lat,
-    center.lng,
-  ]);
+  }, [directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
+
+  const featured = useMemo(
+    () => ALL_LOCATIONS.filter((l) => l.featured).slice(0, 3),
+    [],
+  );
 
   const activeCount =
     eventFilters.length +
@@ -301,30 +297,32 @@ export default function Page() {
     (radiusMode === "Near Center" ? 1 : 0) +
     (directoryQuery.trim() ? 1 : 0);
 
+  const handleCenter = (loc: LocationItem) => {
+    setActiveId(loc.id);
+    setCenter(loc.position);
+    setZoom(15);
+    setSelectedPlace(loc.position);
+  };
+
   return (
-    <APIProvider
-      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
-      libraries={["places"]}
-      version="beta"
-    >
-      {/* Page Shell (matches your home: clean, soft blue accents) */}
-      <div className="min-h-screen bg-white text-slate-900 dark:bg-[#0b1220] dark:text-slate-100">
+    <APIProvider apiKey={apiKey} libraries={["places"]}>
+      {/* LIGHT THEME to match screenshot */}
+      <div className="min-h-screen bg-white text-slate-900">
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
           className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 py-8 sm:py-10"
         >
-          {/* Title / Header */}
+          {/* Header */}
           <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1E3A8A] dark:text-[#7aa2ff]">
-                  Resources Map
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1E3A8A]">
+                  Cross Creek Community Resource Hub
                 </h1>
-                <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Find community events and resources — filter by activity,
-                  event type, directory search, or what’s near you.
+                <p className="mt-2 text-sm sm:text-base text-slate-600">
+                  Explore community resources, events, and support — all in one place.
                 </p>
               </div>
 
@@ -335,8 +333,7 @@ export default function Page() {
                     initial="hidden"
                     animate="show"
                     exit={{ opacity: 0, y: -6 }}
-                    className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-800
-                               dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
+                    className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
                   >
                     {activeCount} filter{activeCount === 1 ? "" : "s"} active
                   </motion.div>
@@ -345,9 +342,51 @@ export default function Page() {
             </div>
           </motion.div>
 
-          {/* Responsive Grid: Filters + Map + List */}
+          {/* Featured / Highlights (TSA requirement) */}
+          <motion.section
+            variants={fadeUp}
+            className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
+          >
+            <div className="flex items-end justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E3A8A]">
+                  Spotlight Resources
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  A quick look at a few key resources in the Cross Creek community.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {featured.map((loc) => (
+                <motion.button
+                  key={loc.id}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => handleCenter(loc)}
+                  className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="text-xs font-semibold text-blue-900">
+                    {loc.eventType}
+                  </div>
+                  <div className="mt-1 text-base font-bold text-slate-900">
+                    {loc.title}
+                  </div>
+                  <div className="mt-2 text-sm text-slate-600">
+                    {loc.description ?? loc.address}
+                  </div>
+                  <div className="mt-3 inline-flex text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
+                    {loc.when}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left: Filters */}
+            {/* Filters */}
             <motion.aside variants={fadeUp} className="lg:col-span-4">
               <FilterBox
                 eventFilters={eventFilters}
@@ -365,49 +404,45 @@ export default function Page() {
               />
             </motion.aside>
 
-            {/* Right: Map + Search + Results */}
+            {/* Map + Search + List */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Map Card */}
+              {/* Map Card — IMPORTANT: overflow-visible so dropdown isn't clipped */}
               <motion.section
                 variants={fadeUp}
-                className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
-                           dark:bg-[#0f1a2e] dark:border-blue-900/60"
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
               >
-                <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div>
-                      <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A] dark:text-[#9bb7ff]">
-                        Explore the map
+                      <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                        Interactive Resource Map
                       </h2>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">
-                        Search the directory (resources) or search the map
-                        (places).
+                      <p className="text-sm text-slate-600">
+                        Search the directory or search the map (autocomplete).
                       </p>
                     </div>
 
                     <motion.div
                       whileHover={{ scale: 1.02 }}
-                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-800
-                                 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
+                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
                     >
-                      Showing {filteredLocations.length} location
-                      {filteredLocations.length === 1 ? "" : "s"}
+                      {`Showing ${filteredLocations.length} location${
+                        filteredLocations.length === 1 ? "" : "s"
+                      }`}
                     </motion.div>
                   </div>
                 </div>
 
                 <div className="p-4 sm:p-5">
-                  <div
-                    className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-2xl border border-blue-200 overflow-hidden
-                               dark:border-blue-900/60"
-                  >
+                  {/* Map container keeps overflow-hidden */}
+                  <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
                     <Map
-                      mapId="8859a83a13a834f6eeef1c63"
                       center={center}
-                      defaultZoom={12}
+                      zoom={zoom}
                       gestureHandling="greedy"
+                      disableDefaultUI={false}
                       onClick={() => setActiveId(null)}
-                      className="w-full h-[420px]"
+                      className="w-full h-full"
                     >
                       {filteredLocations.map((loc) => (
                         <AdvancedMarker key={loc.id} position={loc.position}>
@@ -419,26 +454,31 @@ export default function Page() {
                           />
                         </AdvancedMarker>
                       ))}
+
+                      {/* Selected place pin (from map search) */}
+                      {selectedPlace && (
+                        <AdvancedMarker position={selectedPlace}>
+                          <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
+                        </AdvancedMarker>
+                      )}
                     </Map>
                   </div>
 
-                  {/* Search */}
-                  <div className="mt-4">
+                  {/* Search — dropdown is now VERY visible (z-50, not clipped) */}
+                  <div className="mt-4 relative z-50">
                     <SearchBox
-                      // Directory search
                       directoryQuery={directoryQuery}
                       setDirectoryQuery={setDirectoryQuery}
                       directoryResults={ALL_LOCATIONS}
-                      onDirectoryPick={(loc) => {
-                        setCenter(loc.position);
-                        setSelectedPlace(loc.position);
-                      }}
-                      // Places search
+                      onDirectoryPick={(loc) => handleCenter(loc)}
                       input={input}
                       setInput={setInput}
                       predictions={predictions}
                       setPredictions={setPredictions}
-                      setCenter={setCenter}
+                      setCenter={(loc) => {
+                        setCenter(loc);
+                        setZoom(15);
+                      }}
                       setSelectedPlace={setSelectedPlace}
                     />
                   </div>
@@ -448,14 +488,13 @@ export default function Page() {
               {/* Results List */}
               <motion.section
                 variants={fadeUp}
-                className="rounded-2xl border border-blue-200 bg-white shadow-sm
-                           dark:bg-[#0f1a2e] dark:border-blue-900/60"
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
               >
-                <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A] dark:text-[#9bb7ff]">
-                    Matching resources
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Resource Directory
                   </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                  <p className="text-sm text-slate-600">
                     Tap a card to center it on the map.
                   </p>
                 </div>
@@ -467,17 +506,12 @@ export default function Page() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="rounded-2xl border border-blue-200 bg-blue-50 p-5 text-blue-900
-                                   dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
+                        className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
                       >
-                        No matches. Try removing a filter or changing your
-                        search.
+                        No matches. Try removing a filter or changing your search.
                       </motion.div>
                     ) : (
-                      <motion.div
-                        layout
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                      >
+                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {filteredLocations.map((loc) => (
                           <motion.button
                             key={loc.id}
@@ -488,38 +522,38 @@ export default function Page() {
                             whileHover={{ y: -2 }}
                             whileTap={{ scale: 0.99 }}
                             onClick={() => handleCenter(loc)}
-                            className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm
-                                       hover:shadow-md transition-shadow
-                                       dark:bg-[#0b1220] dark:border-blue-900/60"
+                            className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div>
-                                <div className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                                <div className="text-sm font-semibold text-blue-900">
                                   {loc.eventType}
                                 </div>
-                                <div className="mt-1 text-base font-bold text-slate-900 dark:text-slate-50">
+                                <div className="mt-1 text-base font-bold text-slate-900">
                                   {loc.title}
                                 </div>
                               </div>
 
-                              <span
-                                className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-800
-                                           dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100"
-                              >
+                              <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
                                 {loc.when}
                               </span>
                             </div>
 
-                            <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                            <div className="mt-2 text-sm text-slate-600">
                               {loc.address}
                             </div>
 
+                            {loc.description && (
+                              <div className="mt-2 text-sm text-slate-600">
+                                {loc.description}
+                              </div>
+                            )}
+
                             <div className="mt-3 flex flex-wrap gap-2">
-                              {loc.activities.slice(0, 4).map((a) => (
+                              {loc.activities.slice(0, 6).map((a) => (
                                 <span
                                   key={a}
-                                  className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-white
-                                             dark:border-blue-900/60 dark:text-blue-100 dark:bg-transparent"
+                                  className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50"
                                 >
                                   {a}
                                 </span>
@@ -530,6 +564,58 @@ export default function Page() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </div>
+              </motion.section>
+
+              {/* Submit new resource form (TSA requirement) */}
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Suggest a New Resource
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Submit a resource you think should be added to the hub.
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5">
+                  <SuggestResourceForm />
+                </div>
+              </motion.section>
+
+              {/* Extra content (TSA requirement: additional content) */}
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Helpful Info
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Tips for using the hub + quick guidance for residents.
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoCard
+                    title="How to use this hub"
+                    lines={[
+                      "Use Filters to narrow by category and activities.",
+                      "Use Search directory to find resources by keyword.",
+                      "Use Search map to jump to any place by typing an address/place name.",
+                      "Tap any resource card to center it on the map.",
+                    ]}
+                  />
+                  <InfoCard
+                    title="Emergency & urgent needs"
+                    lines={[
+                      "If this is an emergency, call local emergency services.",
+                      "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
+                      "For after-hours info, use the community Welcome Center during business hours for guidance.",
+                    ]}
+                  />
                 </div>
               </motion.section>
             </div>
@@ -567,19 +653,12 @@ function FilterBox({
     radiusMode === "Near Center";
 
   return (
-    <div
-      className="rounded-2xl border border-blue-200 bg-white shadow-sm overflow-hidden
-                 dark:bg-[#0f1a2e] dark:border-blue-900/60"
-    >
-      <div className="p-4 sm:p-5 border-b border-blue-100 dark:border-blue-900/40">
+    <div className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden">
+      <div className="p-4 sm:p-5 border-b border-blue-200/60">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A] dark:text-[#9bb7ff]">
-              Filter
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Choose what you want to see.
-            </p>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">Filter</h2>
+            <p className="text-sm text-slate-600">Choose what you want to see.</p>
           </div>
 
           <motion.button
@@ -587,12 +666,11 @@ function FilterBox({
             whileTap={{ scale: hasAny ? 0.98 : 1 }}
             onClick={onClear}
             disabled={!hasAny}
-            className={`text-sm px-3 py-2 rounded-xl border transition
-              ${
-                hasAny
-                  ? "border-blue-200 bg-blue-50 text-blue-900 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100 dark:hover:bg-blue-950/60"
-                  : "border-slate-200 text-slate-400 cursor-not-allowed dark:border-slate-700 dark:text-slate-500"
-              }`}
+            className={`text-sm px-3 py-2 rounded-xl border transition ${
+              hasAny
+                ? "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
+                : "border-slate-200 text-slate-400 cursor-not-allowed bg-white"
+            }`}
           >
             Clear
           </motion.button>
@@ -602,9 +680,7 @@ function FilterBox({
       <div className="p-4 sm:p-5 space-y-5">
         {/* Radius */}
         <div>
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Area
-          </div>
+          <div className="text-sm font-semibold text-slate-900">Area</div>
           <div className="mt-2 flex gap-2">
             {(["All", "Near Center"] as const).map((opt) => {
               const active = radiusMode === opt;
@@ -614,12 +690,11 @@ function FilterBox({
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setRadiusMode(opt)}
-                  className={`px-3 py-2 rounded-xl border text-sm transition
-                    ${
-                      active
-                        ? "border-blue-400 bg-blue-600 text-white shadow-sm"
-                        : "border-blue-200 bg-white text-blue-900 hover:bg-blue-50 dark:border-blue-900/60 dark:bg-transparent dark:text-blue-100 dark:hover:bg-blue-950/40"
-                    }`}
+                  className={`px-3 py-2 rounded-xl border text-sm transition ${
+                    active
+                      ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                      : "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
+                  }`}
                 >
                   {opt === "All" ? "All" : "Near map center"}
                 </motion.button>
@@ -630,9 +705,7 @@ function FilterBox({
 
         {/* Event Type */}
         <div>
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Event type
-          </div>
+          <div className="text-sm font-semibold text-slate-900">Category</div>
           <div className="mt-2 flex flex-wrap gap-2">
             {EVENT_OPTIONS.map((e) => {
               const active = eventFilters.includes(e);
@@ -642,12 +715,11 @@ function FilterBox({
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setEventFilters(toggle(eventFilters, e))}
-                  className={`px-3 py-2 rounded-full border text-sm transition
-                    ${
-                      active
-                        ? "border-blue-400 bg-blue-50 text-blue-900 shadow-sm dark:border-blue-400/60 dark:bg-blue-950/40 dark:text-blue-100"
-                        : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50 dark:border-blue-900/60 dark:bg-transparent dark:text-slate-200 dark:hover:bg-blue-950/30"
-                    }`}
+                  className={`px-3 py-2 rounded-full border text-sm transition ${
+                    active
+                      ? "border-blue-400 bg-white text-blue-900 shadow-sm"
+                      : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
+                  }`}
                 >
                   {e}
                 </motion.button>
@@ -658,9 +730,7 @@ function FilterBox({
 
         {/* Activities */}
         <div>
-          <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Activities
-          </div>
+          <div className="text-sm font-semibold text-slate-900">Activities</div>
           <div className="mt-2 flex flex-wrap gap-2">
             {ACTIVITY_OPTIONS.map((a) => {
               const active = activityFilters.includes(a);
@@ -670,12 +740,11 @@ function FilterBox({
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setActivityFilters(toggle(activityFilters, a))}
-                  className={`px-3 py-2 rounded-full border text-sm transition
-                    ${
-                      active
-                        ? "border-blue-400 bg-blue-600 text-white shadow-sm"
-                        : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50 dark:border-blue-900/60 dark:bg-transparent dark:text-slate-200 dark:hover:bg-blue-950/30"
-                    }`}
+                  className={`px-3 py-2 rounded-full border text-sm transition ${
+                    active
+                      ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                      : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
+                  }`}
                 >
                   {a}
                 </motion.button>
@@ -683,8 +752,8 @@ function FilterBox({
             })}
           </div>
 
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Tip: Selecting multiple activities means a location must match{" "}
+          <p className="mt-3 text-xs text-slate-600">
+            Tip: selecting multiple activities means a resource must match{" "}
             <span className="font-semibold">all</span> of them.
           </p>
         </div>
@@ -693,15 +762,17 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (Directory + Places, keeps theme + motion) ---------- */
+/** ---------- SearchBox (Directory + Places) ----------
+ * FIX: dropdown visibility
+ * - parent has relative z-50
+ * - dropdown has z-[9999]
+ * - map card uses overflow-visible
+ */
 function SearchBox({
-  // Directory search
   directoryQuery,
   setDirectoryQuery,
   directoryResults,
   onDirectoryPick,
-
-  // Places search
   input,
   setInput,
   predictions,
@@ -722,34 +793,38 @@ function SearchBox({
   setSelectedPlace: (loc: LatLng | null) => void;
 }) {
   const placesLib = useMapsLibrary("places");
-  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(
-    null,
-  );
+  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"directory" | "places">("directory");
 
-  // Places: init service
+  // init service
   useEffect(() => {
     if (placesLib && !serviceRef.current) {
       serviceRef.current = new placesLib.AutocompleteService();
     }
   }, [placesLib]);
 
-  // Places: fetch predictions
+  // fetch predictions
   useEffect(() => {
     if (mode !== "places") return;
-    if (!serviceRef.current || !input || !open) {
+    const q = input.trim();
+    if (!serviceRef.current || q.length < 2 || !open) {
       setPredictions([]);
       return;
     }
-    serviceRef.current.getPlacePredictions({ input }, (res) => {
-      setPredictions(res || []);
-    });
+
+    const handle = window.setTimeout(() => {
+      serviceRef.current?.getPlacePredictions({ input: q }, (res) => {
+        setPredictions(res || []);
+      });
+    }, 120);
+
+    return () => window.clearTimeout(handle);
   }, [mode, input, open, setPredictions]);
 
-  // Close on outside click
+  // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
@@ -760,7 +835,7 @@ function SearchBox({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Directory: compute results
+  // directory results
   const dirMatches = useMemo(() => {
     const q = directoryQuery.trim().toLowerCase();
     if (!q) return [];
@@ -772,21 +847,19 @@ function SearchBox({
           loc.eventType,
           loc.when,
           loc.host ?? "",
+          loc.description ?? "",
           ...loc.activities,
         ]
           .join(" ")
           .toLowerCase();
         return haystack.includes(q);
       })
-      .slice(0, 6);
+      .slice(0, 8);
   }, [directoryQuery, directoryResults]);
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
-
-    const detailsService = new placesLib.PlacesService(
-      document.createElement("div"),
-    );
+    const detailsService = new placesLib.PlacesService(document.createElement("div"));
 
     detailsService.getDetails({ placeId }, (place) => {
       if (place?.geometry?.location) {
@@ -796,7 +869,7 @@ function SearchBox({
         };
         setCenter(loc);
         setSelectedPlace(loc);
-        setInput(place.formatted_address || "");
+        setInput(place.formatted_address || place.name || "");
         setOpen(false);
         setPredictions([]);
       }
@@ -806,11 +879,7 @@ function SearchBox({
   const currentValue = mode === "directory" ? directoryQuery : input;
 
   return (
-    <div
-      ref={boxRef}
-      className="relative rounded-2xl border border-blue-200 bg-white shadow-sm p-3
-                 dark:bg-[#0b1220] dark:border-blue-900/60"
-    >
+    <div ref={boxRef} className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3">
       {/* Mode toggle */}
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
@@ -825,12 +894,11 @@ function SearchBox({
                 setOpen(true);
                 setPredictions([]);
               }}
-              className={`px-3 py-2 rounded-xl border text-sm transition
-                ${
-                  active
-                    ? "border-blue-400 bg-blue-600 text-white shadow-sm"
-                    : "border-blue-200 bg-white text-slate-700 hover:bg-blue-50 dark:border-blue-900/60 dark:bg-transparent dark:text-slate-200 dark:hover:bg-blue-950/30"
-                }`}
+              className={`px-3 py-2 rounded-xl border text-sm transition ${
+                active
+                  ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                  : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
+              }`}
             >
               {m === "directory" ? "Search directory" : "Search map"}
             </motion.button>
@@ -852,12 +920,11 @@ function SearchBox({
           }}
           placeholder={
             mode === "directory"
-              ? "Search resources (food, tutoring, cleanup, park...)"
-              : "Search a place to move the map..."
+              ? "Search resources (fitness, park, pantry, tutoring...)"
+              : "Search a place/address (autocomplete)..."
           }
-          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 pr-12 text-slate-900
-                     placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300
-                     dark:bg-transparent dark:text-slate-100 dark:border-blue-900/60 dark:focus:ring-blue-900/40"
+          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 pr-12 text-slate-900
+                     placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
 
         {currentValue.trim().length > 0 && (
@@ -873,7 +940,6 @@ function SearchBox({
             }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.96 }}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full
@@ -884,7 +950,7 @@ function SearchBox({
         )}
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown (VERY visible) */}
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
@@ -892,9 +958,9 @@ function SearchBox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden
-                       border border-blue-200 bg-white shadow-lg z-20
-                       dark:bg-[#0f1a2e] dark:border-blue-900/60"
+            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
+                       border border-blue-200 bg-white shadow-xl z-[9999]
+                       max-h-[320px] overflow-y-auto"
           >
             {dirMatches.map((loc, idx) => (
               <li
@@ -903,14 +969,12 @@ function SearchBox({
                   onDirectoryPick(loc);
                   setOpen(false);
                 }}
-                className={`px-4 py-3 cursor-pointer text-sm
-                            hover:bg-blue-50 dark:hover:bg-blue-950/40
-                            ${idx !== 0 ? "border-t border-blue-100 dark:border-blue-900/40" : ""}`}
+                className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
+                  idx !== 0 ? "border-t border-blue-100" : ""
+                }`}
               >
-                <div className="font-semibold text-slate-900 dark:text-slate-50">
-                  {loc.title}
-                </div>
-                <div className="text-xs text-slate-600 dark:text-slate-300">
+                <div className="font-semibold text-slate-900">{loc.title}</div>
+                <div className="text-xs text-slate-600">
                   {loc.eventType} • {loc.when} • {loc.address}
                 </div>
               </li>
@@ -924,17 +988,17 @@ function SearchBox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-2xl overflow-hidden
-                       border border-blue-200 bg-white shadow-lg z-20
-                       dark:bg-[#0f1a2e] dark:border-blue-900/60"
+            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
+                       border border-blue-200 bg-white shadow-xl z-[9999]
+                       max-h-[320px] overflow-y-auto"
           >
-            {predictions.slice(0, 5).map((p, idx) => (
+            {predictions.slice(0, 8).map((p, idx) => (
               <li
                 key={p.place_id}
                 onClick={() => handleSelectPlace(p.place_id)}
-                className={`px-4 py-3 cursor-pointer text-sm
-                            hover:bg-blue-50 dark:hover:bg-blue-950/40
-                            ${idx !== 0 ? "border-t border-blue-100 dark:border-blue-900/40" : ""}`}
+                className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
+                  idx !== 0 ? "border-t border-blue-100" : ""
+                }`}
               >
                 {p.description}
               </li>
@@ -945,6 +1009,8 @@ function SearchBox({
     </div>
   );
 }
+
+/** ---------- Marker ---------- */
 function HoverMarker({
   location,
   activeId,
@@ -957,7 +1023,6 @@ function HoverMarker({
   onCenter: (loc: LocationItem) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-
   const isActive = activeId === location.id;
 
   return (
@@ -972,36 +1037,16 @@ function HoverMarker({
       }}
       onClick={() => onCenter(location)}
       style={{
-        position: "relative",
         transform: "translate(-50%, -100%)",
-        zIndex: hovered || isActive ? 1000 : 1,
         cursor: "pointer",
+        zIndex: hovered || isActive ? 999 : 1,
       }}
     >
-      {/* 🔁 Spinning marker image */}
-      <motion.img
-        src="/marker.png" // make sure this exists in /public
-        alt="Marker"
-        className="w-8 h-8 drop-shadow-md"
-        animate={{
-          rotate: 360,
-          scale: isActive ? 1.25 : 1,
-        }}
-        transition={{
-          rotate: {
-            repeat: Infinity,
-            duration: 6,
-            ease: "linear",
-          },
-          scale: {
-            type: "spring",
-            stiffness: 260,
-            damping: 20,
-          },
-        }}
+      <motion.div
+        className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow-lg"
+        animate={{ scale: hovered || isActive ? 1.25 : 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 18 }}
       />
-
-      {/* 💬 Hover info box */}
       <AnimatePresence>
         {(hovered || isActive) && (
           <motion.div
@@ -1009,22 +1054,147 @@ function HoverMarker({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.96 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="
-              absolute left-1/2 bottom-full mb-2
-              -translate-x-1/2
-              bg-blue-600 text-white text-xs
-              rounded-xl px-3 py-2
-              shadow-lg
-              w-56
-              pointer-events-none
-            "
+            className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2
+                       bg-blue-700 text-white text-xs rounded-2xl px-3 py-2 shadow-xl w-60 pointer-events-none"
           >
             <div className="font-semibold leading-tight">{location.title}</div>
             <div className="mt-0.5 opacity-90">{location.when}</div>
-            <div className="opacity-80">{location.eventType}</div>
+            <div className="opacity-90">{location.eventType}</div>
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+/** ---------- Suggest Resource Form ---------- */
+function SuggestResourceForm() {
+  const [name, setName] = useState("");
+  const [addr, setAddr] = useState("");
+  const [category, setCategory] = useState<EventType>("Support Services");
+  const [desc, setDesc] = useState("");
+  const [contact, setContact] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // This is a demo submit (client-side). Later you can POST to your DB.
+    setSent(true);
+    setTimeout(() => setSent(false), 2500);
+
+    setName("");
+    setAddr("");
+    setCategory("Support Services");
+    setDesc("");
+    setContact("");
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="md:col-span-2">
+        <AnimatePresence>
+          {sent && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="rounded-2xl border border-blue-200 bg-white p-3 text-sm text-blue-900"
+            >
+              ✅ Thanks! Your suggestion was submitted.
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <Field label="Resource name">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          placeholder="Example: Community Tutoring Program"
+        />
+      </Field>
+
+      <Field label="Address / location">
+        <input
+          value={addr}
+          onChange={(e) => setAddr(e.target.value)}
+          required
+          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          placeholder="Example: Cross Creek Ranch, Fulshear TX"
+        />
+      </Field>
+
+      <Field label="Category">
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as EventType)}
+          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        >
+          {EVENT_OPTIONS.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      <Field label="Contact (optional)">
+        <input
+          value={contact}
+          onChange={(e) => setContact(e.target.value)}
+          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          placeholder="Email / phone / website"
+        />
+      </Field>
+
+      <div className="md:col-span-2">
+        <Field label="Description">
+          <textarea
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            className="w-full min-h-[120px] rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            placeholder="What is this resource and how does it help residents?"
+          />
+        </Field>
+      </div>
+
+      <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap">
+        <div className="text-xs text-slate-600">
+          Submissions are reviewed before being added to the directory.
+        </div>
+        <motion.button
+          whileHover={{ y: -1 }}
+          whileTap={{ scale: 0.99 }}
+          type="submit"
+          className="px-4 py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition"
+        >
+          Submit resource
+        </motion.button>
+      </div>
+    </form>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <div className="text-sm font-semibold text-slate-900">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function InfoCard({ title, lines }: { title: string; lines: string[] }) {
+  return (
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="text-base font-bold text-[#1E3A8A]">{title}</div>
+      <ul className="mt-2 space-y-1 text-sm text-slate-600 list-disc pl-5">
+        {lines.map((l) => (
+          <li key={l}>{l}</li>
+        ))}
+      </ul>
     </div>
   );
 }
