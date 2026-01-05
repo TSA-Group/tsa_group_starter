@@ -1,4 +1,4 @@
-Shared layout + Protection + header
+//Shared layout + Protection + header
 
 "use client";
 
