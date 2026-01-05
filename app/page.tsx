@@ -56,7 +56,9 @@ function QuickActions() {
           Quick Actions
         </h3>
         <p className="text-sm text-blue-700">
-               Welcome to Cross Creek!
+          <b>
+            Welcome to Cross Creek!
+          </b>
         </p>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
