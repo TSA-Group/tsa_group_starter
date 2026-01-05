@@ -75,7 +75,7 @@ const pop: Variants = {
  */
 const ALL_LOCATIONS: LocationItem[] = [
   {
-    id: "cc-1",
+    id: "ful-1",
     title: "Cross Creek Ranch Fitness Center",
     address: "Cross Creek Ranch, Fulshear, TX (Fitness Center)",
     position: { lat: 29.7008, lng: -95.9082 },
@@ -83,12 +83,9 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Health", "Family"],
     when: "Daily • 5:00 AM – 10:00 PM",
     host: "Cross Creek Ranch",
-    description:
-      "Community fitness center with cardio/weights and group-friendly spaces.",
-    featured: true,
   },
   {
-    id: "cc-2",
+    id: "ful-2",
     title: "Flewellen Creek Park & Trails",
     address: "Flewellen Creek Park, Fulshear, TX",
     position: { lat: 29.6972, lng: -95.8968 },
@@ -96,12 +93,9 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Outdoors", "Family"],
     when: "Daily • Sunrise – Sunset",
     host: "Community Parks",
-    description:
-      "Neighborhood park area and trails—great for walks, kids, and meetups.",
-    featured: true,
   },
   {
-    id: "cc-3",
+    id: "ful-3",
     title: "Cross Creek Ranch Welcome Center",
     address: "Cross Creek Ranch Welcome Center, Fulshear, TX",
     position: { lat: 29.6988, lng: -95.9056 },
@@ -109,12 +103,9 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Support", "Family"],
     when: "Mon–Fri • 9:00 AM – 5:00 PM",
     host: "Community Staff",
-    description:
-      "Community info hub—questions, community programs, and resident support.",
-    featured: true,
   },
   {
-    id: "cc-4",
+    id: "ful-4",
     title: "Cross Creek Ranch Community Pool",
     address: "Cross Creek Ranch Pool, Fulshear, TX",
     position: { lat: 29.7034, lng: -95.8994 },
@@ -122,23 +113,19 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Family", "Health"],
     when: "Seasonal • Check community schedule",
     host: "Cross Creek Ranch",
-    description:
-      "Pool access and seasonal community programming (family swim, events).",
   },
   {
-    id: "cc-5",
-    title: "HEB (Fulshear / Nearby Grocery)",
+    id: "ful-5",
+    title: "HEB (Nearby Grocery)",
     address: "Fulshear, TX area grocery (HEB)",
     position: { lat: 29.6912, lng: -95.9185 },
     eventType: "Grocery",
     activities: ["Shopping", "Food", "Family"],
     when: "Daily • 6:00 AM – 11:00 PM",
     host: "HEB",
-    description:
-      "Nearby grocery option for essentials (food, pharmacy, household items).",
   },
   {
-    id: "cc-6",
+    id: "ful-6",
     title: "Fulshear Branch Library (Nearby)",
     address: "Fulshear, TX (Public Library)",
     position: { lat: 29.6883, lng: -95.9004 },
@@ -146,23 +133,19 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Education", "Family"],
     when: "Mon–Sat • Hours vary",
     host: "Public Library",
-    description:
-      "Books, study spaces, kids programs, and community learning resources.",
   },
   {
-    id: "cc-7",
-    title: "Community Food Pantry (Nearby Support)",
-    address: "Fulshear / Katy area food pantry support",
+    id: "ful-7",
+    title: "Community Food Pantry Support (Nearby)",
+    address: "Fulshear/Katy area food pantry support",
     position: { lat: 29.6796, lng: -95.9222 },
     eventType: "Food Pantry",
     activities: ["Food", "Support", "Family"],
     when: "Weekly • Appointment or walk-in hours",
     host: "Community Partner",
-    description:
-      "Food assistance support—hours vary (check partner site/call ahead).",
   },
   {
-    id: "cc-8",
+    id: "ful-8",
     title: "Volunteer Cleanup — Trails & Park Day",
     address: "Cross Creek Trails (meet near main trailhead)",
     position: { lat: 29.7051, lng: -95.9041 },
@@ -170,11 +153,9 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Volunteering", "Outdoors", "Family"],
     when: "Sat • 9:00 AM (Monthly)",
     host: "Resident Volunteers",
-    description:
-      "Monthly volunteer cleanup to keep trails and parks beautiful.",
   },
   {
-    id: "cc-9",
+    id: "ful-9",
     title: "Neighborhood Meetup — Community Pavilion",
     address: "Cross Creek Ranch Pavilion / Gathering Spot",
     position: { lat: 29.6999, lng: -95.8989 },
@@ -182,22 +163,19 @@ const ALL_LOCATIONS: LocationItem[] = [
     activities: ["Family", "Support"],
     when: "Sun • 4:00 PM (Weekly)",
     host: "Neighborhood Group",
-    description:
-      "Friendly weekly meetup for residents—introductions, announcements, Q&A.",
   },
   {
-    id: "cc-10",
-    title: "After-School Study & Tutoring Meetup (Library)",
+    id: "ful-10",
+    title: "After-School Study & Tutoring Meetup",
     address: "Nearby library study room / community study space",
     position: { lat: 29.6891, lng: -95.9010 },
     eventType: "Support Services",
     activities: ["Education", "Family", "Support"],
     when: "Tue/Thu • 5:30 PM",
     host: "Volunteer Tutors",
-    description:
-      "Student support meetup—homework help and study group (community-run).",
   },
 ];
+
 
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
