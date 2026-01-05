@@ -242,7 +242,7 @@ export default function Home() {
         {/* RIGHT COLUMN */}
         <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
           {/* EVENTS */}
-          <div className="lg:w-1/2 flex flex-col gap-4">
+          <div className="lg:w-1/4 flex flex-col gap-4">
             <motion.div
               variants={cardPop}
               className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border-blue-200 shadow-sm text-center"
@@ -285,7 +285,7 @@ export default function Home() {
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-3/4 relative"
           >
             <div className="flex items-center justify-between mb-4">
               <button
