@@ -322,45 +322,113 @@ export default function Page() {
 
           {/* Featured / Highlights (TSA requirement) */}
           <motion.section
-            variants={fadeUp}
-            className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
-          >
-            <div className="flex items-end justify-between gap-4 flex-wrap">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E3A8A]">
-                  Spotlight Resources
-                </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  A quick look at a few key resources in the Cross Creek community.
-                </p>
-              </div>
-            </div>
+  variants={fadeUp}
+  className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
+>
+  <div className="flex items-end justify-between gap-4 flex-wrap">
+    <div>
+      <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E3A8A]">
+        Spotlight Resources
+      </h2>
+      <p className="mt-1 text-sm text-slate-600">
+        A quick look at key resources + upcoming events in the Cross Creek community.
+      </p>
+    </div>
+  </div>
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              {featured.map((loc) => (
-                <motion.button
-                  key={loc.id}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => handleCenter(loc)}
-                  className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="text-xs font-semibold text-blue-900">
-                    {loc.eventType}
-                  </div>
-                  <div className="mt-1 text-base font-bold text-slate-900">
-                    {loc.title}
-                  </div>
-                  <div className="mt-2 text-sm text-slate-600">
-                    {loc.description ?? loc.address}
-                  </div>
-                  <div className="mt-3 inline-flex text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
-                    {loc.when}
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.section>
+  {/* ✅ Featured Resources (your existing 3 cards) */}
+  <div className="mt-4">
+    <div className="text-sm font-semibold text-slate-700 mb-2">
+      Featured resources
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {featured.map((loc) => (
+        <motion.button
+          key={loc.id}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.99 }}
+          onClick={() => handleCenter(loc)}
+          className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <div className="text-xs font-semibold text-blue-900">
+            {loc.eventType}
+          </div>
+          <div className="mt-1 text-base font-bold text-slate-900">
+            {loc.title}
+          </div>
+          <div className="mt-2 text-sm text-slate-600">
+            {loc.description ?? loc.address}
+          </div>
+          <div className="mt-3 inline-flex text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
+            {loc.when}
+          </div>
+        </motion.button>
+      ))}
+    </div>
+  </div>
+
+  {/* ✅ Spotlight Events (NEW: 2 motion cards) */}
+  <div className="mt-6">
+    <div className="text-sm font-semibold text-slate-700 mb-2">
+      Spotlight events
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.div
+        variants={fadeUp}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ duration: 0.2 }}
+        className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+      >
+        <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
+          Community Event
+        </div>
+
+        <h3 className="mt-2 text-lg font-bold text-slate-900">
+          Cross Creek Neighborhood Meetup
+        </h3>
+
+        <p className="mt-1 text-sm text-slate-600">
+          Meet neighbors, share updates, and learn about new community resources.
+        </p>
+
+        <div className="mt-3 text-sm text-slate-700">
+          <span className="font-semibold">When:</span> Saturday • 4:00 PM
+          <br />
+          <span className="font-semibold">Where:</span> Community Pavilion (Cross Creek)
+        </div>
+      </motion.div>
+
+      <motion.div
+        variants={fadeUp}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ duration: 0.2 }}
+        className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+      >
+        <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
+          Volunteer Opportunity
+        </div>
+
+        <h3 className="mt-2 text-lg font-bold text-slate-900">
+          Trails & Park Cleanup Day
+        </h3>
+
+        <p className="mt-1 text-sm text-slate-600">
+          Help keep Cross Creek beautiful — gloves and bags provided.
+        </p>
+
+        <div className="mt-3 text-sm text-slate-700">
+          <span className="font-semibold">When:</span> Sunday • 9:00 AM
+          <br />
+          <span className="font-semibold">Where:</span> Main Trailhead (Cross Creek)
+        </div>
+      </motion.div>
+    </div>
+  </div>
+</motion.section>
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
