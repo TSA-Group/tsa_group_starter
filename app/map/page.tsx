@@ -423,222 +423,237 @@ export default function Page() {
         <div className="mt-3 text-sm text-slate-700">
           <span className="font-semibold">When:</span> Sunday • 9:00 AM
           <br />
-          <span className="font-semibold">Where:</span> Main Trailhead (Cross
-          Creek)
+          <span className="font-semibold">Where:</span> Main Trailhead (Cross Creek)
         </div>
       </motion.div>
     </div>
-  </motion.section>
-
-  {/* Map + Search + List */}
-  <div className="lg:col-span-8 space-y-6">
-    {/* Map Card — IMPORTANT: z-20 + overflow-visible so dropdown shows on top */}
-    <motion.section
-      variants={fadeUp}
-      className="relative z-20 rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
-    >
-      <div className="p-4 sm:p-5 border-b border-blue-200/60">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-              Interactive Resource Map
-            </h2>
-            <p className="text-sm text-slate-600">
-              Search the directory or search the map (autocomplete).
-            </p>
-          </div>
-
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
-          >
-            {`Showing ${filteredLocations.length} location${
-              filteredLocations.length === 1 ? "" : "s"
-            }`}
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="p-4 sm:p-5">
-        {/* Map container keeps overflow-hidden */}
-        <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
-          <Map
-            center={center}
-            zoom={zoom}
-            gestureHandling="greedy"
-            disableDefaultUI={false}
-            onClick={() => setActiveId(null)}
-            className="w-full h-full"
-          >
-            {filteredLocations.map((loc) => (
-              <AdvancedMarker key={loc.id} position={loc.position}>
-                <HoverMarker
-                  location={loc}
-                  activeId={activeId}
-                  setActiveId={setActiveId}
-                  onCenter={handleCenter}
-                />
-              </AdvancedMarker>
-            ))}
-
-            {/* Selected place pin (from map search) */}
-            {selectedPlace && (
-              <AdvancedMarker position={selectedPlace}>
-                <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
-              </AdvancedMarker>
-            )}
-          </Map>
-        </div>
-
-        {/* Search — dropdown is now visible */}
-        <div className="mt-4 relative z-50">
-          <SearchBox
-            directoryQuery={directoryQuery}
-            setDirectoryQuery={setDirectoryQuery}
-            directoryResults={ALL_LOCATIONS}
-            onDirectoryPick={(loc) => handleCenter(loc)}
-            input={input}
-            setInput={setInput}
-            predictions={predictions}
-            setPredictions={setPredictions}
-            setCenter={(loc) => {
-              setCenter(loc);
-              setZoom(15);
-            }}
-            setSelectedPlace={setSelectedPlace}
-          />
-        </div>
-      </div>
-    </motion.section>
-
-    {/* Results List — IMPORTANT: z-0 so map dropdown can overlay */}
-    <motion.section
-      variants={fadeUp}
-      className="relative z-0 rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
-    >
-      <div className="p-4 sm:p-5 border-b border-blue-200/60">
-        <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-          Resource Directory
-        </h3>
-        <p className="text-sm text-slate-600">
-          Tap a card to center it on the map.
-        </p>
-      </div>
-
-      <div className="p-4 sm:p-5">
-        <AnimatePresence mode="popLayout">
-          {filteredLocations.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
-            >
-              No matches. Try removing a filter or changing your search.
-            </motion.div>
-          ) : (
-            <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-              {filteredLocations.map((loc) => (
-                <motion.button
-                  key={loc.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => handleCenter(loc)}
-                  className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-blue-900">
-                        {loc.eventType}
-                      </div>
-                      <div className="mt-1 text-base font-bold text-slate-900">
-                        {loc.title}
-                      </div>
-                    </div>
-
-                    <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
-                      {loc.when}
-                    </span>
-                  </div>
-
-                  <div className="mt-2 text-sm text-slate-600">
-                    {loc.address}
-                  </div>
-
-                  {loc.description && (
-                    <div className="mt-2 text-sm text-slate-600">
-                      {loc.description}
-                    </div>
-                  )}
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {loc.activities.slice(0, 6).map((a) => (
-                      <span
-                        key={a}
-                        className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50"
-                      >
-                        {a}
-                      </span>
-                    ))}
-                  </div>
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.section>
-
-    {/* Extra content (TSA requirement: additional content) */}
-    <motion.section
-      variants={fadeUp}
-      className="relative z-0 rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
-    >
-      <div className="p-4 sm:p-5 border-b border-blue-200/60">
-        <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-          Helpful Info
-        </h3>
-        <p className="text-sm text-slate-600">
-          Tips for using the hub + quick guidance for residents.
-        </p>
-      </div>
-
-      <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InfoCard
-          title="How to use this hub"
-          lines={[
-            "Use Filters to narrow by category and activities.",
-            "Use Search directory to find resources by keyword.",
-            "Use Search map to jump to any place by typing an address/place name.",
-            "Tap any resource card to center it on the map.",
-          ]}
-        />
-        <InfoCard
-          title="Emergency & urgent needs"
-          lines={[
-            "If this is an emergency, call local emergency services.",
-            "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
-            "For after-hours info, use the community Welcome Center during business hours for guidance.",
-          ]}
-        />
-      </div>
-    </motion.section>
   </div>
-</div>
+</motion.section>
 
+          {/* Main Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Filters */}
+            <motion.aside variants={fadeUp} className="lg:col-span-4">
+              <FilterBox
+                eventFilters={eventFilters}
+                setEventFilters={setEventFilters}
+                activityFilters={activityFilters}
+                setActivityFilters={setActivityFilters}
+                radiusMode={radiusMode}
+                setRadiusMode={setRadiusMode}
+                onClear={() => {
+                  setEventFilters([]);
+                  setActivityFilters([]);
+                  setRadiusMode("All");
+                  setDirectoryQuery("");
+                }}
+              />
+            </motion.aside>
+
+            {/* Map + Search + List */}
+            <div className="lg:col-span-8 space-y-6">
+              {/* Map Card — IMPORTANT: overflow-visible so dropdown isn't clipped */}
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div>
+                      <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                        Interactive Resource Map
+                      </h2>
+                      <p className="text-sm text-slate-600">
+                        Search the directory or search the map (autocomplete).
+                      </p>
+                    </div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
+                    >
+                      {`Showing ${filteredLocations.length} location${
+                        filteredLocations.length === 1 ? "" : "s"
+                      }`}
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-5">
+                  {/* Map container keeps overflow-hidden */}
+                  <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
+                    <Map
+                      center={center}
+                      zoom={zoom}
+                      gestureHandling="greedy"
+                      disableDefaultUI={false}
+                      onClick={() => setActiveId(null)}
+                      className="w-full h-full"
+                    >
+                      {filteredLocations.map((loc) => (
+                        <AdvancedMarker key={loc.id} position={loc.position}>
+                          <HoverMarker
+                            location={loc}
+                            activeId={activeId}
+                            setActiveId={setActiveId}
+                            onCenter={handleCenter}
+                          />
+                        </AdvancedMarker>
+                      ))}
+
+                      {/* Selected place pin (from map search) */}
+                      {selectedPlace && (
+                        <AdvancedMarker position={selectedPlace}>
+                          <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
+                        </AdvancedMarker>
+                      )}
+                    </Map>
+                  </div>
+
+                  {/* Search — dropdown is now VERY visible (z-50, not clipped) */}
+                  <div className="mt-4 relative z-50">
+                    <SearchBox
+                      directoryQuery={directoryQuery}
+                      setDirectoryQuery={setDirectoryQuery}
+                      directoryResults={ALL_LOCATIONS}
+                      onDirectoryPick={(loc) => handleCenter(loc)}
+                      input={input}
+                      setInput={setInput}
+                      predictions={predictions}
+                      setPredictions={setPredictions}
+                      setCenter={(loc) => {
+                        setCenter(loc);
+                        setZoom(15);
+                      }}
+                      setSelectedPlace={setSelectedPlace}
+                    />
+                  </div>
+                </div>
+              </motion.section>
+
+              {/* Results List */}
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Resource Directory
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Tap a card to center it on the map.
+                  </p>
+                </div>
+
+                <div className="p-4 sm:p-5">
+                  <AnimatePresence mode="popLayout">
+                    {filteredLocations.length === 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
+                      >
+                        No matches. Try removing a filter or changing your search.
+                      </motion.div>
+                    ) : (
+                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {filteredLocations.map((loc) => (
+                          <motion.button
+                            key={loc.id}
+                            layout
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            whileHover={{ y: -2 }}
+                            whileTap={{ scale: 0.99 }}
+                            onClick={() => handleCenter(loc)}
+                            className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-sm font-semibold text-blue-900">
+                                  {loc.eventType}
+                                </div>
+                                <div className="mt-1 text-base font-bold text-slate-900">
+                                  {loc.title}
+                                </div>
+                              </div>
+
+                              <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
+                                {loc.when}
+                              </span>
+                            </div>
+
+                            <div className="mt-2 text-sm text-slate-600">
+                              {loc.address}
+                            </div>
+
+                            {loc.description && (
+                              <div className="mt-2 text-sm text-slate-600">
+                                {loc.description}
+                              </div>
+                            )}
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {loc.activities.slice(0, 6).map((a) => (
+                                <span
+                                  key={a}
+                                  className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50"
+                                >
+                                  {a}
+                                </span>
+                              ))}
+                            </div>
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.section>
+
+             
+              {/* Extra content (TSA requirement: additional content) */}
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Helpful Info
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Tips for using the hub + quick guidance for residents.
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoCard
+                    title="How to use this hub"
+                    lines={[
+                      "Use Filters to narrow by category and activities.",
+                      "Use Search directory to find resources by keyword.",
+                      "Use Search map to jump to any place by typing an address/place name.",
+                      "Tap any resource card to center it on the map.",
+                    ]}
+                  />
+                  <InfoCard
+                    title="Emergency & urgent needs"
+                    lines={[
+                      "If this is an emergency, call local emergency services.",
+                      "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
+                      "For after-hours info, use the community Welcome Center during business hours for guidance.",
+                    ]}
+                  />
+                </div>
+              </motion.section>
+            </div>
+          </div>
         </motion.div>
       </div>
     </APIProvider>
   );
 }
-
 
 /** ---------- Filter Box ---------- */
 function FilterBox({
@@ -776,16 +791,17 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (Directory + Places) ----------*/ 
-
+/** ---------- SearchBox (Directory + Places) ----------
+ * FIX: dropdown visibility
+ * - parent has relative z-50
+ * - dropdown has z-[9999]
+ * - map card uses overflow-visible
+ */
 function SearchBox({
-  // Directory search
   directoryQuery,
   setDirectoryQuery,
   directoryResults,
   onDirectoryPick,
-
-  // Places search
   input,
   setInput,
   predictions,
@@ -819,10 +835,9 @@ function SearchBox({
     }
   }, [placesLib]);
 
-  // fetch predictions (debounced)
+  // fetch predictions
   useEffect(() => {
     if (mode !== "places") return;
-
     const q = input.trim();
     if (!serviceRef.current || q.length < 2 || !open) {
       setPredictions([]);
@@ -868,12 +883,11 @@ function SearchBox({
           .toLowerCase();
         return haystack.includes(q);
       })
-      .slice(0, 10);
+      .slice(0, 8);
   }, [directoryQuery, directoryResults]);
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
-
     const detailsService = new placesLib.PlacesService(document.createElement("div"));
 
     detailsService.getDetails({ placeId }, (place) => {
@@ -893,17 +907,8 @@ function SearchBox({
 
   const currentValue = mode === "directory" ? directoryQuery : input;
 
-  // shared dropdown class
-  const dropdownClass =
-    "absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden " +
-    "border border-blue-200 bg-white shadow-2xl z-[9999] " +
-    "max-h-[360px] overflow-y-auto";
-
   return (
-    <div
-      ref={boxRef}
-      className="relative z-50 rounded-3xl border border-blue-200 bg-white shadow-sm p-3"
-    >
+    <div ref={boxRef} className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3">
       {/* Mode toggle */}
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
@@ -913,7 +918,6 @@ function SearchBox({
               key={m}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
-              type="button"
               onClick={() => {
                 setMode(m);
                 setOpen(true);
@@ -975,7 +979,7 @@ function SearchBox({
         )}
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown (VERY visible) */}
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
@@ -983,7 +987,9 @@ function SearchBox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className={dropdownClass}
+            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
+                       border border-blue-200 bg-white shadow-xl z-[9999]
+                       max-h-[320px] overflow-y-auto"
           >
             {dirMatches.map((loc, idx) => (
               <li
@@ -1011,9 +1017,11 @@ function SearchBox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className={dropdownClass}
+            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
+                       border border-blue-200 bg-white shadow-xl z-[9999]
+                       max-h-[320px] overflow-y-auto"
           >
-            {predictions.slice(0, 10).map((p, idx) => (
+            {predictions.slice(0, 8).map((p, idx) => (
               <li
                 key={p.place_id}
                 onClick={() => handleSelectPlace(p.place_id)}
@@ -1030,7 +1038,6 @@ function SearchBox({
     </div>
   );
 }
-
 
 /** ---------- Marker ---------- */
 function HoverMarker({
