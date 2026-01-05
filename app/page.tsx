@@ -56,7 +56,7 @@ function QuickActions() {
           Quick Actions
         </h3>
         <p className="text-sm text-blue-700">
-          Easy Access To Our Valuable Community Resources
+          Welcome to Cross Creek! View our map to become familar with our area and sign up to participate in daily community activities.
         </p>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
