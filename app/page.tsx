@@ -299,6 +299,17 @@ export default function Home() {
               }
             >
               {date.getDate()}
+              {/* Event Dot */}
+              {events.some(event => {
+                const eDate = new Date(event.dateString);
+                return (
+                  eDate.getFullYear() === date.getFullYear() &&
+                  eDate.getMonth() === date.getMonth() &&
+                  eDate.getDate() === date.getDate()
+                );
+              }) && (
+                <span className="mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+              )}
             </div>
           );
         })}
