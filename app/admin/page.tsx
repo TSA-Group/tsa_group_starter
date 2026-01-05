@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Variants } from "framer-motion";
+import type { Variants, Transition } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 const glow: Variants = {
@@ -12,21 +12,19 @@ const glow: Variants = {
     scale: 1,
     transition: {
       duration: 0.55,
-      ease: [0.16, 1, 0.3, 1], // ✅ was "easeOut"
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
 
 const floaty = {
-  animate: {
-    y: [0, -10, 0],
-    transition: {
-      duration: 5.5,
-      repeat: Infinity,
-      ease: [0.65, 0, 0.35, 1], // ✅ was "easeInOut"
-    },
-  },
-} as const;
+  y: [0, -10, 0] as number[], // ✅ mutable (not readonly)
+  transition: {
+    duration: 5.5,
+    repeat: Infinity,
+    ease: [0.65, 0, 0.35, 1],
+  } satisfies Transition,
+};
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -71,7 +69,8 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#070A12] text-white relative overflow-hidden">
       {/* animated backdrop */}
       <motion.div
-        animate={floaty.animate}
+        animate={{ y: floaty.y }}
+        transition={floaty.transition}
         className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-40"
         style={{
           background:
@@ -79,7 +78,8 @@ export default function AdminLoginPage() {
         }}
       />
       <motion.div
-        animate={floaty.animate}
+        animate={{ y: floaty.y }}
+        transition={floaty.transition}
         className="absolute -bottom-28 -right-28 w-[520px] h-[520px] rounded-full blur-3xl opacity-35"
         style={{
           background:
@@ -100,10 +100,7 @@ export default function AdminLoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.55,
-                  ease: [0.16, 1, 0.3, 1], // ✅ was "easeOut"
-                }}
+                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               >
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-white/80">
                   Secure Admin Portal
