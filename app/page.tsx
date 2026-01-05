@@ -239,14 +239,53 @@ export default function Home() {
           </motion.div>
         </motion.section>
 
-        
+        {/* RIGHT COLUMN */}
+        <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
+          {/* EVENTS */}
+          <div className="lg:w-2/5 flex flex-col gap-4">
+            <motion.div
+              variants={cardPop}
+              className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border-blue-200 shadow-sm text-center"
+            >
+              <h2 className="text-2xl font-semibold text-blue-900">
+                Upcoming Events
+              </h2>
+            </motion.div>
+
+            {filteredEvents.map((event, i) => (
+              <motion.div
+                key={i}
+                variants={cardPop}
+                className="bg-white rounded-2xl border border-blue-200 p-4 cursor-pointer"
+                onClick={() => setOpenEvent(openEvent === i ? null : i)}
+              >
+                <h3 className="font-semibold text-blue-900">{event.title}</h3>
+                <p className="text-sm text-blue-700">
+                  {new Date(event.dateString).toLocaleString()} • {event.location}
+                </p>
+
+                <AnimatePresence>
+                  {openEvent === i && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-blue-800 mt-2"
+                    >
+                      {event.details}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
 
           {/* CALENDAR WITH TOGGLE + CLICK-OUTSIDE */}
           <motion.div
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-2/3 relative"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-3/5 relative"
           >
             <div className="flex items-center justify-between mb-4">
               <button
@@ -308,23 +347,22 @@ export default function Home() {
                   >
                     {date.getDate()}
 
-                    {/* EVENTS FOR SELECTED DAY */}
                     <AnimatePresence>
-                      {selectedDate && (
+                      {isSelected && (
                         <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10 w-60 bg-white border border-blue-200 rounded-lg shadow-lg p-3 text-sm text-blue-900"
                         >
-                          <h3 className="font-semibold text-blue-900 mb-2">
-                            Events on {selectedDate.toLocaleDateString()}
-                          </h3>
-                    
-                          {filteredEvents.length > 0 ? (
-                            <ul className="space-y-3">
-                              {filteredEvents.map((event, i) => (
-                                <li key={i} className="border-l-4 border-blue-500 pl-3">
+                          <p className="font-semibold mb-1">
+                            {monthNames[date.getMonth()]} {date.getDate()}, {date.getFullYear()}
+                          </p>
+
+                          {dayEvents.length > 0 ? (
+                            <ul className="space-y-2">
+                              {dayEvents.map((event, i) => (
+                                <li key={i} className="border-l-4 border-blue-500 pl-2">
                                   <p className="font-semibold text-blue-800">{event.title}</p>
                                   <p className="text-xs text-blue-700">{event.location}</p>
                                   <p className="text-xs text-blue-700">{event.details}</p>
@@ -332,7 +370,7 @@ export default function Home() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="text-blue-700 text-sm">No events for this day</p>
+                            <p className="text-xs text-blue-700">No events for this day</p>
                           )}
                         </motion.div>
                       )}
@@ -433,3 +471,4 @@ export default function Home() {
     </motion.div>
   );
 }
+
