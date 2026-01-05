@@ -1,17 +1,27 @@
-//Add Resources
+// Add Resources
 
 "use client";
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
-const sectionAnim = {
+const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1], // ✅ instead of "easeOut"
+    },
+  },
 };
 
 const COMMUNITIES = ["Cross Creek Ranch", "Cross Creek West", "Cross Creek"] as const;
+
 const RESOURCE_TYPES = [
   "Gym/Fitness",
   "Park/Trails",
@@ -26,18 +36,23 @@ const RESOURCE_TYPES = [
 export default function AddResourcePage() {
   const [sent, setSent] = React.useState(false);
 
-  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>("Cross Creek");
-  const [type, setType] = React.useState<(typeof RESOURCE_TYPES)[number]>("Park/Trails");
+  const [community, setCommunity] =
+    React.useState<(typeof COMMUNITIES)[number]>("Cross Creek");
+  const [type, setType] =
+    React.useState<(typeof RESOURCE_TYPES)[number]>("Park/Trails");
   const [name, setName] = React.useState("");
   const [address, setAddress] = React.useState("");
-  const [indoorOutdoor, setIndoorOutdoor] = React.useState<"Indoor" | "Outdoor" | "Both">("Both");
+  const [indoorOutdoor, setIndoorOutdoor] = React.useState<
+    "Indoor" | "Outdoor" | "Both"
+  >("Both");
   const [contact, setContact] = React.useState("");
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     // demo submit
     setSent(true);
-    setTimeout(() => setSent(false), 2200);
+    window.setTimeout(() => setSent(false), 2200);
 
     // reset
     setName("");
@@ -55,22 +70,32 @@ export default function AddResourcePage() {
       <motion.div variants={sectionAnim} initial="hidden" animate="show">
         <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.45)] overflow-hidden">
           <div className="p-6 border-b border-white/10">
-            <div className="text-white/80 font-semibold">
-              Subsections
-            </div>
+            <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Resources (type, name, address, indoor/outdoor, contact)
+              Community Name (dropdown) → Resources (type, name, address,
+              indoor/outdoor, contact)
             </div>
           </div>
 
-          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={onSubmit}
+            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
+                    }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
                     ✅ Resource submitted (demo). Hook this to your DB later.
@@ -83,7 +108,9 @@ export default function AddResourcePage() {
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) => setCommunity(e.target.value as any)}
+                onChange={(e) =>
+                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
@@ -98,7 +125,9 @@ export default function AddResourcePage() {
             <Field label="Resource Type">
               <select
                 value={type}
-                onChange={(e) => setType(e.target.value as any)}
+                onChange={(e) =>
+                  setType(e.target.value as (typeof RESOURCE_TYPES)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {RESOURCE_TYPES.map((t) => (
@@ -132,12 +161,11 @@ export default function AddResourcePage() {
                       whileHover={{ y: -1 }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => setIndoorOutdoor(opt)}
-                      className={`rounded-2xl px-3 py-3 text-sm border transition
-                        ${
-                          active
-                            ? "border-blue-500/40 bg-blue-500/15 text-white"
-                            : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-                        }`}
+                      className={`rounded-2xl px-3 py-3 text-sm border transition ${
+                        active
+                          ? "border-blue-500/40 bg-blue-500/15 text-white"
+                          : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+                      }`}
                     >
                       {opt}
                     </motion.button>
@@ -192,7 +220,13 @@ export default function AddResourcePage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-2">
       <div className="text-sm font-semibold text-white/85">{label}</div>
