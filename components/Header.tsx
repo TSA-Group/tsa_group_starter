@@ -1,51 +1,72 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, Variants, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
-export default function HeroHeader() {
-  const { scrollY } = useScroll();
-  const [scrollRange, setScrollRange] = useState(1000); // default
+const navItems = [
+  { label: "Resources", href: "/map" },
+  { label: "Events", href: "/events" },
+  { label: "Contact", href: "/contact" },
+  { label: "Admin", href: "/admin" }
+];
 
-  // Calculate scroll range after mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setScrollRange(document.body.scrollHeight - window.innerHeight);
-    }
-  }, []);
-
-  // Scroll-based color
-  const headerColor = useTransform(
-    scrollY,
-    [0, scrollRange],
-    ["#1E3A8A", "#1E3F8A"]
-  );
-
-  // Variants for hero header
-  const heroVariant: Variants = {
-    hidden: { opacity: 0, x: 20, y: 0 },
-    show: {
-      opacity: 1,
-      x: [20, 0, 20],
-      y: [0, -6, 0],
-      transition: { duration: 2.5, ease: "easeInOut" },
-    },
-  };
-
+export const Header: React.FC = () => {
   return (
     <motion.header
-      initial="hidden"
-      animate="show"
-      variants={{ show: {}, hidden: {} }} // parent variant for possible stagger
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10"
+      initial={false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="
+        fixed top-0 left-0 w-full z-50
+        bg-white/70 backdrop-blur-xl
+        border-b border-blue-600/80
+        shadow-sm
+        text-blue-600/80
+      "
     >
-      <motion.h1
-        variants={heroVariant}
-        style={{ color: headerColor, fontFamily: "TAN Buster, sans-serif" }}
-        className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left"
-      >
-        GATHERLY
-      </motion.h1>
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* LOGO */}
+        <Link href="/" passHref>
+          <motion.h1
+            whileHover={{
+              scale: 1.05,
+              textShadow: "0px 0px 8px rgba(37, 99, 235, 0.25)",
+            }}
+            transition={{ type: "spring", stiffness: 260 }}
+            className="text-3xl font-extrabold tracking-tight cursor-pointer text-blue-600/80"
+            style={{ fontFamily: "TAN Buster, sans-serif" }}
+          >
+            Gatherly
+          </motion.h1>
+        </Link>
+
+        {/* NAV */}
+        <nav className="flex gap-10 text-base font-medium ml-auto">
+          {navItems.map(({ label, href }) => (
+            <motion.a
+              key={label}
+              href={href}
+              whileHover={{ y: -2 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="
+                relative text-blue-600/80
+                hover:text-gray-950
+                transition-colors duration-200
+              "
+            >
+              {label}
+
+              <span
+                className="
+                  absolute left-0 -bottom-1 h-[2px] w-0
+                  bg-blue-500
+                  transition-all duration-300
+                "
+              />
+            </motion.a>
+          ))}
+        </nav>
+      </div>
     </motion.header>
   );
-}
+};
