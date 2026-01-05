@@ -243,7 +243,7 @@ export default function Home() {
     ref={calendarRef}
     layout
     variants={cardPop}
-    className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-3/5 relative"
+    className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:col-span-2 relative"
   >
     {/* Calendar Header */}
     <div className="flex items-center justify-between mb-4">
@@ -281,6 +281,7 @@ export default function Home() {
         const isToday = date.getTime() === texasToday.getTime();
         const isSelected = date.getTime() === selectedDate?.getTime();
   
+        // Check if there is an event for this day
         const hasEvent = events.some(event => {
           const eDate = new Date(event.dateString);
           return (
@@ -307,12 +308,10 @@ export default function Home() {
             }
           >
             {/* Date number */}
-            <span>{date.getDate()}</span>
+            <span className="block">{date.getDate()}</span>
   
-            {/* Event Dot */}
-            {hasEvent && (
-              <span className="mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-            )}
+            {/* Event Dot below number */}
+            {hasEvent && <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>}
           </div>
         );
       })}
