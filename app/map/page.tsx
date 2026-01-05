@@ -792,16 +792,15 @@ function FilterBox({
 }
 
 /** ---------- SearchBox (Directory + Places) ----------
- * FIX: dropdown visibility
- * - parent has relative z-50
- * - dropdown has z-[9999]
- * - map card uses overflow-visible
- */
+
 function SearchBox({
+  // Directory search
   directoryQuery,
   setDirectoryQuery,
   directoryResults,
   onDirectoryPick,
+
+  // Places search
   input,
   setInput,
   predictions,
@@ -835,9 +834,10 @@ function SearchBox({
     }
   }, [placesLib]);
 
-  // fetch predictions
+  // fetch predictions (debounced)
   useEffect(() => {
     if (mode !== "places") return;
+
     const q = input.trim();
     if (!serviceRef.current || q.length < 2 || !open) {
       setPredictions([]);
@@ -883,11 +883,12 @@ function SearchBox({
           .toLowerCase();
         return haystack.includes(q);
       })
-      .slice(0, 8);
+      .slice(0, 10);
   }, [directoryQuery, directoryResults]);
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
+
     const detailsService = new placesLib.PlacesService(document.createElement("div"));
 
     detailsService.getDetails({ placeId }, (place) => {
@@ -907,8 +908,17 @@ function SearchBox({
 
   const currentValue = mode === "directory" ? directoryQuery : input;
 
+  // shared dropdown class
+  const dropdownClass =
+    "absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden " +
+    "border border-blue-200 bg-white shadow-2xl z-[9999] " +
+    "max-h-[360px] overflow-y-auto";
+
   return (
-    <div ref={boxRef} className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3">
+    <div
+      ref={boxRef}
+      className="relative z-50 rounded-3xl border border-blue-200 bg-white shadow-sm p-3"
+    >
       {/* Mode toggle */}
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
@@ -918,6 +928,7 @@ function SearchBox({
               key={m}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
+              type="button"
               onClick={() => {
                 setMode(m);
                 setOpen(true);
@@ -979,7 +990,7 @@ function SearchBox({
         )}
       </div>
 
-      {/* Dropdown (VERY visible) */}
+      {/* Dropdown */}
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
@@ -987,9 +998,7 @@ function SearchBox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
-                       border border-blue-200 bg-white shadow-xl z-[9999]
-                       max-h-[320px] overflow-y-auto"
+            className={dropdownClass}
           >
             {dirMatches.map((loc, idx) => (
               <li
@@ -1017,11 +1026,9 @@ function SearchBox({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.99 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
-                       border border-blue-200 bg-white shadow-xl z-[9999]
-                       max-h-[320px] overflow-y-auto"
+            className={dropdownClass}
           >
-            {predictions.slice(0, 8).map((p, idx) => (
+            {predictions.slice(0, 10).map((p, idx) => (
               <li
                 key={p.place_id}
                 onClick={() => handleSelectPlace(p.place_id)}
@@ -1038,6 +1045,7 @@ function SearchBox({
     </div>
   );
 }
+
 
 /** ---------- Marker ---------- */
 function HoverMarker({
