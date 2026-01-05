@@ -239,130 +239,133 @@ export default function Home() {
   </motion.section>
 
   {/* RIGHT COLUMN - Calendar + Events */}
-  <motion.div
-    ref={calendarRef}
-    layout
-    variants={cardPop}
-    className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:col-span-2 relative"
-  >
-    {/* Calendar Header */}
-    <div className="flex items-center justify-between mb-4">
-      <button
-        onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
-        className="text-blue-700 text-2xl font-bold"
-      >
-        ❮
-      </button>
-  
-      <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
-        {monthNames[calMonth]} {calYear}
-      </h3>
-  
-      <button
-        onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
-        className="text-blue-700 text-2xl font-bold"
-      >
-        ❯
-      </button>
-    </div>
-  
-    {/* Days of the Week */}
-    <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-      {daysOfWeek.map(d => (
-        <div key={d} className="text-center">{d}</div>
-      ))}
-    </div>
-  
-    {/* Calendar Grid */}
-    <div className="grid grid-cols-7 gap-1">
-      {calendarDays.map((date, idx) => {
-        if (!date) return <div key={idx} />;
-  
-        const isToday = date.getTime() === texasToday.getTime();
-        const isSelected = date.getTime() === selectedDate?.getTime();
-  
-        // Check if there is an event for this day
-        const hasEvent = events.some(event => {
-          const eDate = new Date(event.dateString);
-          return (
-            eDate.getFullYear() === date.getFullYear() &&
-            eDate.getMonth() === date.getMonth() &&
-            eDate.getDate() === date.getDate()
-          );
-        });
-  
-        return (
-          <div
-            key={idx}
-            className={`relative flex flex-col items-center justify-start h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
-              isSelected
-                ? "bg-blue-400 text-white"
-                : isToday
-                ? "bg-blue-600 text-white"
-                : "bg-blue-50 hover:bg-blue-100 text-blue-900"
-            }`}
-            onClick={() =>
-              setSelectedDate(prev =>
-                prev && prev.getTime() === date.getTime() ? null : date
-              )
-            }
-          >
-            {/* Date number */}
-            <span className="block">{date.getDate()}</span>
-  
-            {/* Event Dot below number */}
-            {hasEvent && <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>}
-          </div>
-        );
-      })}
-    </div>
-  
-    {/* EVENTS POPUP BELOW CALENDAR */}
-    <AnimatePresence>
-      {selectedDate && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+  <motion.section className="lg:col-span-2">
+    <motion.div
+      ref={calendarRef}
+      layout
+      variants={cardPop}
+      className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 relative"
+    >
+      {/* Calendar Header */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+          className="text-blue-700 text-2xl font-bold"
         >
-          <h3 className="font-semibold text-blue-900 mb-2">
-            Events on {selectedDate.toLocaleDateString()}
-          </h3>
-  
-          {events.filter(event => {
+          ❮
+        </button>
+
+        <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+          {monthNames[calMonth]} {calYear}
+        </h3>
+
+        <button
+          onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+          className="text-blue-700 text-2xl font-bold"
+        >
+          ❯
+        </button>
+      </div>
+
+      {/* Days of the Week */}
+      <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
+        {daysOfWeek.map(d => (
+          <div key={d} className="text-center">{d}</div>
+        ))}
+      </div>
+
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {calendarDays.map((date, idx) => {
+          if (!date) return <div key={idx} />;
+
+          const isToday = date.getTime() === texasToday.getTime();
+          const isSelected = date.getTime() === selectedDate?.getTime();
+
+          const hasEvent = events.some(event => {
             const eDate = new Date(event.dateString);
             return (
-              eDate.getFullYear() === selectedDate.getFullYear() &&
-              eDate.getMonth() === selectedDate.getMonth() &&
-              eDate.getDate() === selectedDate.getDate()
+              eDate.getFullYear() === date.getFullYear() &&
+              eDate.getMonth() === date.getMonth() &&
+              eDate.getDate() === date.getDate()
             );
-          }).length > 0 ? (
-            <ul className="space-y-3">
-              {events
-                .filter(event => {
-                  const eDate = new Date(event.dateString);
-                  return (
-                    eDate.getFullYear() === selectedDate.getFullYear() &&
-                    eDate.getMonth() === selectedDate.getMonth() &&
-                    eDate.getDate() === selectedDate.getDate()
-                  );
-                })
-                .map((event, i) => (
-                  <li key={i} className="border-l-4 border-blue-500 pl-3">
-                    <p className="font-semibold text-blue-800">{event.title}</p>
-                    <p className="text-xs text-blue-700">{event.location}</p>
-                    <p className="text-xs text-blue-700">{event.details}</p>
-                  </li>
-                ))}
-            </ul>
-          ) : (
-            <p className="text-blue-700 text-sm">No events for this day</p>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </motion.div>
+          });
+
+          return (
+            <div
+              key={idx}
+              className={`relative flex flex-col items-center justify-start h-16 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
+                isSelected
+                  ? "bg-blue-400 text-white"
+                  : isToday
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-50 hover:bg-blue-100 text-blue-900"
+              }`}
+              onClick={() =>
+                setSelectedDate(prev =>
+                  prev && prev.getTime() === date.getTime() ? null : date
+                )
+              }
+            >
+              {/* Date number */}
+              <span className="block">{date.getDate()}</span>
+
+              {/* Event Dot */}
+              {hasEvent && <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Events Popup */}
+      <AnimatePresence>
+        {selectedDate && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+          >
+            <h3 className="font-semibold text-blue-900 mb-2">
+              Events on {selectedDate.toLocaleDateString()}
+            </h3>
+
+            {events.filter(event => {
+              const eDate = new Date(event.dateString);
+              return (
+                eDate.getFullYear() === selectedDate.getFullYear() &&
+                eDate.getMonth() === selectedDate.getMonth() &&
+                eDate.getDate() === selectedDate.getDate()
+              );
+            }).length > 0 ? (
+              <ul className="space-y-3">
+                {events
+                  .filter(event => {
+                    const eDate = new Date(event.dateString);
+                    return (
+                      eDate.getFullYear() === selectedDate.getFullYear() &&
+                      eDate.getMonth() === selectedDate.getMonth() &&
+                      eDate.getDate() === selectedDate.getDate()
+                    );
+                  })
+                  .map((event, i) => (
+                    <li key={i} className="border-l-4 border-blue-500 pl-3">
+                      <p className="font-semibold text-blue-800">{event.title}</p>
+                      <p className="text-xs text-blue-700">{event.location}</p>
+                      <p className="text-xs text-blue-700">{event.details}</p>
+                    </li>
+                  ))}
+              </ul>
+            ) : (
+              <p className="text-blue-700 text-sm">No events for this day</p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  </motion.section>
+
+</motion.main>
 
 
       {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
