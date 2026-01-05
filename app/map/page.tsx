@@ -776,7 +776,7 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (Directory + Places) ----------
+/** ---------- SearchBox (Directory + Places) ----------*/ 
 
 function SearchBox({
   // Directory search
