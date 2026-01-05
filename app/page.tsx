@@ -1,6 +1,5 @@
 "use client";
 
-
 import React, { useState, useEffect, useRef } from "react";
 import {
   motion,
@@ -11,8 +10,7 @@ import {
 } from "framer-motion";
 import Link from "next/link";
 
-
-// Animation variants
+/* ---------------- ANIMATIONS ---------------- */
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12 } },
@@ -38,7 +36,7 @@ const cardPop: Variants = {
   },
 };
 
-// QuickActions component
+/* ---------------- QUICK ACTIONS ---------------- */
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
@@ -46,9 +44,8 @@ const actions = [
 
 function QuickActions() {
   return (
-    <motion.section layout variants={fadeUp} className="space-y-8">
+    <motion.section variants={fadeUp}>
       <motion.div
-        layout
         variants={cardPop}
         className="p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
@@ -56,14 +53,12 @@ function QuickActions() {
           Quick Actions
         </h3>
         <p className="text-sm text-blue-700">
-          <b>
-            Welcome to Cross Creek!
-          </b>
+          <b>Welcome to Cross Creek!</b>
         </p>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {actions.map(({ label, href }) => (
-            <Link key={label} href={href} className="block">
+            <Link key={label} href={href}>
               <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
                 <span className="text-sm">{label}</span>
                 <span className="text-xs font-semibold text-blue-700">Go</span>
@@ -76,58 +71,47 @@ function QuickActions() {
   );
 }
 
+/* ======================= HOME ======================= */
 export default function Home() {
   const year = new Date().getFullYear();
+
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [openEvent, setOpenEvent] = useState<number | null>(null);
-  const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
-  const { scrollY } = useScroll();
-  const [scrollRange, setScrollRange] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const calendarRef = useRef<HTMLDivElement>(null);
+  const eventsRef = useRef<HTMLDivElement>(null);
+
+  const { scrollY } = useScroll();
+  const [scrollRange, setScrollRange] = useState(0);
 
   useEffect(() => {
     setScrollRange(document.body.scrollHeight - window.innerHeight);
   }, []);
 
-  // Click outside to close calendar popup
+  /* ---- Click outside calendar ---- */
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node)
+        !calendarRef.current.contains(e.target as Node)
       ) {
         setSelectedDate(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
+    return () =>
       document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
-  // Subtle scroll background & header color
   const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
   const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E3F8A"]);
 
-  // Texas time today
-  const now = new Date();
-  const texasToday = new Date(
-    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
-  );
-  texasToday.setHours(0, 0, 0, 0);
+  /* ---- Today ---- */
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  const calYear = calendarDate.getFullYear();
-  const calMonth = calendarDate.getMonth();
-
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-
-  // Events with dateString for calendar
+  /* ---- Events (single source of truth) ---- */
   const events = [
     {
       title: "Neighborhood Meetup",
@@ -149,315 +133,204 @@ export default function Home() {
     },
   ];
 
-  // Generate calendar days
-  const generateCalendarDays = () => {
-    const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay();
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const daysArray: (Date | null)[] = [];
+  /* ---- Synced Event Logic ---- */
+  const filteredEvents = selectedDate
+    ? events.filter(e => {
+        const d = new Date(e.dateString);
+        return d.toDateString() === selectedDate.toDateString();
+      })
+    : events
+        .filter(e => new Date(e.dateString) >= today)
+        .sort(
+          (a, b) =>
+            new Date(a.dateString).getTime() -
+            new Date(b.dateString).getTime()
+        );
 
-    for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
+  /* ---- Calendar Setup ---- */
+  const calYear = calendarDate.getFullYear();
+  const calMonth = calendarDate.getMonth();
+
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  const generateCalendarDays = () => {
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const days: (Date | null)[] = [];
+
+    for (let i = 0; i < firstDay; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(calYear, calMonth, i);
       d.setHours(0, 0, 0, 0);
-      daysArray.push(d);
+      days.push(d);
     }
-    return daysArray;
+    return days;
   };
 
   const calendarDays = generateCalendarDays();
 
   return (
     <motion.div
-      layoutRoot
       initial="hidden"
       animate="show"
       variants={container}
       style={{ background }}
-      className="min-h-screen overflow-x-hidden text-slate-950"
+      className="min-h-screen"
     >
       {/* HEADER */}
-      <motion.header
-        layout
-        variants={fadeUp}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10"
-      >
+      <motion.header variants={fadeUp} className="max-w-7xl mx-auto px-6 pt-12">
         <motion.h1
-          layout
           variants={cardPop}
-          animate={{
-            x: [-20, 0, -20],
-            y: [0, -6, 0],
-            transition: { duration: 2.5, ease: "easeInOut" },
-          }}
           style={{ color: headerColor, fontFamily: "TAN Buster, sans-serif" }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left"
+          className="text-7xl font-extrabold"
         >
           GATHERLY
         </motion.h1>
       </motion.header>
 
-      {/* MAIN GRID */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
-        {/* LEFT COLUMN */}
-        <motion.section className="space-y-8 lg:col-span-1">
+      {/* MAIN */}
+      <motion.main className="max-w-7xl mx-auto px-6 pb-32 grid lg:grid-cols-3 gap-8">
+        <div className="space-y-8">
           <QuickActions />
+        </div>
 
-          {/* Volunteer Opportunities */}
-          <motion.div
-            variants={cardPop}
-            className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
-          >
-            <h3 className="text-lg font-semibold mb-3 text-blue-900">
-              Volunteer Opportunities
-            </h3>
-            <ul className="space-y-4">
-              {[
-                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
-                { title: "Warm clothing drive", meta: "Westside Center" },
-                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
-                { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
-                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
-              ].map((item, i) => (
-                <li
-                  key={i}
-                  className="bg-blue-50 border border-blue-200 rounded-xl p-3"
-                >
-                  <div className="text-sm font-semibold">{item.title}</div>
-                  <div className="text-xs text-blue-700">{item.meta}</div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </motion.section>
-
-        {/* RIGHT COLUMN */}
-        <motion.section className="lg:col-span-2 flex flex-col lg:flex-row gap-6">
+        <div className="lg:col-span-2 flex gap-6 flex-col lg:flex-row">
           {/* EVENTS */}
-          <div className="lg:w-1/2 flex flex-col gap-4">
-            <motion.div
-              variants={cardPop}
-              className="p-6 bg-white rounded-2xl border-l-4 border-blue-500 border-blue-200 shadow-sm text-center"
-            >
+          <div ref={eventsRef} className="lg:w-1/2 space-y-4">
+            <motion.div variants={cardPop} className="p-6 bg-white rounded-2xl border">
               <h2 className="text-2xl font-semibold text-blue-900">
-                Upcoming Events
+                {selectedDate
+                  ? `Events on ${monthNames[selectedDate.getMonth()]} ${selectedDate.getDate()}`
+                  : "Upcoming Events"}
               </h2>
             </motion.div>
 
-            {events.map((event, i) => (
-              <motion.div
-                key={i}
-                variants={cardPop}
-                className="bg-white rounded-2xl border border-blue-200 p-4 cursor-pointer"
-                onClick={() => setOpenEvent(openEvent === i ? null : i)}
-              >
-                <h3 className="font-semibold text-blue-900">{event.title}</h3>
-                <p className="text-sm text-blue-700">
-                  {new Date(event.dateString).toLocaleString()} • {event.location}
-                </p>
+            {filteredEvents.length === 0 ? (
+              <p className="text-center text-blue-700 py-6">
+                No events for this day
+              </p>
+            ) : (
+              filteredEvents.map((event, i) => (
+                <motion.div
+                  key={i}
+                  variants={cardPop}
+                  className="bg-white rounded-2xl border p-4 cursor-pointer"
+                  onClick={() => setOpenEvent(openEvent === i ? null : i)}
+                >
+                  <h3 className="font-semibold text-blue-900">{event.title}</h3>
+                  <p className="text-sm text-blue-700">
+                    {new Date(event.dateString).toLocaleString()} • {event.location}
+                  </p>
 
-                <AnimatePresence>
-                  {openEvent === i && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="text-sm text-blue-800 mt-2"
-                    >
-                      {event.details}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
+                  <AnimatePresence>
+                    {openEvent === i && (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-sm mt-2 text-blue-800"
+                      >
+                        {event.details}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))
+            )}
           </div>
 
-          {/* CALENDAR WITH TOGGLE + CLICK-OUTSIDE */}
+          {/* CALENDAR */}
           <motion.div
             ref={calendarRef}
-            layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-1/2 relative"
+            className="lg:w-1/2 bg-white rounded-2xl border p-6"
           >
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
-                className="text-blue-700 text-2xl font-bold"
-              >
-                ❮
-              </button>
-
-              <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+            <div className="flex justify-between mb-4">
+              <button onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}>❮</button>
+              <h3 className="font-semibold">
                 {monthNames[calMonth]} {calYear}
               </h3>
-
-              <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
-                className="text-blue-700 text-2xl font-bold"
-              >
-                ❯
-              </button>
+              <button onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}>❯</button>
             </div>
 
-            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-              {daysOfWeek.map((d) => (
+            <div className="grid grid-cols-7 text-sm mb-2">
+              {daysOfWeek.map(d => (
                 <div key={d} className="text-center">{d}</div>
               ))}
             </div>
 
             <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((date, idx) => {
-                if (!date) return <div key={idx} />;
+              {calendarDays.map((date, i) => {
+                if (!date) return <div key={i} />;
 
-                const isToday = date.getTime() === texasToday.getTime();
-                const isSelected = date.getTime() === selectedDate?.getTime();
-
-                const dayEvents = events.filter(event => {
-                  const eDate = new Date(event.dateString);
-                  return (
-                    eDate.getFullYear() === date.getFullYear() &&
-                    eDate.getMonth() === date.getMonth() &&
-                    eDate.getDate() === date.getDate()
-                  );
-                });
+                const dayEvents = events.filter(e =>
+                  new Date(e.dateString).toDateString() === date.toDateString()
+                );
 
                 return (
                   <div
-                    key={idx}
-                    className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
-                      isSelected
-                        ? "bg-blue-400 text-white"
-                        : isToday
-                        ? "bg-blue-600 text-white"
-                        : "bg-blue-50 hover:bg-blue-100 text-blue-900"
-                    }`}
-                    onClick={() =>
+                    key={i}
+                    onClick={() => {
                       setSelectedDate(prev =>
-                        prev && prev.getTime() === date.getTime() ? null : date
-                      )
-                    }
+                        prev?.getTime() === date.getTime() ? null : date
+                      );
+                      eventsRef.current?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className={`relative h-12 flex items-center justify-center rounded-lg cursor-pointer ${
+                      selectedDate?.getTime() === date.getTime()
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-50"
+                    }`}
                   >
                     {date.getDate()}
-
-                    <AnimatePresence>
-                      {isSelected && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.9 }}
-                          className="absolute top-14 left-1/2 transform -translate-x-1/2 z-10 w-60 bg-white border border-blue-200 rounded-lg shadow-lg p-3 text-sm text-blue-900"
-                        >
-                          <p className="font-semibold mb-1">
-                            {monthNames[date.getMonth()]} {date.getDate()}, {date.getFullYear()}
-                          </p>
-
-                          {dayEvents.length > 0 ? (
-                            <ul className="space-y-2">
-                              {dayEvents.map((event, i) => (
-                                <li key={i} className="border-l-4 border-blue-500 pl-2">
-                                  <p className="font-semibold text-blue-800">{event.title}</p>
-                                  <p className="text-xs text-blue-700">{event.location}</p>
-                                  <p className="text-xs text-blue-700">{event.details}</p>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="text-xs text-blue-700">No events for this day</p>
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {dayEvents.length > 0 && (
+                      <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    )}
                   </div>
                 );
               })}
             </div>
           </motion.div>
-        </motion.section>
+        </div>
       </motion.main>
 
-      {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
-      <motion.section
-        initial="hidden"
-        variants={container}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16"
-      >
+      {/* IMAGE + TEXT SECTIONS */}
+      <motion.section className="max-w-7xl mx-auto px-6 mt-24 space-y-16">
         {[
-          {
-            title: "Community Stories",
-            text: "See how neighbors are making a difference together.",
-            href: "/stories",
-            align: "left",
-          },
-          {
-            title: "Local Neighborhoods",
-            text: "Explore different neighborhoods and what they offer.",
-            href: "/neighborhoods",
-            align: "right",
-          },
-          {
-            title: "Get Involved",
-            text: "Find ways to volunteer and support your community.",
-            href: "/volunteer",
-            align: "left",
-          },
+          { title: "Community Stories", text: "See how neighbors make a difference.", href: "/stories" },
+          { title: "Local Neighborhoods", text: "Explore nearby communities.", href: "/neighborhoods" },
+          { title: "Get Involved", text: "Volunteer and support locally.", href: "/volunteer" },
         ].map((item, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            className={`flex ${item.align === "right" ? "justify-end" : "justify-start"}`}
-          >
-            <Link href={item.href} className="block w-full md:w-[48%]">
-              <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer"
-              >
-                <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                  Image Here
-                </div>
-                <div className="p-5 space-y-2">
-                  <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
-                  <p className="text-sm text-blue-700">{item.text}</p>
-                  <span className="inline-block mt-2 text-sm font-semibold text-blue-600">
-                    Learn more →
-                  </span>
-                </div>
-              </motion.div>
+          <motion.div key={i} variants={fadeUp}>
+            <Link href={item.href}>
+              <div className="bg-white rounded-2xl border p-6 cursor-pointer">
+                <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
+                <p className="text-sm text-blue-700">{item.text}</p>
+              </div>
             </Link>
           </motion.div>
         ))}
       </motion.section>
-      {/* WEBSITE HISTORY SECTION */}
-      <section className="w-full mt-40 mb-40 px-6">
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
-          Our Story!
+
+      {/* OUR STORY */}
+      <section className="max-w-4xl mx-auto my-32 p-10 bg-blue-50 rounded-2xl border">
+        <h2 className="text-4xl font-bold text-blue-900 mb-6 text-center">
+          Our Story
         </h2>
-      
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900 
-                        bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200">
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2023 – The Idea:</span> The initial concept for Gatherly was formed to give communities a single place to connect.
-          </p>
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2024 – Building the Platform:</span> Core layouts, animations, and interactive features were developed.
-          </p>
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2025 – Public Launch:</span> Gatherly launched with events, calendars, and community tools.
-          </p>
-          <p>
-            <span className="font-bold text-blue-700">Looking Ahead:</span> Expanding neighborhoods, stories, and ways for people to get involved.
-          </p>
-        </div>
+        <p className="mb-4"><b>2023:</b> Idea formed</p>
+        <p className="mb-4"><b>2024:</b> Platform built</p>
+        <p><b>2025:</b> Public launch</p>
       </section>
-      
+
       {/* FOOTER */}
-      <footer className="border-t border-blue-200 bg-white">
-        <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
-          © {year} Gatherly. All rights reserved.
-        </div>
+      <footer className="text-center py-4 bg-blue-50 text-blue-700">
+        © {year} Gatherly. All rights reserved.
       </footer>
     </motion.div>
   );
 }
+
