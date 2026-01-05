@@ -1,4 +1,4 @@
-Choose Event/ Resource
+//Choose Event/ Resource
 
 "use client";
 
