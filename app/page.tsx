@@ -239,83 +239,85 @@ export default function Home() {
   </motion.section>
 
   {/* RIGHT COLUMN - Calendar + Events */}
-  <motion.section className="lg:col-span-2 flex flex-col gap-4">
-    <motion.div
-      ref={calendarRef}
-      layout
-      variants={cardPop}
-      className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 w-full relative"
-    >
-      {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
-          className="text-blue-700 text-2xl font-bold"
-        >
-          ❮
-        </button>
-
-        <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
-          {monthNames[calMonth]} {calYear}
-        </h3>
-
-        <button
-          onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
-          className="text-blue-700 text-2xl font-bold"
-        >
-          ❯
-        </button>
-      </div>
-
-      {/* Days of the Week */}
-      <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-        {daysOfWeek.map(d => (
-          <div key={d} className="text-center">{d}</div>
-        ))}
-      </div>
-
-      {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {calendarDays.map((date, idx) => {
-          if (!date) return <div key={idx} />;
-
-          const isToday = date.getTime() === texasToday.getTime();
-          const isSelected = date.getTime() === selectedDate?.getTime();
-
+  <motion.div
+    ref={calendarRef}
+    layout
+    variants={cardPop}
+    className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-4 sm:p-6 lg:w-3/5 relative"
+  >
+    {/* Calendar Header */}
+    <div className="flex items-center justify-between mb-4">
+      <button
+        onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+        className="text-blue-700 text-2xl font-bold"
+      >
+        ❮
+      </button>
+  
+      <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
+        {monthNames[calMonth]} {calYear}
+      </h3>
+  
+      <button
+        onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+        className="text-blue-700 text-2xl font-bold"
+      >
+        ❯
+      </button>
+    </div>
+  
+    {/* Days of the Week */}
+    <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
+      {daysOfWeek.map(d => (
+        <div key={d} className="text-center">{d}</div>
+      ))}
+    </div>
+  
+    {/* Calendar Grid */}
+    <div className="grid grid-cols-7 gap-1">
+      {calendarDays.map((date, idx) => {
+        if (!date) return <div key={idx} />;
+  
+        const isToday = date.getTime() === texasToday.getTime();
+        const isSelected = date.getTime() === selectedDate?.getTime();
+  
+        const hasEvent = events.some(event => {
+          const eDate = new Date(event.dateString);
           return (
-            <div
-              key={idx}
-              className={`relative flex items-center justify-center h-12 sm:h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
-                isSelected
-                  ? "bg-blue-400 text-white"
-                  : isToday
-                  ? "bg-blue-600 text-white"
-                  : "bg-blue-50 hover:bg-blue-100 text-blue-900"
-              }`}
-              onClick={() =>
-                setSelectedDate(prev =>
-                  prev && prev.getTime() === date.getTime() ? null : date
-                )
-              }
-            >
-              {date.getDate()}
-              {/* Event Dot */}
-              {events.some(event => {
-                const eDate = new Date(event.dateString);
-                return (
-                  eDate.getFullYear() === date.getFullYear() &&
-                  eDate.getMonth() === date.getMonth() &&
-                  eDate.getDate() === date.getDate()
-                );
-              }) && (
-                <span className="mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-              )}
-            </div>
+            eDate.getFullYear() === date.getFullYear() &&
+            eDate.getMonth() === date.getMonth() &&
+            eDate.getDate() === date.getDate()
           );
-        })}
-      </div>
-    </motion.div>
-
+        });
+  
+        return (
+          <div
+            key={idx}
+            className={`relative flex flex-col items-center justify-start h-14 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
+              isSelected
+                ? "bg-blue-400 text-white"
+                : isToday
+                ? "bg-blue-600 text-white"
+                : "bg-blue-50 hover:bg-blue-100 text-blue-900"
+            }`}
+            onClick={() =>
+              setSelectedDate(prev =>
+                prev && prev.getTime() === date.getTime() ? null : date
+              )
+            }
+          >
+            {/* Date number */}
+            <span>{date.getDate()}</span>
+  
+            {/* Event Dot */}
+            {hasEvent && (
+              <span className="mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  
     {/* EVENTS POPUP BELOW CALENDAR */}
     <AnimatePresence>
       {selectedDate && (
@@ -323,21 +325,37 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
-          className="bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+          className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
         >
           <h3 className="font-semibold text-blue-900 mb-2">
             Events on {selectedDate.toLocaleDateString()}
           </h3>
-
-          {filteredEvents.length > 0 ? (
+  
+          {events.filter(event => {
+            const eDate = new Date(event.dateString);
+            return (
+              eDate.getFullYear() === selectedDate.getFullYear() &&
+              eDate.getMonth() === selectedDate.getMonth() &&
+              eDate.getDate() === selectedDate.getDate()
+            );
+          }).length > 0 ? (
             <ul className="space-y-3">
-              {filteredEvents.map((event, i) => (
-                <li key={i} className="border-l-4 border-blue-500 pl-3">
-                  <p className="font-semibold text-blue-800">{event.title}</p>
-                  <p className="text-xs text-blue-700">{event.location}</p>
-                  <p className="text-xs text-blue-700">{event.details}</p>
-                </li>
-              ))}
+              {events
+                .filter(event => {
+                  const eDate = new Date(event.dateString);
+                  return (
+                    eDate.getFullYear() === selectedDate.getFullYear() &&
+                    eDate.getMonth() === selectedDate.getMonth() &&
+                    eDate.getDate() === selectedDate.getDate()
+                  );
+                })
+                .map((event, i) => (
+                  <li key={i} className="border-l-4 border-blue-500 pl-3">
+                    <p className="font-semibold text-blue-800">{event.title}</p>
+                    <p className="text-xs text-blue-700">{event.location}</p>
+                    <p className="text-xs text-blue-700">{event.details}</p>
+                  </li>
+                ))}
             </ul>
           ) : (
             <p className="text-blue-700 text-sm">No events for this day</p>
@@ -345,8 +363,7 @@ export default function Home() {
         </motion.div>
       )}
     </AnimatePresence>
-  </motion.section>
-</motion.main>
+  </motion.div>
 
 
       {/* IMAGE + TEXT BOXES (ALTERNATING + SCROLL ANIMATION) */}
