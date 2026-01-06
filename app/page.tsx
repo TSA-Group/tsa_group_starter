@@ -36,13 +36,12 @@ const cardPop: Variants = {
   },
 };
 
-// Actions for the first box (links)
+// Bring to other page
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
 ];
 
-// ✅ Named export for QuickActions
 export function QuickActions() {
   return (
     <motion.section
@@ -50,13 +49,13 @@ export function QuickActions() {
       variants={fadeUp}
       initial="hidden"
       animate="show"
-      className="flex flex-wrap gap-4"
+      className="flex flex-wrap gap-4 justify-center"
     >
-      {/* Box 1: with links */}
+      {/* Box 1 */}
       <motion.div
         layout
         variants={cardPop}
-        className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+        className="flex-1 min-w-[280px] max-w-[400px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
         <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
         <p className="text-sm text-blue-700"><b>Welcome to Cross Creek!</b></p>
@@ -75,11 +74,11 @@ export function QuickActions() {
         </div>
       </motion.div>
 
-      {/* Box 2: identical visual box, no links */}
+      {/* Box 2 */}
       <motion.div
         layout
         variants={cardPop}
-        className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+        className="flex-1 min-w-[280px] max-w-[400px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
         <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
         <p className="text-sm text-blue-700"><b>Welcome to Cross Creek!</b></p>
