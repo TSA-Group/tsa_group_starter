@@ -22,15 +22,19 @@ export function QuickActions() {
       variants={cardPop}
       initial="hidden"
       animate="show"
-      className="h-[220px] w-full sm:w-[600px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+      className="h-[300px] w-full sm:w-[650px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
     >
-      <h3 className="text-lg font-semibold mb-4 text-blue-900">Quick Actions</h3>
-      <ul className="space-y-3">
+      <h3 className="text-lg font-semibold mb-2 text-blue-900">Quick Actions</h3>
+      <p className="text-sm text-blue-700 mb-4">
+        Welcome to Cross Creek! Explore some of our community resources.
+      </p>
+
+      <ul className="space-y-2">
         {actions.map((action, i) => (
           <li key={i}>
             <Link
               href={action.href}
-              className="block bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm font-semibold text-blue-900 hover:bg-blue-100 transition"
+              className="block bg-blue-50 border border-blue-200 rounded-xl py-2 px-3 text-sm font-semibold text-blue-900 hover:bg-blue-100 transition"
             >
               {action.label}
             </Link>
