@@ -1,5 +1,5 @@
 // Add Resources
- 
+
 "use client";
 
 import React from "react";
@@ -15,12 +15,12 @@ const sectionAnim: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
-      ease: [0.16, 1, 0.3, 1], // ✅ instead of "easeOut"
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
 
-const COMMUNITIES = ["Cross Creek Ranch",] as const;
+const COMMUNITIES = ["Cross Creek Ranch"] as const;
 
 const RESOURCE_TYPES = [
   "Gym/Fitness",
@@ -36,10 +36,14 @@ const RESOURCE_TYPES = [
 export default function AddResourcePage() {
   const [sent, setSent] = React.useState(false);
 
-  const [community, setCommunity] =
-    React.useState<(typeof COMMUNITIES)[number]>("Cross Creek");
-  const [type, setType] =
-    React.useState<(typeof RESOURCE_TYPES)[number]>("Park/Trails");
+  // ✅ must match a value in COMMUNITIES
+  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
+    "Cross Creek Ranch",
+  );
+
+  const [type, setType] = React.useState<(typeof RESOURCE_TYPES)[number]>(
+    "Park/Trails",
+  );
   const [name, setName] = React.useState("");
   const [address, setAddress] = React.useState("");
   const [indoorOutdoor, setIndoorOutdoor] = React.useState<
@@ -50,11 +54,9 @@ export default function AddResourcePage() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // demo submit
     setSent(true);
     window.setTimeout(() => setSent(false), 2200);
 
-    // reset
     setName("");
     setAddress("");
     setContact("");
@@ -72,8 +74,7 @@ export default function AddResourcePage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Resources (type, name, address,
-              indoor/outdoor, contact)
+              Community Name (dropdown) → Resources (type, name, address, indoor/outdoor, contact)
             </div>
           </div>
 
@@ -220,13 +221,7 @@ export default function AddResourcePage() {
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
       <div className="text-sm font-semibold text-white/85">{label}</div>
