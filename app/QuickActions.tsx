@@ -22,7 +22,7 @@ export function QuickActions() {
       variants={cardPop}
       initial="hidden"
       animate="show"
-      className="h-[450px] w-full sm:w-[280px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-y-auto"
+      className="h-[300px] w-full sm:w-[400px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
     >
       <h3 className="text-lg font-semibold mb-4 text-blue-900">Quick Actions</h3>
       <ul className="space-y-3">
