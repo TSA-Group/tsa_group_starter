@@ -36,7 +36,7 @@ const cardPop: Variants = {
   },
 };
 
-// QuickActions content
+// Actions for the first box (links)
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
@@ -94,7 +94,7 @@ export default function QuickActions() {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {actions.map(({ label }) => (
             <div
-              key={label + "-copy"} // unique key
+              key={label + "-copy"}
               className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer"
             >
               <span className="text-sm">{label}</span>
