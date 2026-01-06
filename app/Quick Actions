@@ -15,7 +15,7 @@ const cardPop: Variants = {
   show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: "easeOut" } },
 };
 
-// Box 1 actions
+// Actions for Box 1
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
