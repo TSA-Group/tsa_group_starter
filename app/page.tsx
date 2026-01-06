@@ -9,6 +9,7 @@ import {
   useTransform,
 } from "framer-motion";
 import Link from "next/link";
+import { QuickActions } from "@/components/QuickActions";
 
 // Animation variants
 const container: Variants = {
