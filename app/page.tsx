@@ -48,7 +48,7 @@ function QuickActions() {
       <motion.div
         layout
         variants={cardPop}
-        className="p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+        className="w-full p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
         <h3 className="text-lg font-semibold mb-1 text-blue-900">
           Quick Actions
