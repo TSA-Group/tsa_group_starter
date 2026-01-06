@@ -42,20 +42,20 @@ const actions = [
   { label: "Contact Us", href: "/contact" },
 ];
 
-export default function QuickActions() {
+export default function QuickActionsPage() {
   return (
     <motion.section
       layout
       variants={fadeUp}
       initial="hidden"
       animate="show"
-      className="flex flex-row flex-wrap w-full max-w-full gap-4 justify-center"
+      className="flex flex-wrap gap-4 justify-center w-full"
     >
       {/* Box 1: with links */}
       <motion.div
         layout
         variants={cardPop}
-        className="w-[calc(50%-0.5rem)] min-w-[280px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+        className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
         <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
         <p className="text-sm text-blue-700"><b>Welcome to Cross Creek!</b></p>
@@ -78,7 +78,7 @@ export default function QuickActions() {
       <motion.div
         layout
         variants={cardPop}
-        className="w-[calc(50%-0.5rem)] min-w-[280px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+        className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
         <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
         <p className="text-sm text-blue-700"><b>Welcome to Cross Creek!</b></p>
