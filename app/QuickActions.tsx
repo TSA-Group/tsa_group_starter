@@ -29,12 +29,12 @@ export function QuickActions() {
         Welcome to Cross Creek! Explore some of our community resources.
       </p>
 
-      <ul className="space-y-2">
+      <ul className="flex flex-col gap-2">
         {actions.map((action, i) => (
           <li key={i}>
             <Link
               href={action.href}
-              className="block bg-blue-50 border border-blue-200 rounded-xl py-2 px-3 text-sm font-semibold text-blue-900 hover:bg-blue-100 transition"
+              className="block bg-blue-50 border border-blue-200 rounded-xl py-1.5 px-3 text-sm font-semibold text-blue-900 hover:bg-blue-100 transition"
             >
               {action.label}
             </Link>
