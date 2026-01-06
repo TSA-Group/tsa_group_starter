@@ -21,7 +21,7 @@ export function QuickActions() {
       variants={cardPop}
       initial="hidden"
       animate="show"
-      className="h-[250px] w-full lg:w-[400px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-y-auto"
+      className="h-[220px] w-full lg:w-[450px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-y-auto"
     >
       <h3 className="text-lg font-semibold mb-4 text-blue-900">Quick Actions</h3>
       <ul className="space-y-3">
@@ -31,7 +31,6 @@ export function QuickActions() {
           "Volunteer for Clothing Drive",
           "Donate Items for Local Pantry",
           "Register for Community Cleanup",
-          "Attend Literacy Tutoring",
         ].map((action, i) => (
           <li
             key={i}
