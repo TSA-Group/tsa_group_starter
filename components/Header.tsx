@@ -18,10 +18,10 @@ export const Header: React.FC = () => {
   const headerClass = isAdmin
     ? `
         fixed top-0 left-0 w-full z-50
-        bg-black/70 backdrop-blur-2xl
+        bg-[#070A12]/70 backdrop-blur-2xl
         border-b border-white/10
-        shadow-[0_12px_40px_rgba(0,0,0,0.55)]
-        text-white/90
+        shadow-[0_10px_35px_rgba(0,0,0,0.55)]
+        text-white
       `
     : `
         fixed top-0 left-0 w-full z-50
@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
       `;
 
   const logoClass = isAdmin
-    ? "text-3xl font-extrabold tracking-tight cursor-pointer text-white/90"
+    ? "text-3xl font-extrabold tracking-tight cursor-pointer text-white"
     : "text-3xl font-extrabold tracking-tight cursor-pointer text-blue-600/80";
 
   const linkClass = isAdmin
@@ -41,64 +41,57 @@ export const Header: React.FC = () => {
 
   const underlineClass = isAdmin ? "bg-white/70" : "bg-blue-500";
 
-  const spacerHeight = isAdmin ? "h-24" : "h-20"; // ✅ pushes admin page down a bit more
-
   return (
-    <>
-      <motion.header
-        initial={false}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        className={headerClass}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/">
-            <motion.h1
-              whileHover={{
-                scale: 1.05,
-                textShadow: isAdmin
-                  ? "0px 0px 12px rgba(255,255,255,0.14)"
-                  : "0px 0px 8px rgba(37, 99, 235, 0.25)",
-              }}
-              transition={{ type: "spring", stiffness: 260 }}
-              className={logoClass}
-              style={{ fontFamily: "TAN Buster, sans-serif" }}
-            >
-              Gatherly
-            </motion.h1>
-          </Link>
+    <motion.header
+      initial={false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+      className={headerClass}
+    >
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <Link href="/">
+          <motion.h1
+            whileHover={{
+              scale: 1.05,
+              textShadow: isAdmin
+                ? "0px 0px 12px rgba(255,255,255,0.12)"
+                : "0px 0px 8px rgba(37, 99, 235, 0.25)",
+            }}
+            transition={{ type: "spring", stiffness: 260 }}
+            className={logoClass}
+            style={{ fontFamily: "TAN Buster, sans-serif" }}
+          >
+            Gatherly
+          </motion.h1>
+        </Link>
 
-          <nav className="flex gap-10 text-base font-medium ml-auto">
-            {navItems.map(({ label, href }) => {
-              const active =
-                pathname === href || (href !== "/" && pathname?.startsWith(href));
+        <nav className="flex gap-10 text-base font-medium ml-auto">
+          {navItems.map(({ label, href }) => {
+            const active =
+              pathname === href || (href !== "/" && pathname?.startsWith(href));
 
-              return (
-                <Link key={label} href={href} className="relative">
-                  <motion.span
-                    whileHover={{ y: -2 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className={linkClass}
-                  >
-                    {label}
-                    <span
-                      className={`
-                        absolute left-0 -bottom-1 h-[2px]
-                        ${active ? "w-full" : "w-0"}
-                        ${underlineClass}
-                        transition-all duration-300
-                      `}
-                    />
-                  </motion.span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </motion.header>
-
-      {/* ✅ pushes content down (admin a bit more) */}
-      <div aria-hidden className={spacerHeight} />
-    </>
+            return (
+              <Link key={label} href={href} className="relative">
+                <motion.span
+                  whileHover={{ y: -2 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className={linkClass}
+                >
+                  {label}
+                  <span
+                    className={`
+                      absolute left-0 -bottom-1 h-[2px]
+                      ${active ? "w-full" : "w-0"}
+                      ${underlineClass}
+                      transition-all duration-300
+                    `}
+                  />
+                </motion.span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    </motion.header>
   );
 };
