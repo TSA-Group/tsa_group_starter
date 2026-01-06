@@ -42,7 +42,8 @@ const actions = [
   { label: "Contact Us", href: "/contact" },
 ];
 
-export default function QuickActions() {
+// ✅ Named export for QuickActions
+export function QuickActions() {
   return (
     <motion.section
       layout
@@ -57,12 +58,8 @@ export default function QuickActions() {
         variants={cardPop}
         className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
-        <h3 className="text-lg font-semibold mb-1 text-blue-900">
-          Quick Actions
-        </h3>
-        <p className="text-sm text-blue-700">
-          <b>Welcome to Cross Creek!</b>
-        </p>
+        <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
+        <p className="text-sm text-blue-700"><b>Welcome to Cross Creek!</b></p>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {actions.map(({ label, href }) => (
@@ -84,12 +81,8 @@ export default function QuickActions() {
         variants={cardPop}
         className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
-        <h3 className="text-lg font-semibold mb-1 text-blue-900">
-          Quick Actions
-        </h3>
-        <p className="text-sm text-blue-700">
-          <b>Welcome to Cross Creek!</b>
-        </p>
+        <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
+        <p className="text-sm text-blue-700"><b>Welcome to Cross Creek!</b></p>
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {actions.map(({ label }) => (
