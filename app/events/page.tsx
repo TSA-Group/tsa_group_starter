@@ -1,10 +1,9 @@
-
 "use client";
 
 import Head from "next/head";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, Variants } from "framer-motion";
 
 /* =====================
    Types
@@ -27,7 +26,6 @@ type Event = {
 
 /* =====================
    Data (single source of truth)
-   ✅ Locations updated to match your 2nd attachment
 ===================== */
 const EVENTS: Event[] = [
   {
@@ -163,7 +161,8 @@ const EVENTS: Event[] = [
     activities: ["education", "family"],
     date: "Jan 20, 2026",
     time: "3:30 PM – 5:30 PM",
-    location: "After-School Study & Tutoring Meetup (Nearby study room / community study space)",
+    location:
+      "After-School Study & Tutoring Meetup (Nearby study room / community study space)",
     attendees: 26,
     spots: 30,
     description:
@@ -176,7 +175,8 @@ const EVENTS: Event[] = [
     activities: ["volunteering", "family"],
     date: "Jan 22, 2026",
     time: "7:00 PM – 8:30 PM",
-    location: "Neighborhood Meetup — Community Pavilion (Cross Creek Ranch Pavilion / Gathering Spot)",
+    location:
+      "Neighborhood Meetup — Community Pavilion (Cross Creek Ranch Pavilion / Gathering Spot)",
     attendees: 34,
     spots: 60,
     description:
@@ -185,7 +185,7 @@ const EVENTS: Event[] = [
 ];
 
 /* =====================
-   Small UI piece
+   Theme + UI bits
 ===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -195,25 +195,38 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 
 /* =====================
    Motion helpers
+   ✅ FIX: use easing arrays (not strings) + type as Variants
 ===================== */
-const pageFade = {
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const pageFade: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.45, ease: "easeOut" } },
+  show: { opacity: 1, transition: { duration: 0.45, ease: EASE_OUT } },
 };
 
-const headerUp = {
+const headerUp: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.55 } },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.55, ease: EASE_OUT },
+  },
 };
 
-const panelUp = {
+const panelUp: Variants = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_OUT } },
 };
 
-const cardPop = {
+const cardPop: Variants = {
   hidden: { opacity: 0, y: 10, scale: 0.98 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: "easeOut" } },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.45, ease: EASE_OUT },
+  },
   exit: { opacity: 0, y: 8, scale: 0.98, transition: { duration: 0.22 } },
 };
 
@@ -296,7 +309,6 @@ export default function EventsPage() {
         />
       </Head>
 
-      {/* ✅ Theme updated to match your light-blue UI */}
       <motion.div
         variants={pageFade}
         initial="hidden"
@@ -313,27 +325,26 @@ export default function EventsPage() {
         `}</style>
 
         <div className="max-w-7xl mx-auto px-6 py-10">
-          {/* Header */}
-          <motion.header variants={headerUp} initial="hidden" animate="show" className="mb-8">
+          <motion.header variants={headerUp} className="mb-8">
             <h1 className="text-4xl font-semibold text-[#143B8C]">
               Gatherly — Community Events
             </h1>
             <p className="mt-2 text-slate-600 max-w-2xl">
-              Discover local volunteering opportunities and community events in Cross Creek.
+              Discover local volunteering opportunities and community events in
+              Cross Creek.
             </p>
           </motion.header>
 
-          {/* Filters */}
           <motion.div
             variants={panelUp}
-            initial="hidden"
-            animate="show"
             className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
           >
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
-                <p className="text-sm text-slate-600">Choose what you want to see.</p>
+                <p className="text-sm text-slate-600">
+                  Choose what you want to see.
+                </p>
               </div>
 
               <button
@@ -344,7 +355,6 @@ export default function EventsPage() {
               </button>
             </div>
 
-            {/* Categories */}
             <div className="flex flex-wrap gap-2 mb-4">
               {categories.map((c) => (
                 <button
@@ -361,7 +371,6 @@ export default function EventsPage() {
               ))}
             </div>
 
-            {/* Activities */}
             <div className="flex flex-wrap gap-2 mb-4">
               {activities.map((a) => (
                 <button
@@ -378,16 +387,13 @@ export default function EventsPage() {
               ))}
             </div>
 
-            {/* Search + Sort */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="relative flex-1">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search events..."
-                  className="w-full bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search events..."
+                className="flex-1 bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
 
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-600">Sort:</span>
@@ -395,7 +401,9 @@ export default function EventsPage() {
                   {["upcoming", "popular"].map((option) => (
                     <button
                       key={option}
-                      onClick={() => setSortBy(option as "upcoming" | "popular")}
+                      onClick={() =>
+                        setSortBy(option as "upcoming" | "popular")
+                      }
                       className={`px-4 py-1 text-sm rounded-full transition ${
                         sortBy === option
                           ? "bg-blue-600 text-white"
@@ -410,11 +418,7 @@ export default function EventsPage() {
             </div>
           </motion.div>
 
-          {/* Events */}
-          <motion.div
-            layout
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <AnimatePresence mode="popLayout">
               {filtered.map((ev) => {
                 const percent = Math.round((ev.attendees / ev.spots) * 100);
@@ -456,7 +460,7 @@ export default function EventsPage() {
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${percent}%` }}
-                          transition={{ duration: 0.6, ease: "easeOut" }}
+                          transition={{ duration: 0.6, ease: EASE_OUT }}
                           className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
                         />
                       </div>
@@ -466,7 +470,6 @@ export default function EventsPage() {
                       </div>
                     </div>
 
-                    {/* Register */}
                     <div className="flex gap-2 mt-5">
                       <Link
                         href={`/events/register?id=${ev.id}`}
