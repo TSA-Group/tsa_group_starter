@@ -9,7 +9,6 @@ import {
   useTransform,
 } from "framer-motion";
 import Link from "next/link";
-import { QuickActions } from "./QuickActions";
 import { QuickActions } from "./components/QuickActions";
 
 // Animation variants
