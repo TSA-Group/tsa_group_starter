@@ -69,13 +69,13 @@ export default function QuickActions() {
 
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {actions.map(({ label, href }) => (
-              <Link key={label} href={href} legacyBehavior>
-                <a className="block">
-                  <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
-                    <span className="text-sm">{label}</span>
-                    <span className="text-xs font-semibold text-blue-700">Go</span>
-                  </div>
-                </a>
+              <Link
+                key={label}
+                href={href}
+                className="block flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer"
+              >
+                <span className="text-sm">{label}</span>
+                <span className="text-xs font-semibold text-blue-700">Go</span>
               </Link>
             ))}
           </div>
