@@ -36,53 +36,40 @@ const cardPop: Variants = {
   },
 };
 
-// Define actions for each box
-const box1Actions = [
-  { label: "Map", href: "/map" },
-  { label: "Contact", href: "/contact" },
+// QuickActions component
+const actions = [
+  { label: "Visit Our Map", href: "/map" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
-const box2Actions = [
-  { label: "Admin", href: "/admin" },
-];
-
-function ActionBox({ title, actions }: { title: string; actions: { label: string; href: string }[] }) {
+function QuickActions() {
   return (
-    <motion.div
-      layout
-      variants={cardPop}
-      className="p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
-    >
-      <h3 className="text-lg font-semibold mb-1 text-blue-900">{title}</h3>
-      <p className="text-sm text-blue-700">
-        <b>Welcome to Cross Creek!</b>
-      </p>
+    <motion.section layout variants={fadeUp} className="space-y-8">
+      <motion.div
+        layout
+        variants={cardPop}
+        className="p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+      >
+        <h3 className="text-lg font-semibold mb-1 text-blue-900">
+          Quick Actions
+        </h3>
+        <p className="text-sm text-blue-700">
+          <b>
+            Welcome to Cross Creek!
+          </b>
+        </p>
 
-      <div className="mt-4 grid grid-cols-1 gap-3">
-        {actions.map(({ label, href }) => (
-          <Link key={label} href={href} className="block">
-            <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer hover:bg-blue-100 transition">
-              <span className="text-sm">{label}</span>
-              <span className="text-xs font-semibold text-blue-700">Go</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-export default function QuickActions() {
-  return (
-    <motion.section
-      layout
-      variants={fadeUp}
-      initial="hidden"
-      animate="visible"
-      className="grid grid-cols-1 md:grid-cols-2 gap-6"
-    >
-      <ActionBox title="Quick Actions" actions={box1Actions} />
-      <ActionBox title="Admin Actions" actions={box2Actions} />
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {actions.map(({ label, href }) => (
+            <Link key={label} href={href} className="block">
+              <div className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer">
+                <span className="text-sm">{label}</span>
+                <span className="text-xs font-semibold text-blue-700">Go</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </motion.div>
     </motion.section>
   );
 }
