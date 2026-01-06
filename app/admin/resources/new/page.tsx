@@ -20,7 +20,7 @@ const sectionAnim: Variants = {
   },
 };
 
-const COMMUNITIES = ["Cross Creek Ranch", "Cross Creek West", "Cross Creek"] as const;
+const COMMUNITIES = ["Cross Creek Ranch",] as const;
 
 const RESOURCE_TYPES = [
   "Gym/Fitness",
