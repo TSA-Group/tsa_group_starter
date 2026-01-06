@@ -1,5 +1,3 @@
-//Event Form
-
 "use client";
 
 import React from "react";
@@ -15,12 +13,13 @@ const sectionAnim: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
-      ease: [0.16, 1, 0.3, 1], // ✅ fixed (no string easing)
+      ease: [0.16, 1, 0.3, 1], // ✅ tuple easing (TS-safe)
     },
   },
 };
 
-const COMMUNITIES = ["Cross Creek Ranch",] as const;
+const COMMUNITIES = ["Cross Creek Ranch"] as const;
+
 const EVENT_TYPES = [
   "Meetup",
   "Volunteer",
@@ -34,9 +33,11 @@ const EVENT_TYPES = [
 export default function AddEventPage() {
   const [sent, setSent] = React.useState(false);
 
+  // ✅ must match one of COMMUNITIES values
   const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
-    "Cross Creek",
+    "Cross Creek Ranch",
   );
+
   const [eventName, setEventName] = React.useState("");
   const [eventType, setEventType] = React.useState<(typeof EVENT_TYPES)[number]>(
     "Meetup",
@@ -52,7 +53,7 @@ export default function AddEventPage() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSent(true);
-    setTimeout(() => setSent(false), 2200);
+    window.setTimeout(() => setSent(false), 2200);
 
     setEventName("");
     setAddress("");
@@ -73,8 +74,7 @@ export default function AddEventPage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Events (name, type, address, start/end
-              date&time, contact, indoor/outdoor)
+              Community Name (dropdown) → Events (name, type, address, start/end date&time, contact, indoor/outdoor)
             </div>
           </div>
 
@@ -101,7 +101,9 @@ export default function AddEventPage() {
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) => setCommunity(e.target.value as any)}
+                onChange={(e) =>
+                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
@@ -116,7 +118,9 @@ export default function AddEventPage() {
             <Field label="Event Type">
               <select
                 value={eventType}
-                onChange={(e) => setEventType(e.target.value as any)}
+                onChange={(e) =>
+                  setEventType(e.target.value as (typeof EVENT_TYPES)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {EVENT_TYPES.map((t) => (
@@ -150,12 +154,11 @@ export default function AddEventPage() {
                       whileHover={{ y: -1 }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => setIndoorOutdoor(opt)}
-                      className={`rounded-2xl px-3 py-3 text-sm border transition
-                        ${
-                          active
-                            ? "border-blue-500/40 bg-blue-500/15 text-white"
-                            : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-                        }`}
+                      className={`rounded-2xl px-3 py-3 text-sm border transition ${
+                        active
+                          ? "border-blue-500/40 bg-blue-500/15 text-white"
+                          : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+                      }`}
                     >
                       {opt}
                     </motion.button>
@@ -212,7 +215,9 @@ export default function AddEventPage() {
             </div>
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
-              <div className="text-xs text-white/55">Demo submit only. Later connect to DB.</div>
+              <div className="text-xs text-white/55">
+                Demo submit only. Later connect to DB.
+              </div>
 
               <motion.button
                 whileHover={{ y: -1 }}
