@@ -36,7 +36,7 @@ const cardPop: Variants = {
   },
 };
 
-// Bring to other page
+// Actions for first box
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
