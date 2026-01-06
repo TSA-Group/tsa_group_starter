@@ -36,7 +36,7 @@ const cardPop: Variants = {
   },
 };
 
-// QuickActions component
+// QuickActions content
 const actions = [
   { label: "Visit Our Map", href: "/map" },
   { label: "Contact Us", href: "/contact" },
@@ -57,7 +57,9 @@ export default function QuickActions() {
         variants={cardPop}
         className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
-        <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
+        <h3 className="text-lg font-semibold mb-1 text-blue-900">
+          Quick Actions
+        </h3>
         <p className="text-sm text-blue-700">
           <b>Welcome to Cross Creek!</b>
         </p>
@@ -76,13 +78,15 @@ export default function QuickActions() {
         </div>
       </motion.div>
 
-      {/* Box 2 */}
+      {/* Box 2: identical visual box, no links */}
       <motion.div
         layout
         variants={cardPop}
         className="w-full sm:w-1/2 p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
       >
-        <h3 className="text-lg font-semibold mb-1 text-blue-900">Quick Actions</h3>
+        <h3 className="text-lg font-semibold mb-1 text-blue-900">
+          Quick Actions
+        </h3>
         <p className="text-sm text-blue-700">
           <b>Welcome to Cross Creek!</b>
         </p>
@@ -90,7 +94,7 @@ export default function QuickActions() {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {actions.map(({ label }) => (
             <div
-              key={label + "-copy"}
+              key={label + "-copy"} // unique key
               className="flex items-center justify-between rounded-xl bg-blue-50 px-4 py-3 border border-blue-200 cursor-pointer"
             >
               <span className="text-sm">{label}</span>
