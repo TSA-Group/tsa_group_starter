@@ -3,13 +3,13 @@
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 
-// Animation variant for Quick Actions container
+// Container animation
 const cardPop: Variants = {
   hidden: { opacity: 0, y: 10, scale: 0.98 },
   show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: "easeOut" } },
 };
 
-// Hover animation for each button
+// Hover animation for buttons
 const buttonHover = {
   scale: 1.03,
   y: -2,
@@ -29,7 +29,7 @@ export function QuickActions() {
       variants={cardPop}
       initial="hidden"
       animate="show"
-      className="h-[240px] w-full sm:w-[650px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+      className="h-[220px] w-full sm:w-[500px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
     >
       <h3 className="text-lg font-semibold mb-2 text-blue-900">Quick Actions</h3>
       <p className="text-sm text-blue-700 mb-4">
