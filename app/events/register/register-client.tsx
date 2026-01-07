@@ -1,8 +1,10 @@
+// app/events/register/register-client.tsx
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, Variants } from "framer-motion";
 
 type Event = {
   id: number;
@@ -17,6 +19,7 @@ type Event = {
   description: string;
 };
 
+/* ✅ Locations + vibe updated to match your light-blue theme */
 const EVENTS: Event[] = [
   {
     id: 1,
@@ -25,7 +28,7 @@ const EVENTS: Event[] = [
     activities: ["food", "family"],
     date: "Dec 28, 2025",
     time: "6:00 PM – 8:00 PM",
-    location: "Highland Park Community Center",
+    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
     attendees: 42,
     spots: 60,
     description:
@@ -38,7 +41,7 @@ const EVENTS: Event[] = [
     activities: ["education"],
     date: "Dec 25, 2025",
     time: "4:00 PM – 6:00 PM",
-    location: "Westbury Library",
+    location: "Fulshear Branch Library (Nearby) (Fulshear, TX)",
     attendees: 14,
     spots: 20,
     description:
@@ -51,7 +54,7 @@ const EVENTS: Event[] = [
     activities: ["food", "donations"],
     date: "Dec 26, 2025",
     time: "9:00 AM – 1:00 PM",
-    location: "Houston Food Bank",
+    location: "Community Food Pantry Support (Nearby) (Fulshear/Katy area)",
     attendees: 88,
     spots: 110,
     description: "Help organize and distribute food to families in need.",
@@ -63,11 +66,11 @@ const EVENTS: Event[] = [
     activities: ["outdoors", "volunteering"],
     date: "Dec 29, 2025",
     time: "8:00 AM – 12:00 PM",
-    location: "Brazos River Park",
+    location: "Cross Creek Trails (meet near main trailhead)",
     attendees: 31,
     spots: 50,
     description:
-      "Protect local wildlife by helping clean up river trails and banks.",
+      "Protect local wildlife by helping clean up trails and public spaces.",
   },
   {
     id: 5,
@@ -76,7 +79,7 @@ const EVENTS: Event[] = [
     activities: ["donations", "family"],
     date: "Dec 27, 2025",
     time: "10:00 AM – 4:00 PM",
-    location: "Richmond Community Hub",
+    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
     attendees: 27,
     spots: 40,
     description:
@@ -89,7 +92,7 @@ const EVENTS: Event[] = [
     activities: ["outdoors", "volunteering"],
     date: "Jan 04, 2026",
     time: "9:00 AM – 12:00 PM",
-    location: "Meadowbrook Park",
+    location: "Flewellen Creek Park & Trails (Fulshear, TX)",
     attendees: 22,
     spots: 40,
     description: "Plant native trees and learn about local ecology.",
@@ -101,7 +104,7 @@ const EVENTS: Event[] = [
     activities: ["volunteering", "family"],
     date: "Jan 12, 2026",
     time: "9:00 AM – 5:00 PM",
-    location: "Main St. Alley",
+    location: "Cross Creek Ranch Community Pool (Fulshear, TX)",
     attendees: 16,
     spots: 30,
     description:
@@ -114,7 +117,7 @@ const EVENTS: Event[] = [
     activities: ["food", "volunteering"],
     date: "Jan 08, 2026",
     time: "10:00 AM – 1:00 PM",
-    location: "Fulshear Senior Services",
+    location: "HEB (Nearby Grocery) (Fulshear, TX area)",
     attendees: 12,
     spots: 20,
     description: "Deliver warm meals and check in with homebound seniors.",
@@ -126,7 +129,7 @@ const EVENTS: Event[] = [
     activities: ["outdoors", "education"],
     date: "Jan 15, 2026",
     time: "9:00 AM – 11:30 AM",
-    location: "Riverbend Community Garden",
+    location: "Flewellen Creek Park & Trails (Fulshear, TX)",
     attendees: 18,
     spots: 30,
     description: "Hands-on workshop about seasonal planting and composting.",
@@ -138,7 +141,7 @@ const EVENTS: Event[] = [
     activities: ["donations", "education"],
     date: "Jan 18, 2026",
     time: "11:00 AM – 3:00 PM",
-    location: "Sugar Land Makerspace",
+    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
     attendees: 9,
     spots: 20,
     description:
@@ -151,7 +154,8 @@ const EVENTS: Event[] = [
     activities: ["education", "family"],
     date: "Jan 20, 2026",
     time: "3:30 PM – 5:30 PM",
-    location: "Lakeside Middle School",
+    location:
+      "After-School Study & Tutoring Meetup (Nearby study room / community study space)",
     attendees: 26,
     spots: 30,
     description:
@@ -164,13 +168,32 @@ const EVENTS: Event[] = [
     activities: ["volunteering", "family"],
     date: "Jan 22, 2026",
     time: "7:00 PM – 8:30 PM",
-    location: "Sugar Land Police Substation",
+    location:
+      "Neighborhood Meetup — Community Pavilion (Cross Creek Ranch Pavilion / Gathering Spot)",
     attendees: 34,
     spots: 60,
     description:
       "Community safety meeting with local officers and block captains.",
   },
 ];
+
+/* ===== Motion (TS-safe easing) ===== */
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const pageFade: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.35, ease: EASE_OUT } },
+};
+
+const cardUp: Variants = {
+  hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.45, ease: EASE_OUT },
+  },
+};
 
 export default function RegisterClient() {
   const router = useRouter();
@@ -193,22 +216,30 @@ export default function RegisterClient() {
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white flex items-center justify-center px-6">
-        <div className="max-w-xl w-full bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h1 className="text-2xl font-semibold text-indigo-300">
+      <motion.div
+        variants={pageFade}
+        initial="hidden"
+        animate="show"
+        className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 flex items-center justify-center px-6"
+      >
+        <motion.div
+          variants={cardUp}
+          className="max-w-xl w-full bg-white border border-blue-200 rounded-2xl p-6 shadow-sm"
+        >
+          <h1 className="text-2xl font-semibold text-[#143B8C]">
             Event not found
           </h1>
-          <p className="text-slate-400 mt-2">
+          <p className="text-slate-600 mt-2">
             That registration link is missing a valid event id.
           </p>
           <button
             onClick={() => router.push("/events")}
-            className="mt-5 px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600"
+            className="mt-5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition active:scale-[0.99]"
           >
             Back to Events
           </button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
@@ -222,103 +253,137 @@ export default function RegisterClient() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#071026] via-[#0b1220] to-[#020617] text-white antialiased">
+    <motion.div
+      variants={pageFade}
+      initial="hidden"
+      animate="show"
+      className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
+    >
       <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex items-start justify-between gap-3 flex-wrap mb-6">
-          <div>
-            <h1 className="text-3xl font-semibold text-indigo-300">
-              Register for {event.title}
-            </h1>
-            <p className="mt-2 text-slate-400">
-              {event.date} • {event.time} • {event.location}
-            </p>
-          </div>
+        <motion.div variants={cardUp} className="mb-6">
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <h1 className="text-3xl font-semibold text-[#143B8C]">
+                Register for {event.title}
+              </h1>
+              <p className="mt-2 text-slate-600">
+                {event.date} • {event.time} • {event.location}
+              </p>
+            </div>
 
-          <Link
-            href="/events"
-            className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15"
-          >
-            Back to Events
-          </Link>
-        </div>
+            <Link
+              href="/events"
+              className="px-4 py-2 rounded-xl bg-white border border-blue-200 hover:bg-blue-50 transition"
+            >
+              Back to Events
+            </Link>
+          </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left summary */}
-          <section className="lg:col-span-5 bg-white/5 border border-white/10 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-2">Event details</h2>
-            <p className="text-slate-300 text-sm">{event.description}</p>
+          <motion.section
+            variants={cardUp}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-5 bg-white border border-blue-200 rounded-2xl p-6 shadow-sm"
+          >
+            <h2 className="text-lg font-semibold mb-2 text-[#143B8C]">
+              Event details
+            </h2>
+            <p className="text-slate-700 text-sm">{event.description}</p>
 
             <div className="mt-5">
-              <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-blue-500"
-                  style={{ width: `${percent}%` }}
+              <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percent}%` }}
+                  transition={{ duration: 0.6, ease: EASE_OUT }}
+                  className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
                 />
               </div>
-              <div className="flex justify-between text-xs text-slate-400 mt-1">
+              <div className="flex justify-between text-xs text-slate-600 mt-1">
                 <span>{percent}% filled</span>
                 <span>{spotsLeft} spots left</span>
               </div>
             </div>
-          </section>
+
+            <div className="mt-4 text-xs text-slate-600">
+              <p>
+                <span className="font-medium text-slate-700">Location:</span>{" "}
+                {event.location}
+              </p>
+            </div>
+          </motion.section>
 
           {/* Right form */}
-          <section className="lg:col-span-7 bg-white/5 border border-white/10 rounded-2xl p-6">
+          <motion.section
+            variants={cardUp}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-7 bg-white border border-blue-200 rounded-2xl p-6 shadow-sm"
+          >
             {!submitted ? (
               <>
-                <h2 className="text-lg font-semibold mb-2">Your info</h2>
+                <h2 className="text-lg font-semibold mb-2 text-[#143B8C]">
+                  Your info
+                </h2>
                 <form onSubmit={onSubmit} className="grid gap-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs text-slate-300">First name</label>
+                      <label className="text-xs text-slate-700">
+                        First name
+                      </label>
                       <input
                         required
                         value={first}
                         onChange={(e) => setFirst(e.target.value)}
-                        className="mt-1 w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="mt-1 w-full bg-white border border-blue-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Jane"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-slate-300">Last name</label>
+                      <label className="text-xs text-slate-700">Last name</label>
                       <input
                         required
                         value={last}
                         onChange={(e) => setLast(e.target.value)}
-                        className="mt-1 w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="mt-1 w-full bg-white border border-blue-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
                         placeholder="Doe"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs text-slate-300">Email</label>
+                    <label className="text-xs text-slate-700">Email</label>
                     <input
                       required
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1 w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="mt-1 w-full bg-white border border-blue-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
                       placeholder="jane@example.com"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs text-slate-300">Notes (optional)</label>
+                    <label className="text-xs text-slate-700">
+                      Notes (optional)
+                    </label>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      className="mt-1 w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
+                      className="mt-1 w-full bg-white border border-blue-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400 min-h-[100px]"
                       placeholder="Anything we should know?"
                     />
                   </div>
 
-                  <label className="flex items-start gap-3 text-sm text-slate-300">
+                  <label className="flex items-start gap-3 text-sm text-slate-700">
                     <input
                       type="checkbox"
                       checked={agree}
                       onChange={(e) => setAgree(e.target.checked)}
-                      className="mt-1"
+                      className="mt-1 accent-blue-600"
                       required
                     />
                     <span>I agree to follow the event rules and code of conduct.</span>
@@ -326,47 +391,58 @@ export default function RegisterClient() {
 
                   <button
                     type="submit"
-                    className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
                   >
                     Confirm Registration
                   </button>
+
+                  <p className="text-xs text-slate-600">
+                    By registering, you’ll receive updates about this event.
+                  </p>
                 </form>
               </>
             ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <h2 className="text-xl font-semibold text-indigo-300">
+              <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
+                <h2 className="text-xl font-semibold text-[#143B8C]">
                   You’re registered ✅
                 </h2>
-                <p className="text-slate-300 mt-2">
+                <p className="text-slate-700 mt-2">
                   Thanks, {first}! Your spot is saved.
                 </p>
 
-                <div className="mt-4 text-sm text-slate-300 space-y-1">
+                <div className="mt-4 text-sm text-slate-700 space-y-1">
                   <p>
-                    <span className="text-slate-400">Event:</span> {event.title}
+                    <span className="text-slate-500">Event:</span> {event.title}
                   </p>
                   <p>
-                    <span className="text-slate-400">When:</span> {event.date} • {event.time}
+                    <span className="text-slate-500">When:</span> {event.date} •{" "}
+                    {event.time}
                   </p>
                   <p>
-                    <span className="text-slate-400">Where:</span> {event.location}
+                    <span className="text-slate-500">Where:</span>{" "}
+                    {event.location}
                   </p>
                   <p>
-                    <span className="text-slate-400">Email:</span> {email}
+                    <span className="text-slate-500">Email:</span> {email}
                   </p>
+                  {notes.trim() ? (
+                    <p>
+                      <span className="text-slate-500">Notes:</span> {notes}
+                    </p>
+                  ) : null}
                 </div>
 
                 <Link
                   href="/events"
-                  className="mt-6 block text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl"
+                  className="mt-6 block text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
                 >
                   Back to Events
                 </Link>
               </div>
             )}
-          </section>
+          </motion.section>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
