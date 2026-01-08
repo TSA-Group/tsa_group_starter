@@ -1,192 +1,288 @@
-"use client";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us | Gatherly</title>
+  <style>
+    :root {
+      --primary: #1E3A8A; /* Gatherly blue */
+      --primary-soft: #eaf3ff;
+      --primary-border: #bfdbfe;
+      --bg: #ffffff;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #bfdbfe;
+      --radius: 24px;
+    }
 
-import React from "react";
-import { motion, Variants } from "framer-motion";
-import Link from "next/link";
+    * { box-sizing: border-box; }
 
-const container: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eaf3ff 0%, #ffffff 45%);
+    }
 
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 14, filter: "blur(6px)" },
-  show: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.55, ease: "easeOut" },
-  },
-};
+    header {
+      padding: 1.25rem 1rem;
+      background: transparent;
+    }
 
-const pop: Variants = {
-  hidden: { opacity: 0, scale: 0.98 },
-  show: { opacity: 1, scale: 1, transition: { duration: 0.35 } },
-};
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
 
-export default function ContactPage() {
-  const year = new Date().getFullYear();
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--primary);
+    }
 
-  return (
-    <motion.div
-      initial="hidden"
-      animate="show"
-      variants={container}
-      className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-emerald-50 text-slate-900"
-    >
-      {/* soft background accents */}
-      <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[520px] h-[520px] bg-sky-300/30 rounded-full blur-[90px]" />
-        <div className="absolute top-40 right-10 w-[360px] h-[360px] bg-emerald-300/25 rounded-full blur-[80px]" />
-        <div className="absolute bottom-[-120px] left-1/2 w-[420px] h-[420px] bg-indigo-300/20 rounded-full blur-[90px] -translate-x-1/2" />
-      </div>
+    main {
+      padding: 2rem 0 3rem;
+    }
 
-      <main className="mx-auto w-full max-w-7xl px-6 py-12">
-        {/* header */}
-        <motion.div variants={fadeUp} className="mb-10">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-sky-900">
-            Contact Gatherly
-          </h1>
-          <p className="mt-2 max-w-2xl text-slate-600">
-            Have a question, feedback, or a new community resource to suggest? Send us a
-            message and we’ll get back to you.
-          </p>
-        </motion.div>
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.5rem;
+    }
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* form card */}
-          <motion.section
-            variants={pop}
-            className="lg:col-span-8 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-md shadow-sm"
-          >
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-xl font-semibold text-slate-900">Send a message</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                We usually reply within 1–2 business days.
-              </p>
-            </div>
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
 
-            <motion.form
-              variants={container}
-              className="p-6 grid gap-4"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <motion.div variants={fadeUp} className="grid sm:grid-cols-2 gap-4">
-                <Input label="First name" placeholder="Jane" />
-                <Input label="Last name" placeholder="Doe" />
-              </motion.div>
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: 0 12px 28px rgba(30, 58, 138, 0.08);
+    }
 
-              <motion.div variants={fadeUp} className="grid sm:grid-cols-2 gap-4">
-                <Input label="Email" type="email" placeholder="jane@email.com" />
-                <Input label="Subject" placeholder="New resource suggestion / question" />
-              </motion.div>
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--primary);
+    }
 
-              <motion.div variants={fadeUp}>
-                <label className="text-sm font-medium text-slate-700">Message</label>
-                <textarea
-                  required
-                  placeholder="Share your question, feedback, or a resource we should add (name, address, phone, website, hours, category)..."
-                  className="mt-2 w-full min-h-[140px] rounded-xl border border-slate-200 bg-white px-4 py-3
-                             text-slate-900 placeholder:text-slate-400 shadow-sm
-                             focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-300"
-                />
-              </motion.div>
+    p.lead {
+      margin: 0 0 1.5rem;
+      color: var(--muted);
+    }
 
-              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 pt-2">
-                <motion.button
-                  whileHover={{ scale: 1.02, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  type="submit"
-                  className="rounded-full bg-sky-600 px-6 py-3 font-semibold text-white hover:bg-sky-700 shadow-sm"
-                >
-                  Send Message
-                </motion.button>
+    form {
+      display: grid;
+      gap: 1rem;
+    }
 
-                <p className="text-sm text-slate-600 sm:self-center">
-                  By messaging us, you agree to be contacted back at your email.
-                </p>
-              </motion.div>
-            </motion.form>
-          </motion.section>
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
 
-          {/* info card */}
-          <motion.aside
-            variants={pop}
-            className="lg:col-span-4 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-md shadow-sm"
-          >
-            <div className="p-6 border-b border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900">Get in touch</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Quick ways to reach the team.
-              </p>
-            </div>
+    @media (max-width: 600px) {
+      .row { grid-template-columns: 1fr; }
+    }
 
-            <motion.div variants={container} className="p-6 grid gap-4">
-              <Info label="Support" value="support@gatherly.com" />
-              <Info label="Partnerships" value="partners@gatherly.com" />
-              <Info label="Location" value="Remote-first, worldwide" />
+    label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+      display: block;
+    }
 
-              <motion.div variants={fadeUp}>
-                <Link
-                  href="/"
-                  className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3
-                             text-slate-800 hover:bg-slate-50 shadow-sm"
-                >
-                  ← Back to Home
-                </Link>
-              </motion.div>
-            </motion.div>
-          </motion.aside>
-        </div>
-      </main>
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem 0.85rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      outline: none;
+    }
 
-      {/* footer */}
-      <footer className="border-t border-slate-200 bg-white/60 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-6 py-6 flex flex-col sm:flex-row justify-between gap-3">
-          <motion.small variants={fadeUp} className="text-slate-600">
-            © {year} Gatherly. All rights reserved.
-          </motion.small>
-          <motion.small variants={fadeUp} className="text-slate-600 flex gap-2">
-            <a href="#" className="hover:text-sky-700">Privacy</a>
-            <span>·</span>
-            <a href="#" className="hover:text-sky-700">Terms</a>
-          </motion.small>
-        </div>
-      </footer>
-    </motion.div>
-  );
-}
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
 
-function Input({
-  label,
-  placeholder,
-  type = "text",
-}: {
-  label: string;
-  placeholder: string;
-  type?: string;
-}) {
-  return (
-    <div>
-      <label className="text-sm font-medium text-slate-700">{label}</label>
-      <input
-        type={type}
-        required
-        placeholder={placeholder}
-        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3
-                   text-slate-900 placeholder:text-slate-400 shadow-sm
-                   focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-300"
-      />
+    textarea { min-height: 130px; resize: vertical; }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 0.8rem 1.35rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      box-shadow: 0 6px 14px rgba(30, 58, 138, 0.25);
+    }
+
+    button:hover {
+      background: #1c4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(30, 58, 138, 0.28);
+    }
+
+    button:hover { background: var(--primary-dark); }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .info h3 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .info li {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid var(--primary-border);
+    }
+
+    footer {
+      border-top: 1px solid var(--primary-border);
+      background: #ffffff;
+    }
+
+    footer .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      flex-wrap: wrap;
+    }
+
+    footer small { color: var(--muted); }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="brand">Gatherly</div>
     </div>
-  );
-}
+  </header>
 
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <motion.div variants={fadeUp} className="flex flex-col">
-      <span className="text-xs font-semibold text-sky-700">{label}</span>
-      <span className="text-sm text-slate-700">{value}</span>
-    </motion.div>
-  );
-}
+  <main>
+    <div class="container">
+      <div class="grid">
+        <!-- Contact Form -->
+        <section class="card">
+          <h1>Contact Gatherly</h1>
+          <p class="lead">Have a question, feedback, or partnership idea? Send us a message and we’ll get back to you.</p>
+
+          <form action="#" method="post">
+            <div class="row">
+              <div>
+                <label for="firstName">First name</label>
+                <input id="firstName" name="firstName" type="text" placeholder="Jane" required />
+              </div>
+              <div>
+                <label for="lastName">Last name</label>
+                <input id="lastName" name="lastName" type="text" placeholder="Doe" required />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="jane@gatherly.com" required />
+              </div>
+              <div>
+                <label for="subject">Subject</label>
+                <input id="subject" name="subject" type="text" placeholder="How can we help?" />
+              </div>
+            </div>
+
+            <div>
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+            </div>
+
+            <div class="actions">
+              <button type="submit">Send Message</button>
+              <span class="hint">We usually reply within 1–2 business days.</span>
+            </div>
+          </form>
+        </section>
+
+        <!-- Contact Info -->
+        <aside class="card info">
+          <h3>Get in touch</h3>
+          <ul>
+            <li>
+              <span class="badge">Email</span>
+              <span>support@gatherly.com</span>
+            </li>
+            <li>
+              <span class="badge">Business</span>
+              <span>partners@gatherly.com</span>
+            </li>
+            <li>
+              <span class="badge">Social</span>
+              <span>
+                <a href="#">Twitter</a> · <a href="#">Instagram</a> · <a href="#">LinkedIn</a>
+              </span>
+            </li>
+            <li>
+              <span class="badge">Location</span>
+              <span>Remote-first • Serving communities worldwide</span>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <small>© 2025 Gatherly. All rights reserved.</small>
+      <small><a href="#">Privacy</a> · <a href="#">Terms</a></small>
+    </div>
+  </footer>
+</body>
+</html>
