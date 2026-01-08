@@ -2,9 +2,6 @@
 
 import styles from "./contact.module.css";
 
-export const metadata = {
-  title: "Contact Us | Gatherly",
-};
 
 export default function ContactPage() {
   return (
