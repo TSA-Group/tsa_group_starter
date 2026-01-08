@@ -151,13 +151,8 @@ export default function Home() {
 
       {/* MAIN GRID */}
       <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-stretch">
-        <motion.section className="lg:col-span-1 flex flex-col justify-start">
-          <motion.div
-            className="mt-2 ml-10 h-80"  
-            variants={cardPop}
-            initial="hidden"
-            animate="show"
-          >
+        <motion.section className="lg:col-span-1 flex flex-col justify-start pl-4 mt-48">
+          <motion.div className="h-80 w-full" variants={cardPop} initial="hidden" animate="show">
             <QuickActions />
           </motion.div>
         </motion.section>
