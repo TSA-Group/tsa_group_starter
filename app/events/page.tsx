@@ -1,6 +1,5 @@
 "use client";
 
-import Head from "next/head";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import { AnimatePresence, motion, Variants } from "framer-motion";
@@ -25,7 +24,7 @@ type Event = {
 };
 
 /* =====================
-   Data (single source of truth)
+   Data
 ===================== */
 const EVENTS: Event[] = [
   {
@@ -185,7 +184,7 @@ const EVENTS: Event[] = [
 ];
 
 /* =====================
-   Theme + UI bits
+   UI bits
 ===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -194,13 +193,13 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 /* =====================
-   Motion helpers
-   ✅ FIX: use easing arrays (not strings) + type as Variants
+   Motion helpers (TS-safe easing)
 ===================== */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+// ✅ FIX: don't go fully transparent to avoid white flash during route change
 const pageFade: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0.01 },
   show: { opacity: 1, transition: { duration: 0.45, ease: EASE_OUT } },
 };
 
@@ -299,195 +298,170 @@ export default function EventsPage() {
   };
 
   return (
-    <>
-      <Head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
+    <motion.div
+      variants={pageFade}
+      initial="hidden"
+      animate="show"
+      className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
+    >
+      {/* Keep fonts simple here (layout already handles fonts) */}
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <motion.header variants={headerUp} className="mb-8">
+          <h1 className="text-4xl font-semibold text-[#143B8C]">
+            Gatherly — Community Events
+          </h1>
+          <p className="mt-2 text-slate-600 max-w-2xl">
+            Discover local volunteering opportunities and community events in
+            Cross Creek.
+          </p>
+        </motion.header>
 
-      <motion.div
-        variants={pageFade}
-        initial="hidden"
-        animate="show"
-        className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
-      >
-        <style jsx>{`
-          :global(body) {
-            font-family: "Inter", sans-serif;
-          }
-          :global(h1, h2, h3, h4, h5, h6) {
-            font-family: "Poppins", sans-serif;
-          }
-        `}</style>
+        <motion.div
+          variants={panelUp}
+          className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
+        >
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
+              <p className="text-sm text-slate-600">Choose what you want to see.</p>
+            </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <motion.header variants={headerUp} className="mb-8">
-            <h1 className="text-4xl font-semibold text-[#143B8C]">
-              Gatherly — Community Events
-            </h1>
-            <p className="mt-2 text-slate-600 max-w-2xl">
-              Discover local volunteering opportunities and community events in
-              Cross Creek.
-            </p>
-          </motion.header>
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
+            >
+              Clear
+            </button>
+          </div>
 
-          <motion.div
-            variants={panelUp}
-            className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
-          >
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div>
-                <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
-                <p className="text-sm text-slate-600">
-                  Choose what you want to see.
-                </p>
-              </div>
-
+          <div className="flex flex-wrap gap-2 mb-4">
+            {categories.map((c) => (
               <button
-                onClick={clearFilters}
-                className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
+                key={c.id}
+                onClick={() => setSelectedCategory(c.id)}
+                className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
+                  selectedCategory === c.id
+                    ? "bg-blue-600 text-white border border-blue-600"
+                    : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
+                }`}
               >
-                Clear
+                {c.name}
               </button>
-            </div>
+            ))}
+          </div>
 
-            <div className="flex flex-wrap gap-2 mb-4">
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedCategory(c.id)}
-                  className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
-                    selectedCategory === c.id
-                      ? "bg-blue-600 text-white border border-blue-600"
-                      : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {activities.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => toggleActivity(a.id)}
+                className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
+                  selectedActivities.includes(a.id)
+                    ? "bg-blue-600 text-white border border-blue-600"
+                    : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
+                }`}
+              >
+                {a.name}
+              </button>
+            ))}
+          </div>
 
-            <div className="flex flex-wrap gap-2 mb-4">
-              {activities.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => toggleActivity(a.id)}
-                  className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
-                    selectedActivities.includes(a.id)
-                      ? "bg-blue-600 text-white border border-blue-600"
-                      : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
-                  }`}
-                >
-                  {a.name}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events..."
+              className="flex-1 bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search events..."
-                className="flex-1 bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">Sort:</span>
-                <div className="inline-flex rounded-full bg-white border border-blue-200 p-1">
-                  {["upcoming", "popular"].map((option) => (
-                    <button
-                      key={option}
-                      onClick={() =>
-                        setSortBy(option as "upcoming" | "popular")
-                      }
-                      className={`px-4 py-1 text-sm rounded-full transition ${
-                        sortBy === option
-                          ? "bg-blue-600 text-white"
-                          : "text-slate-700 hover:bg-blue-50"
-                      }`}
-                    >
-                      {option === "upcoming" ? "Upcoming" : "Popular"}
-                    </button>
-                  ))}
-                </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">Sort:</span>
+              <div className="inline-flex rounded-full bg-white border border-blue-200 p-1">
+                {["upcoming", "popular"].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setSortBy(option as "upcoming" | "popular")}
+                    className={`px-4 py-1 text-sm rounded-full transition ${
+                      sortBy === option
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-700 hover:bg-blue-50"
+                    }`}
+                  >
+                    {option === "upcoming" ? "Upcoming" : "Popular"}
+                  </button>
+                ))}
               </div>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AnimatePresence mode="popLayout">
-              {filtered.map((ev) => {
-                const percent = Math.round((ev.attendees / ev.spots) * 100);
-                const spotsLeft = ev.spots - ev.attendees;
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((ev) => {
+              const percent = Math.round((ev.attendees / ev.spots) * 100);
+              const spotsLeft = ev.spots - ev.attendees;
 
-                return (
-                  <motion.article
-                    key={ev.id}
-                    layout
-                    variants={cardPop}
-                    initial="hidden"
-                    animate="show"
-                    exit="exit"
-                    whileHover={{ y: -4, scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                    className="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
-                  >
-                    <h3 className="text-xl font-semibold mb-1 text-slate-900">
-                      {ev.title}
-                    </h3>
+              return (
+                <motion.article
+                  key={ev.id}
+                  layout
+                  variants={cardPop}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                  className="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
+                >
+                  <h3 className="text-xl font-semibold mb-1 text-slate-900">
+                    {ev.title}
+                  </h3>
 
-                    <p className="text-slate-600 text-sm">{ev.location}</p>
-                    <p className="text-slate-700 text-sm mt-1">
-                      {ev.date} • {ev.time}
-                    </p>
+                  <p className="text-slate-600 text-sm">{ev.location}</p>
+                  <p className="text-slate-700 text-sm mt-1">
+                    {ev.date} • {ev.time}
+                  </p>
 
-                    <p className="text-slate-700 text-sm mt-3">
-                      {ev.description}
-                    </p>
+                  <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
 
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {ev.activities.map((a) => (
-                        <Chip key={a}>{a}</Chip>
-                      ))}
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {ev.activities.map((a) => (
+                      <Chip key={a}>{a}</Chip>
+                    ))}
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percent}%` }}
+                        transition={{ duration: 0.6, ease: EASE_OUT }}
+                        className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
+                      />
                     </div>
-
-                    <div className="mt-4">
-                      <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${percent}%` }}
-                          transition={{ duration: 0.6, ease: EASE_OUT }}
-                          className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
-                        />
-                      </div>
-                      <div className="flex justify-between text-xs text-slate-600 mt-1">
-                        <span>{percent}% filled</span>
-                        <span>{spotsLeft} spots left</span>
-                      </div>
+                    <div className="flex justify-between text-xs text-slate-600 mt-1">
+                      <span>{percent}% filled</span>
+                      <span>{spotsLeft} spots left</span>
                     </div>
+                  </div>
 
-                    <div className="flex gap-2 mt-5">
-                      <Link
-                        href={`/events/register?id=${ev.id}`}
-                        className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
-                      >
-                        Register
-                      </Link>
-                      <button className="flex-1 bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]">
-                        Details
-                      </button>
-                    </div>
-                  </motion.article>
-                );
-              })}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      </motion.div>
-    </>
+                  <div className="flex gap-2 mt-5">
+                    <Link
+                      href={`/events/register?id=${ev.id}`}
+                      className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
+                    >
+                      Register
+                    </Link>
+                    <button className="flex-1 bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]">
+                      Details
+                    </button>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
