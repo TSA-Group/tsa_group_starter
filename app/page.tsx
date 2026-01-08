@@ -147,19 +147,21 @@ export default function Home() {
         </motion.h1>
       </motion.header>
 
-      {/* MAIN GRID */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-start">
+      {/* MAIN ROW */}
+      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 flex flex-col lg:flex-row gap-8 lg:gap-10">
+        
         {/* LEFT COLUMN - QuickActions */}
-        <motion.section className="lg:col-span-1">
+        <motion.section className="lg:w-1/3 flex flex-col justify-end">
           <QuickActions />
         </motion.section>
+      
         {/* RIGHT COLUMN - Calendar */}
-        <motion.section className="lg:col-span-2">
+        <motion.section className="lg:w-2/3 flex flex-col justify-end">
           <motion.div
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 w-full max-w-2xl mx-auto"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 w-full"
           >
             {/* Calendar Header */}
             <div className="flex items-center justify-between mb-4">
