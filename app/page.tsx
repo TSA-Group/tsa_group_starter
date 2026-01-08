@@ -151,10 +151,8 @@ export default function Home() {
       {/* MAIN GRID */}
       <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {/* LEFT COLUMN */}
-        <motion.section className="space-y-8 lg:col-span-1">
-          <div className="mt-32">
-            <QuickActions />
-          </div>
+        <motion.section className="space-y-8 lg:col-span-1 pt-32">
+          <QuickActions />
         </motion.section>
 
         {/* RIGHT COLUMN - Calendar */}
