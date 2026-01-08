@@ -37,7 +37,6 @@ const cardPop: Variants = {
   },
 };
 
-
 export default function Home() {
   const year = new Date().getFullYear();
   const [calendarDate, setCalendarDate] = useState(new Date());
