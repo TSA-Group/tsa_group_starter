@@ -19,10 +19,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <RouteShell>{children}</RouteShell>
 
-        // app/layout.tsx (inside <body>)
-      <RouteTransition>
-          <main className="min-h-screen pt-24">{children}</main>
-      </RouteTransition>
+        {/* app/layout.tsx (inside <body>) */}
+        <RouteTransition>
+            <main className="min-h-screen pt-24">{children}</main>
+        </RouteTransition>
 
       </body>
     </html>
