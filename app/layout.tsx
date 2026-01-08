@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Geist_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header"; // default import
-
-const geistSans = Geist_Sans({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+import Header from "@/components/Header";
+import { geistSans, geistMono } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Gatherly",
   description: "Location Datasets",
 };
 
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" data-theme="light">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
