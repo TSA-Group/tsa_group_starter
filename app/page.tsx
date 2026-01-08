@@ -154,33 +154,6 @@ export default function Home() {
         <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
 
-          {/* Volunteer Opportunities */}
-          <motion.div
-            variants={cardPop}
-            className="h-[350px] p-4 overflow-y-auto bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
-          >
-            <h3 className="text-lg font-semibold mb-3 text-blue-900">
-              Incredible Eats Near You!
-            </h3>
-            <ul className="space-y-4">
-              {[
-                { title: "Free community dinner — Sat 6pm", meta: "Downtown Church" },
-                { title: "Warm clothing drive", meta: "Westside Center" },
-                { title: "Volunteer literacy tutors needed", meta: "Library Annex" },
-                { title: "Neighborhood cleanup — Sun 10am", meta: "Riverside Park" },
-                { title: "Food pantry helpers — Wed 4pm", meta: "Community Hall" },
-              ].map((item, i) => (
-                <li
-                  key={i}
-                  className="bg-blue-50 border border-blue-200 rounded-xl p-3"
-                >
-                  <div className="text-sm font-semibold">{item.title}</div>
-                  <div className="text-xs text-blue-700">{item.meta}</div>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </motion.section>
 
         {/* RIGHT COLUMN - Calendar */}
         <motion.section className="lg:col-span-2">
