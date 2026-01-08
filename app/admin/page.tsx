@@ -1,16 +1,30 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
+
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const pageIn: Variants = {
+  initial: { opacity: 0, y: 10, scale: 0.995, filter: "blur(10px)" },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.6, ease: EASE_OUT },
+  },
+};
 
 const glow: Variants = {
   initial: { opacity: 0, scale: 0.98 },
   animate: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.55, ease: EASE_OUT },
   },
 };
 
@@ -23,11 +37,9 @@ export default function AdminLoginPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
-  // keep ONE timer; don’t stack multiple
   const timerRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
-    // already logged in? go dashboard
     const authed = localStorage.getItem("admin_authed") === "1";
     if (authed) router.replace("/admin/dashboard");
 
@@ -43,7 +55,6 @@ export default function AdminLoginPage() {
 
     if (timerRef.current) window.clearTimeout(timerRef.current);
 
-    // Only NEXT_PUBLIC_* env vars work in client components
     const ADMIN_USER = process.env.NEXT_PUBLIC_ADMIN_USER || "admin";
     const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASS || "crosscreek";
 
@@ -63,8 +74,34 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070A12] text-white relative overflow-hidden">
-      {/* animated backdrop (inline so TS doesn’t complain about readonly arrays) */}
+    <motion.div
+      variants={pageIn}
+      initial="initial"
+      animate="animate"
+      className="min-h-screen bg-[#070A12] text-white relative overflow-hidden"
+    >
+      {/* ✅ Back to home (top-left) */}
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE_OUT, delay: 0.1 } }}
+        className="absolute top-5 left-5 z-20"
+      >
+        <Link href="/" className="group inline-block">
+          <motion.div
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            className="flex items-center gap-2 rounded-2xl border border-white/12 bg-white/5 backdrop-blur px-4 py-3 text-sm sm:text-base font-semibold text-white/90 shadow-[0_18px_50px_rgba(0,0,0,0.35)] hover:bg-white/10"
+          >
+            <span className="text-lg sm:text-xl leading-none transition-transform duration-200 group-hover:-translate-x-0.5">
+              ←
+            </span>
+            <span>Back to Home</span>
+          </motion.div>
+        </Link>
+      </motion.div>
+
+      {/* animated backdrop */}
       <motion.div
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: [0.65, 0, 0.35, 1] }}
@@ -83,7 +120,6 @@ export default function AdminLoginPage() {
             "radial-gradient(circle at 30% 30%, rgba(147,51,234,0.85), rgba(147,51,234,0) 62%)",
         }}
       />
-
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.08),transparent_45%),radial-gradient(circle_at_80%_60%,rgba(255,255,255,0.06),transparent_45%)]" />
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-6 py-12">
@@ -93,7 +129,7 @@ export default function AdminLoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.55, ease: EASE_OUT }}
               >
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-xs text-white/80">
                   Secure Admin Portal
@@ -107,7 +143,6 @@ export default function AdminLoginPage() {
               </motion.div>
             </div>
 
-            {/* ✅ IMPORTANT: just use onSubmit directly */}
             <form onSubmit={onSubmit} className="p-6 sm:p-7 space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-white/85">Username</label>
@@ -145,16 +180,8 @@ export default function AdminLoginPage() {
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
-                    }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: EASE_OUT } }}
+                    exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: EASE_OUT } }}
                     className="rounded-2xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
                   >
                     {error}
@@ -181,6 +208,6 @@ export default function AdminLoginPage() {
           </div>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
