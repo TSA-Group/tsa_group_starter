@@ -1,5 +1,3 @@
-// Add Resources
-
 "use client";
 
 import React from "react";
@@ -7,16 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
+import { db } from "@/lib/firebase";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  type Timestamp,
+} from "firebase/firestore";
+
 const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: {
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1],
-    },
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
   },
 };
 
@@ -33,14 +36,26 @@ const RESOURCE_TYPES = [
   "Other",
 ] as const;
 
+export type ResourceDoc = {
+  community: (typeof COMMUNITIES)[number];
+  type: (typeof RESOURCE_TYPES)[number];
+  name: string;
+  address: string;
+  indoorOutdoor: "Indoor" | "Outdoor" | "Both";
+  contact: string;
+  // optional location (you can fill later)
+  location?: { lat: number; lng: number } | null;
+  createdAt: Timestamp | null; // Firestore will set this, but TS wants a shape
+};
+
 export default function AddResourcePage() {
   const [sent, setSent] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [saving, setSaving] = React.useState(false);
 
-  // ✅ must match a value in COMMUNITIES
   const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
     "Cross Creek Ranch",
   );
-
   const [type, setType] = React.useState<(typeof RESOURCE_TYPES)[number]>(
     "Park/Trails",
   );
@@ -51,17 +66,45 @@ export default function AddResourcePage() {
   >("Both");
   const [contact, setContact] = React.useState("");
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    setSent(true);
-    window.setTimeout(() => setSent(false), 2200);
+    // basic validation
+    if (!name.trim() || !address.trim()) {
+      setError("Please fill out Resource Name and Address.");
+      return;
+    }
 
-    setName("");
-    setAddress("");
-    setContact("");
-    setIndoorOutdoor("Both");
-    setType("Park/Trails");
+    try {
+      setSaving(true);
+
+      // Create document in Firestore
+      await addDoc(collection(db, "resources"), {
+        community,
+        type,
+        name: name.trim(),
+        address: address.trim(),
+        indoorOutdoor,
+        contact: contact.trim(),
+        location: null, // optional: you can geocode later
+        createdAt: serverTimestamp(),
+      });
+
+      setSent(true);
+      window.setTimeout(() => setSent(false), 2200);
+
+      // reset
+      setName("");
+      setAddress("");
+      setContact("");
+      setIndoorOutdoor("Both");
+      setType("Park/Trails");
+    } catch (err: any) {
+      setError(err?.message || "Failed to save resource. Check Firestore rules.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -78,28 +121,30 @@ export default function AddResourcePage() {
             </div>
           </div>
 
-          <form
-            onSubmit={onSubmit}
-            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
+          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
+                    animate={{ opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 } }}
+                    exit={{ opacity: 0, y: -6, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 } }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
-                    ✅ Resource submitted (demo). Hook this to your DB later.
+                    ✅ Resource saved to Firestore!
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 } }}
+                    exit={{ opacity: 0, y: -6, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 } }}
+                    className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
+                  >
+                    ❌ {error}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -202,16 +247,17 @@ export default function AddResourcePage() {
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
               <div className="text-xs text-white/55">
-                This is a demo submit. Later connect to DB (POST request).
+                Saves directly to Firestore collection: <span className="font-semibold">resources</span>
               </div>
 
               <motion.button
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.99 }}
                 type="submit"
-                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold shadow-[0_20px_55px_rgba(37,99,235,0.25)] hover:brightness-110 transition"
+                disabled={saving}
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold shadow-[0_20px_55px_rgba(37,99,235,0.25)] hover:brightness-110 transition disabled:opacity-60"
               >
-                Save Resource
+                {saving ? "Saving..." : "Save Resource"}
               </motion.button>
             </div>
           </form>
