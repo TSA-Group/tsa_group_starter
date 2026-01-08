@@ -19,8 +19,10 @@ export function QuickActions() {
       <ul className="flex flex-col gap-2" role="list">
         {actions.map((action, i) => (
           <li key={i} role="listitem">
-            <Link href={action.href} className="block bg-blue-50 border border-blue-200 rounded-xl py-2 px-3 text-sm font-semibold text-blue-900 hover:bg-blue-100 transition">
-              {action.label}
+            <Link href={action.href}>
+              <a className="block bg-blue-50 border border-blue-200 rounded-xl py-2 px-3 text-sm font-semibold text-blue-900 hover:bg-blue-100 transition">
+                {action.label}
+              </a>
             </Link>
           </li>
         ))}
@@ -28,4 +30,3 @@ export function QuickActions() {
     </section>
   );
 }
-
