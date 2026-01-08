@@ -154,6 +154,11 @@ export default function Home() {
         <motion.section className="space-y-8 lg:col-span-1">
           <QuickActions />
         </motion.section>
+        <motion.section className="space-y-8 lg:col-span-1">
+          <div className="mt-16">
+            <QuickActions />
+          </div>
+        </motion.section>
 
         {/* RIGHT COLUMN - Calendar */}
         <motion.section className="lg:col-span-2">
