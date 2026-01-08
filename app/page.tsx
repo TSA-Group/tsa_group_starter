@@ -151,17 +151,16 @@ export default function Home() {
       {/* MAIN GRID */}
       <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-stretch">
         <motion.section className="lg:col-span-1 flex flex-col justify-start mt-48">
-          <motion.section className="lg:col-span-1 flex flex-col justify-start mt-48">
-            <motion.div
-              className="h-80 w-[90%]"      // slightly narrower than column
-              style={{ transform: "translateX(2rem)" }} // now this actually moves it right
-              variants={cardPop}
-              initial="hidden"
-              animate="show"
-            >
-              <QuickActions />
-            </motion.div>
-          </motion.section>
+          <motion.div
+            className="h-80 w-[90%]"
+            style={{ transform: `translateX(${2 * 16}px)` }} // 2rem = 32px
+            variants={cardPop}
+            initial="hidden"
+            animate="show"
+          >
+            <QuickActions />
+          </motion.div>
+        </motion.section>
         {/* RIGHT COLUMN - Calendar */}
         <motion.section className="lg:col-span-2">
           <motion.div
