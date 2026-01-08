@@ -153,7 +153,7 @@ export default function Home() {
       <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-stretch">
         <motion.section className="lg:col-span-1 flex flex-col justify-start">
           <motion.div
-            className="mt-48 ml-4"  // ↑ bigger mt pushes it farther down
+            className="mt-58 ml-4 h-80"  
             variants={cardPop}
             initial="hidden"
             animate="show"
