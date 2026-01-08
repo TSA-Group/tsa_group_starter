@@ -20,7 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Wrap the children in both RouteTransition and RouteShell */}
         <RouteTransition>
-          <RouteShell>{children}</RouteShell>
+          <RouteShell>
+            {children}   {/* children here is the page content */}
+          </RouteShell>
         </RouteTransition>
       </body>
     </html>
