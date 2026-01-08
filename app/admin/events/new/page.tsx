@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
-import { db } from "@/components/lib/firebase";
+import { db } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 const sectionAnim: Variants = {
