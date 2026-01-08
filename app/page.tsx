@@ -153,7 +153,7 @@ export default function Home() {
         <motion.section className="lg:col-span-1 flex flex-col justify-start mt-48">
           <motion.div
             className="h-80 w-full"
-            style={{ transform: "translateX(4rem)" }} 
+            style={{ transform: "translateX(16rem)" }} 
             variants={cardPop}
             initial="hidden"
             animate="show"
