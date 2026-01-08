@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
+import { db } from "@/components/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+
 const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
   show: {
@@ -13,7 +16,7 @@ const sectionAnim: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
-      ease: [0.16, 1, 0.3, 1], // ✅ tuple easing (TS-safe)
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };
@@ -30,10 +33,25 @@ const EVENT_TYPES = [
   "Other",
 ] as const;
 
+type IndoorOutdoor = "Indoor" | "Outdoor" | "Both";
+
+type EventDoc = {
+  community: (typeof COMMUNITIES)[number];
+  eventName: string;
+  eventType: (typeof EVENT_TYPES)[number];
+  address: string;
+  start: string; // store ISO-ish string from input for now
+  end: string;
+  contact?: string;
+  indoorOutdoor: IndoorOutdoor;
+  createdAt: any; // Firestore serverTimestamp
+};
+
 export default function AddEventPage() {
   const [sent, setSent] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // ✅ must match one of COMMUNITIES values
   const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
     "Cross Creek Ranch",
   );
@@ -46,15 +64,9 @@ export default function AddEventPage() {
   const [start, setStart] = React.useState("");
   const [end, setEnd] = React.useState("");
   const [contact, setContact] = React.useState("");
-  const [indoorOutdoor, setIndoorOutdoor] = React.useState<
-    "Indoor" | "Outdoor" | "Both"
-  >("Both");
+  const [indoorOutdoor, setIndoorOutdoor] = React.useState<IndoorOutdoor>("Both");
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSent(true);
-    window.setTimeout(() => setSent(false), 2200);
-
+  const resetForm = () => {
     setEventName("");
     setAddress("");
     setStart("");
@@ -62,6 +74,43 @@ export default function AddEventPage() {
     setContact("");
     setIndoorOutdoor("Both");
     setEventType("Meetup");
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // basic guard
+    if (!eventName.trim() || !address.trim() || !start || !end) {
+      setError("Please fill out: Event name, address, start date/time, and end date/time.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload: EventDoc = {
+        community,
+        eventName: eventName.trim(),
+        eventType,
+        address: address.trim(),
+        start,
+        end,
+        contact: contact.trim() ? contact.trim() : undefined,
+        indoorOutdoor,
+        createdAt: serverTimestamp(),
+      };
+
+      // ✅ creates a new document in "events"
+      await addDoc(collection(db, "events"), payload);
+
+      setSent(true);
+      window.setTimeout(() => setSent(false), 2200);
+      resetForm();
+    } catch (err: any) {
+      setError(err?.message ?? "Failed to save event. Check Firestore rules + config.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -74,24 +123,51 @@ export default function AddEventPage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Events (name, type, address, start/end date&time, contact, indoor/outdoor)
+              Community Name (dropdown) → Events (name, type, address, start/end date&time,
+              contact, indoor/outdoor)
             </div>
           </div>
 
-          <form
-            onSubmit={onSubmit}
-            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
+          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
+                    }}
                     className="rounded-2xl border border-blue-400/20 bg-blue-500/10 px-4 py-3 text-sm text-blue-100"
                   >
-                    ✅ Event submitted (demo). Hook this to your DB later.
+                    ✅ Event saved to Firestore.
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
+                    }}
+                    className="mt-3 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
+                  >
+                    ❌ {error}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -101,10 +177,9 @@ export default function AddEventPage() {
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) =>
-                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
-                }
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                onChange={(e) => setCommunity(e.target.value as (typeof COMMUNITIES)[number])}
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
                   <option key={c} value={c} className="bg-[#0b1020]">
@@ -118,10 +193,9 @@ export default function AddEventPage() {
             <Field label="Event Type">
               <select
                 value={eventType}
-                onChange={(e) =>
-                  setEventType(e.target.value as (typeof EVENT_TYPES)[number])
-                }
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                onChange={(e) => setEventType(e.target.value as (typeof EVENT_TYPES)[number])}
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {EVENT_TYPES.map((t) => (
                   <option key={t} value={t} className="bg-[#0b1020]">
@@ -138,7 +212,8 @@ export default function AddEventPage() {
                 onChange={(e) => setEventName(e.target.value)}
                 required
                 placeholder="Example: Trails & Park Cleanup Day"
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                           placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
             </Field>
 
@@ -175,7 +250,8 @@ export default function AddEventPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   required
                   placeholder="Where is this event held?"
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                             placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </Field>
             </div>
@@ -187,7 +263,8 @@ export default function AddEventPage() {
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
                 required
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
             </Field>
 
@@ -198,7 +275,8 @@ export default function AddEventPage() {
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
                 required
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
             </Field>
 
@@ -209,23 +287,27 @@ export default function AddEventPage() {
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
                   placeholder="Email / phone / website (optional)"
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white
+                             placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </Field>
             </div>
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
               <div className="text-xs text-white/55">
-                Demo submit only. Later connect to DB.
+                Saves to Firestore collection: <span className="font-semibold">events</span>
               </div>
 
               <motion.button
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.99 }}
                 type="submit"
-                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold shadow-[0_20px_55px_rgba(37,99,235,0.25)] hover:brightness-110 transition"
+                disabled={saving}
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold
+                           shadow-[0_20px_55px_rgba(37,99,235,0.25)] hover:brightness-110 transition
+                           disabled:opacity-60"
               >
-                Save Event
+                {saving ? "Saving..." : "Save Event"}
               </motion.button>
             </div>
           </form>
