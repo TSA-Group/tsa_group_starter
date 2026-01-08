@@ -149,9 +149,9 @@ export default function Home() {
       </motion.header>
 
       {/* MAIN GRID */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-stretch">
         {/* LEFT COLUMN */}
-        <motion.section className="lg:col-span-1 flex flex-col h-full justify-end">
+        <motion.section className="lg:col-span-1 flex flex-col justify-end">
           <QuickActions />
         </motion.section>
 
