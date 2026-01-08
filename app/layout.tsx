@@ -1,18 +1,15 @@
+// app/layout.tsx
 import type { Metadata } from "next";
-import "./globals.css";
-import Header from "@/components/Header";
 import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Header } from "@/components/Header";
+import RouteShell from "./route-shell";
+import RouteTransition from "./route-transition";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,16 +23,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      data-theme="light"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
-      <body className="antialiased">
-        <Header />
-        <main className="min-h-screen pt-24 bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF]">
-          {children}
-        </main>
+    <html lang="en" data-theme="light">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {/* Wrap the children in both RouteTransition and RouteShell */}
+        <RouteTransition>
+          <RouteShell>
+            {children} {/* children here is the page content */}
+          </RouteShell>
+        </RouteTransition>
       </body>
     </html>
   );
