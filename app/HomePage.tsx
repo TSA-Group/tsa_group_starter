@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion, Variants } from "framer-motion"; 
-import QuickActions from "./QuickActions"; // Make sure this points to your QuickActions component
+import { QuickActions } from "./QuickActions"; // Make sure this points to your QuickActions component
 
 // Animation variants
 const fadeUp: Variants = {
