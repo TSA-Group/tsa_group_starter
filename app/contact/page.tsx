@@ -2,10 +2,6 @@
 
 import styles from "./contact.module.css";
 
-export const metadata = {
-  title: "Contact Us | Gatherly",
-};
-
 export default function ContactPage() {
   return (
     <main className={styles.page}>
@@ -15,13 +11,13 @@ export default function ContactPage() {
           <section className={styles.card}>
             <h1>Contact Gatherly</h1>
             <p className={styles.lead}>
-              Have a question, feedback, or partnership idea? Send us a message and
-              we’ll get back to you.
+              Have a question, feedback, or partnership idea? Send us a message
+              and we’ll get back to you.
             </p>
 
             <form
-              onSubmit={(e) => e.preventDefault()}
               className={styles.form}
+              onSubmit={(e) => e.preventDefault()}
             >
               <div className={styles.row}>
                 <div>
@@ -62,7 +58,7 @@ export default function ContactPage() {
             </form>
           </section>
 
-          {/* Info */}
+          {/* Contact Info */}
           <aside className={`${styles.card} ${styles.info}`}>
             <h3>Get in touch</h3>
             <ul>
