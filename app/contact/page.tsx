@@ -66,8 +66,8 @@ export default function ContactPage() {
               <li>
                 <span className={styles.badge}>Social</span>
                 <span>
-                  <a className={styles.link} href="#">Twitter</a> · 
-                  <a className={styles.link} href="#">Instagram</a> · 
+                  <a className={styles.link} href="#">Twitter</a> ·
+                  <a className={styles.link} href="#">Instagram</a> ·
                   <a className={styles.link} href="#">LinkedIn</a>
                 </span>
               </li>
