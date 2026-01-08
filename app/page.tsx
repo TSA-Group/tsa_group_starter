@@ -17,7 +17,6 @@ const container: Variants = {
   show: { transition: { staggerChildren: 0.12 } },
 };
 
-
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18, filter: "blur(4px)" },
   show: {
