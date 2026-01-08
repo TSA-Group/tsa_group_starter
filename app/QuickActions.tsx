@@ -11,7 +11,7 @@ export function QuickActions() {
 
   return (
     <section
-      className="h-[260px] w-full sm:w-[650px] p-5 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
+      className="p-3 bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm"
     >
       <h3 className="text-lg font-semibold mb-2 text-blue-900">Quick Actions</h3>
       <p className="text-sm text-blue-700 mb-4">
