@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 
+
 // Animation variants
 const container: Variants = {
   hidden: {},
