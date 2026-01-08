@@ -151,8 +151,10 @@ export default function Home() {
 
       {/* MAIN GRID */}
       <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-stretch">
-        <motion.section className="lg:col-span-1 flex flex-col justify-end">
-          <QuickActions />
+        <motion.section className="lg:col-span-1 flex flex-col">
+          <div className="mt-16 ml-4"> {/* Moves it down and slightly right */}
+            <QuickActions />
+          </div>
         </motion.section>
         {/* RIGHT COLUMN - Calendar */}
         <motion.section className="lg:col-span-2">
