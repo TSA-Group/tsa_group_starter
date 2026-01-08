@@ -29,7 +29,7 @@
   box-shadow: 0 12px 28px rgba(30, 58, 138, 0.08);
 }
 
-h1 {
+.card h1 {
   margin: 0 0 0.5rem;
   font-size: 2.25rem;
   font-weight: 800;
@@ -58,15 +58,15 @@ h1 {
   }
 }
 
-label {
+.form label {
   font-size: 0.85rem;
   color: #475569;
   display: block;
   margin-bottom: 0.25rem;
 }
 
-input,
-textarea {
+.form input,
+.form textarea {
   width: 100%;
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
@@ -74,7 +74,7 @@ textarea {
   font-size: 0.95rem;
 }
 
-textarea {
+.form textarea {
   min-height: 130px;
 }
 
@@ -85,7 +85,7 @@ textarea {
   margin-top: 0.5rem;
 }
 
-button {
+.actions button {
   background: #1e3a8a;
   color: white;
   border: none;
@@ -95,7 +95,7 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.actions button:hover {
   background: #1c4ed8;
 }
 
@@ -127,11 +127,11 @@ button:hover {
   font-weight: 700;
 }
 
-a {
+.info a {
   color: #1e3a8a;
   text-decoration: none;
 }
 
-a:hover {
+.info a:hover {
   text-decoration: underline;
 }
