@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: "Location Datasets",
 };
 
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="light">
