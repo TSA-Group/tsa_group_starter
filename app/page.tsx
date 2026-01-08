@@ -161,7 +161,7 @@ export default function Home() {
             ref={calendarRef}
             layout
             variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 relative w-full"
+            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 relative w-full max-w-2xl mx-auto"
           >
             {/* Calendar Header */}
             <div className="flex items-center justify-between mb-4">
