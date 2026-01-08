@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
@@ -8,6 +8,7 @@ import {
   AdvancedMarker,
   useMapsLibrary,
 } from "@vis.gl/react-google-maps";
+import Image from "next/image";
 
 /** ---------- Types ---------- */
 interface LatLng {
@@ -168,14 +169,13 @@ const ALL_LOCATIONS: LocationItem[] = [
     id: "ful-10",
     title: "After-School Study & Tutoring Meetup",
     address: "Nearby library study room / community study space",
-    position: { lat: 29.6891, lng: -95.9010 },
+    position: { lat: 29.6891, lng: -95.901 },
     eventType: "Support Services",
     activities: ["Education", "Family", "Support"],
     when: "Tue/Thu • 5:30 PM",
     host: "Volunteer Tutors",
   },
 ];
-
 
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
@@ -204,7 +204,7 @@ export default function Page() {
   const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
   // Cross Creek Ranch-ish default center
-  const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.9040 });
+  const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
 
   // Places autocomplete (map search)
@@ -260,9 +260,20 @@ export default function Page() {
     };
 
     return ALL_LOCATIONS.filter(
-      (loc) => passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
+      (loc) =>
+        passQuery(loc) &&
+        passEvent(loc) &&
+        passActivity(loc) &&
+        passRadius(loc),
     );
-  }, [directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
+  }, [
+    directoryQuery,
+    eventFilters,
+    activityFilters,
+    radiusMode,
+    center.lat,
+    center.lng,
+  ]);
 
   const featured = useMemo(
     () => ALL_LOCATIONS.filter((l) => l.featured).slice(0, 3),
@@ -283,7 +294,10 @@ export default function Page() {
   };
 
   return (
-    <APIProvider apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM" libraries={["places"]}>
+    <APIProvider
+      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
+      libraries={["places"]}
+    >
       {/* LIGHT THEME to match screenshot */}
       <div className="min-h-screen bg-white text-slate-900">
         <motion.div
@@ -300,7 +314,8 @@ export default function Page() {
                   Cross Creek Community Resource Hub
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600">
-                  Explore community resources, events, and support — all in one place.
+                  Explore community resources, events, and support — all in one
+                  place.
                 </p>
               </div>
 
@@ -322,113 +337,119 @@ export default function Page() {
 
           {/* Featured / Highlights (TSA requirement) */}
           <motion.section
-  variants={fadeUp}
-  className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
->
-  <div className="flex items-end justify-between gap-4 flex-wrap">
-    <div>
-      <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E3A8A]">
-        Spotlight Resources
-      </h2>
-      <p className="mt-1 text-sm text-slate-600">
-        A quick look at key resources + upcoming events in the Cross Creek community.
-      </p>
-    </div>
-  </div>
+            variants={fadeUp}
+            className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
+          >
+            <div className="flex items-end justify-between gap-4 flex-wrap">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E3A8A]">
+                  Spotlight Resources
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  A quick look at key resources + upcoming events in the Cross
+                  Creek community.
+                </p>
+              </div>
+            </div>
 
-  {/* ✅ Featured Resources (your existing 3 cards) */}
-  <div className="mt-4">
-    <div className="text-sm font-semibold text-slate-700 mb-2">
-      Featured resources
-    </div>
+            {/* ✅ Featured Resources (your existing 3 cards) */}
+            <div className="mt-4">
+              <div className="text-sm font-semibold text-slate-700 mb-2">
+                Featured resources
+              </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {featured.map((loc) => (
-        <motion.button
-          key={loc.id}
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.99 }}
-          onClick={() => handleCenter(loc)}
-          className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <div className="text-xs font-semibold text-blue-900">
-            {loc.eventType}
-          </div>
-          <div className="mt-1 text-base font-bold text-slate-900">
-            {loc.title}
-          </div>
-          <div className="mt-2 text-sm text-slate-600">
-            {loc.description ?? loc.address}
-          </div>
-          <div className="mt-3 inline-flex text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
-            {loc.when}
-          </div>
-        </motion.button>
-      ))}
-    </div>
-  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {featured.map((loc) => (
+                  <motion.button
+                    key={loc.id}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => handleCenter(loc)}
+                    className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="text-xs font-semibold text-blue-900">
+                      {loc.eventType}
+                    </div>
+                    <div className="mt-1 text-base font-bold text-slate-900">
+                      {loc.title}
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">
+                      {loc.description ?? loc.address}
+                    </div>
+                    <div className="mt-3 inline-flex text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
+                      {loc.when}
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
 
-  {/* ✅ Spotlight Events (NEW: 2 motion cards) */}
-  <div className="mt-6">
-    <div className="text-sm font-semibold text-slate-700 mb-2">
-      Spotlight events
-    </div>
+            {/* ✅ Spotlight Events (NEW: 2 motion cards) */}
+            <div className="mt-6">
+              <div className="text-sm font-semibold text-slate-700 mb-2">
+                Spotlight events
+              </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <motion.div
-        variants={fadeUp}
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.99 }}
-        transition={{ duration: 0.2 }}
-        className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-      >
-        <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
-          Community Event
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                  variants={fadeUp}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
+                    Community Event
+                  </div>
 
-        <h3 className="mt-2 text-lg font-bold text-slate-900">
-          Cross Creek Neighborhood Meetup
-        </h3>
+                  <h3 className="mt-2 text-lg font-bold text-slate-900">
+                    Cross Creek Neighborhood Meetup
+                  </h3>
 
-        <p className="mt-1 text-sm text-slate-600">
-          Meet neighbors, share updates, and learn about new community resources.
-        </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Meet neighbors, share updates, and learn about new community
+                    resources.
+                  </p>
 
-        <div className="mt-3 text-sm text-slate-700">
-          <span className="font-semibold">When:</span> Saturday • 4:00 PM
-          <br />
-          <span className="font-semibold">Where:</span> Community Pavilion (Cross Creek)
-        </div>
-      </motion.div>
+                  <div className="mt-3 text-sm text-slate-700">
+                    <span className="font-semibold">When:</span> Saturday • 4:00
+                    PM
+                    <br />
+                    <span className="font-semibold">Where:</span> Community
+                    Pavilion (Cross Creek)
+                  </div>
+                </motion.div>
 
-      <motion.div
-        variants={fadeUp}
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.99 }}
-        transition={{ duration: 0.2 }}
-        className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-      >
-        <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
-          Volunteer Opportunity
-        </div>
+                <motion.div
+                  variants={fadeUp}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
+                    Volunteer Opportunity
+                  </div>
 
-        <h3 className="mt-2 text-lg font-bold text-slate-900">
-          Trails & Park Cleanup Day
-        </h3>
+                  <h3 className="mt-2 text-lg font-bold text-slate-900">
+                    Trails & Park Cleanup Day
+                  </h3>
 
-        <p className="mt-1 text-sm text-slate-600">
-          Help keep Cross Creek beautiful — gloves and bags provided.
-        </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Help keep Cross Creek beautiful — gloves and bags provided.
+                  </p>
 
-        <div className="mt-3 text-sm text-slate-700">
-          <span className="font-semibold">When:</span> Sunday • 9:00 AM
-          <br />
-          <span className="font-semibold">Where:</span> Main Trailhead (Cross Creek)
-        </div>
-      </motion.div>
-    </div>
-  </div>
-</motion.section>
+                  <div className="mt-3 text-sm text-slate-700">
+                    <span className="font-semibold">When:</span> Sunday • 9:00
+                    AM
+                    <br />
+                    <span className="font-semibold">Where:</span> Main Trailhead
+                    (Cross Creek)
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </motion.section>
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -483,6 +504,7 @@ export default function Page() {
                   {/* Map container keeps overflow-hidden */}
                   <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
                     <Map
+                      mapId="8859a83a13a834f6eeef1c63"
                       center={center}
                       zoom={zoom}
                       gestureHandling="greedy"
@@ -554,10 +576,14 @@ export default function Page() {
                         exit={{ opacity: 0 }}
                         className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
                       >
-                        No matches. Try removing a filter or changing your search.
+                        No matches. Try removing a filter or changing your
+                        search.
                       </motion.div>
                     ) : (
-                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <motion.div
+                        layout
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                      >
                         {filteredLocations.map((loc) => (
                           <motion.button
                             key={loc.id}
@@ -613,7 +639,6 @@ export default function Page() {
                 </div>
               </motion.section>
 
-             
               {/* Extra content (TSA requirement: additional content) */}
               <motion.section
                 variants={fadeUp}
@@ -686,8 +711,12 @@ function FilterBox({
       <div className="p-4 sm:p-5 border-b border-blue-200/60">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">Filter</h2>
-            <p className="text-sm text-slate-600">Choose what you want to see.</p>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+              Filter
+            </h2>
+            <p className="text-sm text-slate-600">
+              Choose what you want to see.
+            </p>
           </div>
 
           <motion.button
@@ -822,7 +851,9 @@ function SearchBox({
   setSelectedPlace: (loc: LatLng | null) => void;
 }) {
   const placesLib = useMapsLibrary("places");
-  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(
+    null,
+  );
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -888,7 +919,9 @@ function SearchBox({
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
-    const detailsService = new placesLib.PlacesService(document.createElement("div"));
+    const detailsService = new placesLib.PlacesService(
+      document.createElement("div"),
+    );
 
     detailsService.getDetails({ placeId }, (place) => {
       if (place?.geometry?.location) {
@@ -908,7 +941,10 @@ function SearchBox({
   const currentValue = mode === "directory" ? directoryQuery : input;
 
   return (
-    <div ref={boxRef} className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3">
+    <div
+      ref={boxRef}
+      className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3"
+    >
       {/* Mode toggle */}
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
@@ -1072,16 +1108,39 @@ function HoverMarker({
       }}
     >
       <motion.div
-        className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow-lg"
-        animate={{ scale: hovered || isActive ? 1.25 : 1 }}
-        transition={{ type: "spring", stiffness: 260, damping: 18 }}
-      />
+        animate={{
+          scale: hovered || isActive ? 1.25 : 1,
+          rotate: hovered || isActive ? 0 : 360,
+        }}
+        transition={{
+          rotate: {
+            repeat: Infinity,
+            duration: 6,
+            ease: "linear",
+          },
+          scale: {
+            type: "spring",
+            stiffness: 260,
+            damping: 18,
+          },
+        }}
+        className="w-8 h-8"
+      >
+        <Image
+          src="/apple-icon.png" // <-- put your image in /public
+          alt={location.title}
+          width={32}
+          height={32}
+          priority
+        />
+      </motion.div>
+
       <AnimatePresence>
         {(hovered || isActive) && (
           <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
             className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2
                        bg-blue-700 text-white text-xs rounded-2xl px-3 py-2 shadow-xl w-60 pointer-events-none"
@@ -1206,7 +1265,13 @@ function SuggestResourceForm() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-2">
       <div className="text-sm font-semibold text-slate-900">{label}</div>
