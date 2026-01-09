@@ -1,6 +1,7 @@
 "use client";
- 
+
 import React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
@@ -12,6 +13,7 @@ import {
   serverTimestamp,
   type Timestamp,
 } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
@@ -38,17 +40,22 @@ const RESOURCE_TYPES = [
 
 export type ResourceDoc = {
   community: (typeof COMMUNITIES)[number];
-  type: (typeof RESOURCE_TYPES)[number];
+
+  // ✅ changed: multi-select
+  types: (typeof RESOURCE_TYPES)[number][];
+
   name: string;
   address: string;
   indoorOutdoor: "Indoor" | "Outdoor" | "Both";
   contact: string;
-  // optional location (you can fill later)
+
   location?: { lat: number; lng: number } | null;
-  createdAt: Timestamp | null; // Firestore will set this, but TS wants a shape
+  createdAt: Timestamp | null;
 };
 
 export default function AddResourcePage() {
+  const router = useRouter();
+
   const [sent, setSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
@@ -56,9 +63,14 @@ export default function AddResourcePage() {
   const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
     "Cross Creek Ranch",
   );
-  const [type, setType] = React.useState<(typeof RESOURCE_TYPES)[number]>(
+
+  // ✅ multi-select state
+  const [types, setTypes] = React.useState<(typeof RESOURCE_TYPES)[number][]>([
     "Park/Trails",
-  );
+  ]);
+  const [typesOpen, setTypesOpen] = React.useState(false);
+  const typesRef = React.useRef<HTMLDivElement | null>(null);
+
   const [name, setName] = React.useState("");
   const [address, setAddress] = React.useState("");
   const [indoorOutdoor, setIndoorOutdoor] = React.useState<
@@ -66,40 +78,64 @@ export default function AddResourcePage() {
   >("Both");
   const [contact, setContact] = React.useState("");
 
+  // ✅ close dropdown when clicking outside
+  React.useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (!typesRef.current) return;
+      if (!typesRef.current.contains(e.target as Node)) setTypesOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  const toggleType = (t: (typeof RESOURCE_TYPES)[number]) => {
+    setTypes((prev) => {
+      if (prev.includes(t)) return prev.filter((x) => x !== t);
+      return [...prev, t];
+    });
+  };
+
+  const logoutAndHome = () => {
+    // ✅ auto logout
+    localStorage.removeItem("admin_authed");
+    router.push("/");
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // basic validation
     if (!name.trim() || !address.trim()) {
       setError("Please fill out Resource Name and Address.");
+      return;
+    }
+    if (types.length === 0) {
+      setError("Please select at least 1 Resource Type.");
       return;
     }
 
     try {
       setSaving(true);
 
-      // Create document in Firestore
       await addDoc(collection(db, "resources"), {
         community,
-        type,
+        types, // ✅ multi-select
         name: name.trim(),
         address: address.trim(),
         indoorOutdoor,
         contact: contact.trim(),
-        location: null, // optional: you can geocode later
+        location: null,
         createdAt: serverTimestamp(),
       });
 
       setSent(true);
       window.setTimeout(() => setSent(false), 2200);
 
-      // reset
       setName("");
       setAddress("");
       setContact("");
       setIndoorOutdoor("Both");
-      setType("Park/Trails");
+      setTypes(["Park/Trails"]);
     } catch (err: any) {
       setError(err?.message || "Failed to save resource. Check Firestore rules.");
     } finally {
@@ -112,23 +148,48 @@ export default function AddResourcePage() {
       title="Add Resource"
       subtitle="Resources are places/services that exist (gym, parks, grocery stores, support services)."
     >
+      {/* ✅ Back to Home (logs out) */}
+      <div className="mb-4">
+        <motion.button
+          onClick={logoutAndHome}
+          whileHover={{ y: -1 }}
+          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 transition"
+        >
+          <span aria-hidden>←</span>
+          Back to Home
+        </motion.button>
+      </div>
+
       <motion.div variants={sectionAnim} initial="hidden" animate="show">
         <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.45)] overflow-hidden">
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Resources (type, name, address, indoor/outdoor, contact)
+              Community Name (dropdown) → Resources (types, name, address,
+              indoor/outdoor, contact)
             </div>
           </div>
 
-          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={onSubmit}
+            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 } }}
-                    exit={{ opacity: 0, y: -6, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 } }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
+                    }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
                     ✅ Resource saved to Firestore!
@@ -140,8 +201,16 @@ export default function AddResourcePage() {
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 } }}
-                    exit={{ opacity: 0, y: -6, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 } }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
+                    }}
                     className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
                   >
                     ❌ {error}
@@ -167,21 +236,91 @@ export default function AddResourcePage() {
               </select>
             </Field>
 
-            {/* Resource Type */}
-            <Field label="Resource Type">
-              <select
-                value={type}
-                onChange={(e) =>
-                  setType(e.target.value as (typeof RESOURCE_TYPES)[number])
-                }
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-              >
-                {RESOURCE_TYPES.map((t) => (
-                  <option key={t} value={t} className="bg-[#0b1020]">
-                    {t}
-                  </option>
-                ))}
-              </select>
+            {/* ✅ Resource Types (multi-select dropdown) */}
+            <Field label="Resource Types (multi-select)">
+              <div ref={typesRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setTypesOpen((v) => !v)}
+                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-left text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="truncate">
+                      {types.length === 0 ? (
+                        <span className="text-white/50">Select types…</span>
+                      ) : (
+                        <span className="text-white">
+                          {types.join(", ")}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-white/60">{typesOpen ? "▲" : "▼"}</span>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {typesOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, filter: "blur(6px)" }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        filter: "blur(0px)",
+                        transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 6,
+                        filter: "blur(6px)",
+                        transition: { duration: 0.16, ease: [0.16, 1, 0.3, 1] },
+                      }}
+                      className="absolute z-20 mt-2 w-full rounded-2xl border border-white/10 bg-[#070A12]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.65)] p-2"
+                    >
+                      <div className="max-h-56 overflow-auto">
+                        {RESOURCE_TYPES.map((t) => {
+                          const checked = types.includes(t);
+                          return (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => toggleType(t)}
+                              className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-left"
+                            >
+                              <span className="text-sm text-white/90">{t}</span>
+                              <span
+                                className={`h-5 w-5 rounded-md border flex items-center justify-center text-xs ${
+                                  checked
+                                    ? "border-blue-400/40 bg-blue-500/20 text-white"
+                                    : "border-white/15 bg-white/5 text-white/40"
+                                }`}
+                              >
+                                {checked ? "✓" : ""}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/10 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setTypes([])}
+                          className="text-xs px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-white/75 hover:bg-white/10 transition"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTypesOpen(false)}
+                          className="text-xs px-3 py-2 rounded-xl bg-blue-600/90 text-white hover:bg-blue-600 transition"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </Field>
 
             {/* Name */}
@@ -227,7 +366,7 @@ export default function AddResourcePage() {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
-                  placeholder="Street / area / landmark in Fulshear / Cross Creek"
+                  placeholder="Street address (recommended) or landmark"
                   className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </Field>
@@ -247,7 +386,8 @@ export default function AddResourcePage() {
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
               <div className="text-xs text-white/55">
-                Saves directly to Firestore collection: <span className="font-semibold">resources</span>
+                Saves directly to Firestore collection:{" "}
+                <span className="font-semibold">resources</span>
               </div>
 
               <motion.button
