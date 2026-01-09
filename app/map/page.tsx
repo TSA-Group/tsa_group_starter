@@ -1127,7 +1127,7 @@ function HoverMarker({
         className="w-8 h-8"
       >
         <Image
-          src="/apple-icon.png" // <-- put your image in /public
+          src="/marker.png" // <-- put your image in /public
           alt={location.title}
           width={32}
           height={32}
