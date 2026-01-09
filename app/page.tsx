@@ -36,7 +36,6 @@ const orbs = [
   { size: 100, color: "rgba(59,130,246,0.2)", top: "60%", left: "50%", speed: 0.25 },
 ];
 
-/* ---------------- PAGE ---------------- */
 export default function Home() {
   const year = new Date().getFullYear();
   const { scrollY } = useScroll();
@@ -83,15 +82,22 @@ export default function Home() {
 
   return (
     <motion.div style={{background: baseBg}} initial="hidden" animate="show" className="relative min-h-screen overflow-x-hidden text-slate-900">
+
       {/* FLOATING ORBS */}
       {orbs.map((orb,i)=>{
         const orbY = useTransform(scrollY,[0,scrollRange],[0, -200*orb.speed]);
-        return <motion.div key={i} style={{top:orb.top,left:orb.left,y:orbY}} className="absolute rounded-full pointer-events-none" style={{width:orb.size,height:orb.size,backgroundColor:orb.color,zIndex:-5}}/>
+        return (
+          <motion.div
+            key={i}
+            style={{ top: orb.top, left: orb.left, y: orbY, width: orb.size, height: orb.size, backgroundColor: orb.color }}
+            className="absolute rounded-full pointer-events-none -z-10"
+          />
+        )
       })}
 
       {/* COLOR OVERLAYS */}
-      <motion.div style={{backgroundColor:greyChapter}} className="fixed inset-0 pointer-events-none -z-10"/>
-      <motion.div style={{backgroundColor:deepBlueChapter}} className="fixed inset-0 pointer-events-none -z-10"/>
+      <motion.div style={{backgroundColor:greyChapter}} className="fixed inset-0 pointer-events-none -z-20"/>
+      <motion.div style={{backgroundColor:deepBlueChapter}} className="fixed inset-0 pointer-events-none -z-20"/>
 
       {/* HERO */}
       <motion.header style={{y: slowY}} className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6">
@@ -155,7 +161,7 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* CINEMATIC IMAGE SECTIONS */}
+      {/* ADDITIONAL IMAGE + TEXT SECTIONS */}
       <section className="relative min-h-[120vh] flex items-center">
         <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac" className="absolute inset-0 w-full h-full object-cover" alt="" />
         <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-transparent"/>
@@ -191,4 +197,5 @@ export default function Home() {
     </motion.div>
   );
 }
+
 
