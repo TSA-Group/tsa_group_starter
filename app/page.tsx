@@ -7,6 +7,7 @@ import {
   Variants,
   useScroll,
   useTransform,
+  useMotionValue,
 } from "framer-motion";
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
@@ -14,12 +15,12 @@ import { QuickActions } from "./QuickActions";
 /* ---------------- ANIMATIONS ---------------- */
 const container: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
+  show: { transition: { staggerChildren: 0.1 } },
 };
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 50, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.9, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 50 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
 
 const cardPop: Variants = {
@@ -27,25 +28,33 @@ const cardPop: Variants = {
   show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
-/* ---------------- FLOATING ORBS CONFIG ---------------- */
-const orbs = [
-  { size: 120, color: "rgba(59,130,246,0.3)", top: "10%", left: "15%", speed: 0.2 },
-  { size: 180, color: "rgba(147,197,253,0.25)", top: "40%", left: "70%", speed: 0.35 },
-  { size: 80, color: "rgba(15,23,42,0.2)", top: "70%", left: "25%", speed: 0.15 },
-  { size: 150, color: "rgba(147,197,253,0.15)", top: "20%", left: "80%", speed: 0.3 },
-  { size: 100, color: "rgba(59,130,246,0.2)", top: "60%", left: "50%", speed: 0.25 },
+/* ---------------- FLOATING ORBS ---------------- */
+const ORBS = [
+  { size: 120, color: "rgba(59,130,246,0.35)", top: 10, left: 15, speed: 0.2 },
+  { size: 180, color: "rgba(147,197,253,0.25)", top: 40, left: 70, speed: 0.35 },
+  { size: 80, color: "rgba(15,23,42,0.25)", top: 70, left: 25, speed: 0.15 },
+  { size: 150, color: "rgba(147,197,253,0.15)", top: 20, left: 80, speed: 0.3 },
+  { size: 100, color: "rgba(59,130,246,0.2)", top: 60, left: 50, speed: 0.25 },
 ];
 
+/* ---------------- PAGE ---------------- */
 export default function Home() {
   const year = new Date().getFullYear();
   const { scrollY } = useScroll();
-  const [scrollRange, setScrollRange] = useState(1);
+  const scrollX = useMotionValue(0);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [scrollRange, setScrollRange] = useState(1);
 
-  useEffect(() => setScrollRange(document.body.scrollHeight - window.innerHeight), []);
+  useEffect(() => {
+    setScrollRange(document.body.scrollHeight - window.innerHeight);
+    const handleMouse = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
 
   // Calendar helpers
   const calYear = calendarDate.getFullYear();
@@ -74,43 +83,42 @@ export default function Home() {
 
   // Scroll-based colors
   const baseBg = useTransform(scrollY,[0,scrollRange*0.25,scrollRange],["#ffffff","#EEF3F9","#E5E9EF"]);
-  const greyChapter = useTransform(scrollY,[scrollRange*0.35,scrollRange*0.6],["rgba(226,232,240,0)","rgba(203,213,225,0.65)"]);
-  const deepBlueChapter = useTransform(scrollY,[scrollRange*0.6,scrollRange],["rgba(15,23,42,0)","rgba(15,23,42,0.15)"]);
+  const greyOverlay = useTransform(scrollY,[scrollRange*0.35,scrollRange*0.6],["rgba(226,232,240,0)","rgba(203,213,225,0.65)"]);
+  const blueOverlay = useTransform(scrollY,[scrollRange*0.6,scrollRange],["rgba(15,23,42,0)","rgba(15,23,42,0.15)"]);
 
-  const slowY = useTransform(scrollY,[0,scrollRange],[0,-140]);
-  const fastY = useTransform(scrollY,[0,scrollRange],[0,-320]);
+  // Parallax hero
+  const heroY = useTransform(scrollY,[0,scrollRange*0.5],[0,-120]);
+  const heroTextY = useTransform(scrollY,[0,scrollRange*0.5],[0,-60]);
 
   return (
-    <motion.div style={{background: baseBg}} initial="hidden" animate="show" className="relative min-h-screen overflow-x-hidden text-slate-900">
+    <motion.div style={{background: baseBg}} className="relative min-h-screen overflow-x-hidden text-slate-900">
 
       {/* FLOATING ORBS */}
-      {orbs.map((orb,i)=>{
-        const orbY = useTransform(scrollY,[0,scrollRange],[0, -200*orb.speed]);
+      {ORBS.map((orb,i)=>{
+        const orbY = useTransform(scrollY,[0,scrollRange],[0,-200*orb.speed]);
+        const orbX = (mousePos.x/window.innerWidth-0.5)*orb.speed*200;
+        const orbOffsetY = (mousePos.y/window.innerHeight-0.5)*orb.speed*200;
         return (
-          <motion.div
-            key={i}
-            style={{ top: orb.top, left: orb.left, y: orbY, width: orb.size, height: orb.size, backgroundColor: orb.color }}
-            className="absolute rounded-full pointer-events-none -z-10"
-          />
+          <motion.div key={i} style={{top:`${orb.top}%`, left:`${orb.left}%`, y: orbY+orbOffsetY, x: orbX, width: orb.size, height: orb.size, backgroundColor: orb.color}} className="absolute rounded-full pointer-events-none -z-10"/>
         )
       })}
 
       {/* COLOR OVERLAYS */}
-      <motion.div style={{backgroundColor:greyChapter}} className="fixed inset-0 pointer-events-none -z-20"/>
-      <motion.div style={{backgroundColor:deepBlueChapter}} className="fixed inset-0 pointer-events-none -z-20"/>
+      <motion.div style={{backgroundColor:greyOverlay}} className="fixed inset-0 pointer-events-none -z-20"/>
+      <motion.div style={{backgroundColor:blueOverlay}} className="fixed inset-0 pointer-events-none -z-20"/>
 
       {/* HERO */}
-      <motion.header style={{y: slowY}} className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6">
-        <motion.h1 animate={{y:[0,-16,0],scale:[1,1.02,1]}} transition={{duration:6,repeat:Infinity,ease:"easeInOut"}} className="text-8xl sm:text-9xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+      <motion.header style={{y: heroY}} className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6">
+        <motion.h1 style={{y: heroTextY}} animate={{scale:[1,1.03,1]}} transition={{duration:6,repeat:Infinity,ease:"easeInOut"}} className="text-8xl sm:text-9xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
           GATHERLY
         </motion.h1>
-        <p className="mt-10 max-w-xl text-xl text-blue-800">Discover, connect, and engage with your real community — without the noise.</p>
+        <motion.p style={{y: heroTextY}} className="mt-10 max-w-xl text-xl text-blue-800">Discover, connect, and engage with your real community — without the noise.</motion.p>
       </motion.header>
 
       {/* CALENDAR + QUICK ACTIONS */}
       <motion.main className="max-w-7xl mx-auto px-6 pb-72 flex flex-col lg:flex-row gap-20">
         {/* Left QuickActions */}
-        <motion.section style={{y: fastY}} className="lg:w-1/3">
+        <motion.section style={{y: heroTextY}} className="lg:w-1/3">
           <QuickActions />
         </motion.section>
 
@@ -161,7 +169,7 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* ADDITIONAL IMAGE + TEXT SECTIONS */}
+      {/* ADDITIONAL SECTIONS */}
       <section className="relative min-h-[120vh] flex items-center">
         <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac" className="absolute inset-0 w-full h-full object-cover" alt="" />
         <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-transparent"/>
@@ -171,7 +179,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* GREY CHAPTER */}
       <section className="py-72 px-6 bg-gradient-to-b from-slate-100 via-slate-200/70 to-slate-300/60">
         <h2 className="text-5xl font-extrabold text-center mb-24 text-slate-900">A slower digital experience</h2>
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-12">
@@ -183,7 +190,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FINAL IMAGE + STATEMENT */}
       <section className="relative min-h-[100vh] flex items-center justify-center px-6">
         <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" className="absolute inset-0 w-full h-full object-cover" alt="" />
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 to-slate-900/20"/>
@@ -197,5 +203,6 @@ export default function Home() {
     </motion.div>
   );
 }
+
 
 
