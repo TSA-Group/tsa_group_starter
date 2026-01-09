@@ -1,417 +1,572 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import type { Variants } from "framer-motion";
-import AdminShell from "../../_components/AdminShell";
+import React, { useMemo, useState } from "react";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 
-import { db } from "@/lib/firebase";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-  type Timestamp,
-} from "firebase/firestore";
-import { useRouter } from "next/navigation";
+/* =====================
+   Types
+===================== */
+type Category = { id: string; name: string };
+type Activity = { id: string; name: string };
 
-const sectionAnim: Variants = {
-  hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
+type Event = {
+  id: number;
+  title: string;
+  category: string;
+  activities: string[];
+  date: string;
+  time: string;
+
+  // ✅ Real address fields
+  venue: string;
+  addressLine1: string;
+  cityStateZip: string;
+
+  attendees: number;
+  spots: number;
+  description: string;
+};
+
+/* =====================
+   Real Locations + Addresses
+   (Pulled from official/primary sources where possible)
+===================== */
+const EVENTS: Event[] = [
+  {
+    id: 1,
+    title: "Community Dinner Night",
+    category: "community",
+    activities: ["food", "family"],
+    date: "Dec 28, 2025",
+    time: "6:00 PM – 8:00 PM",
+    venue: "Cross Creek Ranch Welcome Center",
+    addressLine1: "6450 Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 42,
+    spots: 60,
+    description:
+      "A welcoming dinner bringing neighbors together for conversation and connection.",
+  },
+  {
+    id: 2,
+    title: "Literacy Tutoring Session",
+    category: "tutoring",
+    activities: ["education"],
+    date: "Dec 25, 2025",
+    time: "4:00 PM – 6:00 PM",
+    venue: "Fulshear Branch Library",
+    addressLine1: "6350 GM Library Rd",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 14,
+    spots: 20,
+    description:
+      "Volunteer to help young students improve reading and writing skills.",
+  },
+  {
+    id: 3,
+    title: "Food Pantry Distribution",
+    category: "pantry",
+    activities: ["food", "donations"],
+    date: "Dec 26, 2025",
+    time: "9:00 AM – 1:00 PM",
+    venue: "Family Hope Fulshear (Food Fairs/Assistance)",
+    addressLine1: "5757 Flewellen Oaks Ln #303",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 88,
+    spots: 110,
+    description: "Help organize and distribute food to families in need.",
+  },
+  {
+    id: 4,
+    title: "River Cleanup Day",
+    category: "cleanup",
+    activities: ["outdoors", "volunteering"],
+    date: "Dec 29, 2025",
+    time: "8:00 AM – 12:00 PM",
+    venue: "Flewellen Creek Park (Trail Access)",
+    addressLine1: "Morgans Spur Dr",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 31,
+    spots: 50,
+    description:
+      "Protect local wildlife by helping clean up trails and public spaces.",
+  },
+  {
+    id: 5,
+    title: "Holiday Clothing Drive",
+    category: "clothing",
+    activities: ["donations", "family"],
+    date: "Dec 27, 2025",
+    time: "10:00 AM – 4:00 PM",
+    venue: "Cross Creek Ranch Welcome Center",
+    addressLine1: "6450 Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 27,
+    spots: 40,
+    description:
+      "Sort and organize donated winter clothing for families in need.",
+  },
+  {
+    id: 6,
+    title: "Park Tree Planting",
+    category: "cleanup",
+    activities: ["outdoors", "volunteering"],
+    date: "Jan 04, 2026",
+    time: "9:00 AM – 12:00 PM",
+    venue: "Flewellen Creek Park (Meetup Point)",
+    addressLine1: "Morgans Spur Dr",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 22,
+    spots: 40,
+    description: "Plant native trees and learn about local ecology.",
+  },
+  {
+    id: 7,
+    title: "Neighborhood Mural Project",
+    category: "meetup",
+    activities: ["volunteering", "family"],
+    date: "Jan 12, 2026",
+    time: "9:00 AM – 5:00 PM",
+    venue: "Greenthread Park (Community Area)",
+    addressLine1: "3212 Creek Falls Dr",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 16,
+    spots: 30,
+    description:
+      "Assist local artists in painting a community mural; no experience required.",
+  },
+  {
+    id: 8,
+    title: "Senior Meal Delivery",
+    category: "community",
+    activities: ["food", "volunteering"],
+    date: "Jan 08, 2026",
+    time: "10:00 AM – 1:00 PM",
+    venue: "Cross Creek Ranch H-E-B",
+    addressLine1: "4950 FM 1463",
+    cityStateZip: "Katy, TX 77494",
+    attendees: 12,
+    spots: 20,
+    description: "Deliver warm meals and check in with homebound seniors.",
+  },
+  {
+    id: 9,
+    title: "Community Garden Workshop",
+    category: "meetup",
+    activities: ["outdoors", "education"],
+    date: "Jan 15, 2026",
+    time: "9:00 AM – 11:30 AM",
+    venue: "Flewellen Creek Park (Nature Area)",
+    addressLine1: "Morgans Spur Dr",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 18,
+    spots: 30,
+    description: "Hands-on workshop about seasonal planting and composting.",
+  },
+  {
+    id: 10,
+    title: "Clothing Repair Pop-up",
+    category: "clothing",
+    activities: ["donations", "education"],
+    date: "Jan 18, 2026",
+    time: "11:00 AM – 3:00 PM",
+    venue: "Cross Creek Ranch Welcome Center",
+    addressLine1: "6450 Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 9,
+    spots: 20,
+    description:
+      "Learn basic mending skills and repair donated garments for reuse.",
+  },
+  {
+    id: 11,
+    title: "After-school STEM Club",
+    category: "tutoring",
+    activities: ["education", "family"],
+    date: "Jan 20, 2026",
+    time: "3:30 PM – 5:30 PM",
+    venue: "Fulshear Branch Library (Meeting Space)",
+    addressLine1: "6350 GM Library Rd",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 26,
+    spots: 30,
+    description:
+      "Volunteer mentors lead hands-on STEM projects for middle schoolers.",
+  },
+  {
+    id: 12,
+    title: "Neighborhood Watch Meeting",
+    category: "meetup",
+    activities: ["volunteering", "family"],
+    date: "Jan 22, 2026",
+    time: "7:00 PM – 8:30 PM",
+    venue: "Irene Stern Community Center (City of Fulshear)",
+    addressLine1: "6611 W Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
+    attendees: 34,
+    spots: 60,
+    description:
+      "Community safety meeting with neighbors and local updates.",
+  },
+];
+
+/* =====================
+   UI Bits
+===================== */
+const Chip = ({ children }: { children: React.ReactNode }) => (
+  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+    {children}
+  </span>
+);
+
+function mapsHref(ev: Event) {
+  const q = `${ev.venue}, ${ev.addressLine1}, ${ev.cityStateZip}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
+/* =====================
+   Motion
+===================== */
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const pageWrap: Variants = {
+  hidden: { opacity: 1 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+  },
+};
+
+const headerUp: Variants = {
+  hidden: { opacity: 0, y: 12, filter: "blur(10px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.6, ease: EASE_OUT },
   },
 };
 
-const COMMUNITIES = ["Cross Creek Ranch"] as const;
-
-const RESOURCE_TYPES = [
-  "Gym/Fitness",
-  "Park/Trails",
-  "Grocery",
-  "Library",
-  "Support Services",
-  "Non-Profit",
-  "Clinic/Health",
-  "Other",
-] as const;
-
-export type ResourceDoc = {
-  community: (typeof COMMUNITIES)[number];
-
-  // ✅ changed: multi-select
-  types: (typeof RESOURCE_TYPES)[number][];
-
-  name: string;
-  address: string;
-  indoorOutdoor: "Indoor" | "Outdoor" | "Both";
-  contact: string;
-
-  location?: { lat: number; lng: number } | null;
-  createdAt: Timestamp | null;
+const panelUp: Variants = {
+  hidden: { opacity: 0, y: 14, filter: "blur(10px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.55, ease: EASE_OUT },
+  },
 };
 
-export default function AddResourcePage() {
-  const router = useRouter();
+const gridWrap: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05 } },
+};
 
-  const [sent, setSent] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [saving, setSaving] = React.useState(false);
+const cardPop: Variants = {
+  hidden: { opacity: 0, y: 14, scale: 0.985, filter: "blur(10px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: EASE_OUT },
+  },
+  exit: { opacity: 0, y: 10, scale: 0.985, transition: { duration: 0.18 } },
+};
 
-  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
-    "Cross Creek Ranch",
-  );
+export default function EventsPage() {
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
 
-  // ✅ multi-select state
-  const [types, setTypes] = React.useState<(typeof RESOURCE_TYPES)[number][]>([
-    "Park/Trails",
-  ]);
-  const [typesOpen, setTypesOpen] = React.useState(false);
-  const typesRef = React.useRef<HTMLDivElement | null>(null);
+  const categories: Category[] = [
+    { id: "all", name: "All" },
+    { id: "community", name: "Community" },
+    { id: "meetup", name: "Meetups" },
+    { id: "clothing", name: "Clothing" },
+    { id: "tutoring", name: "Tutoring" },
+    { id: "pantry", name: "Food Pantry" },
+    { id: "cleanup", name: "Cleanup" },
+  ];
 
-  const [name, setName] = React.useState("");
-  const [address, setAddress] = React.useState("");
-  const [indoorOutdoor, setIndoorOutdoor] = React.useState<
-    "Indoor" | "Outdoor" | "Both"
-  >("Both");
-  const [contact, setContact] = React.useState("");
+  const activities: Activity[] = [
+    { id: "food", name: "Food" },
+    { id: "volunteering", name: "Volunteering" },
+    { id: "education", name: "Education" },
+    { id: "donations", name: "Donations" },
+    { id: "outdoors", name: "Outdoors" },
+    { id: "family", name: "Family" },
+  ];
 
-  // ✅ close dropdown when clicking outside
-  React.useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (!typesRef.current) return;
-      if (!typesRef.current.contains(e.target as Node)) setTypesOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, []);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
 
-  const toggleType = (t: (typeof RESOURCE_TYPES)[number]) => {
-    setTypes((prev) => {
-      if (prev.includes(t)) return prev.filter((x) => x !== t);
-      return [...prev, t];
-    });
-  };
+    let list =
+      selectedCategory === "all"
+        ? EVENTS
+        : EVENTS.filter((e) => e.category === selectedCategory);
 
-  const logoutAndHome = () => {
-    // ✅ auto logout
-    localStorage.removeItem("admin_authed");
-    router.push("/");
-  };
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!name.trim() || !address.trim()) {
-      setError("Please fill out Resource Name and Address.");
-      return;
-    }
-    if (types.length === 0) {
-      setError("Please select at least 1 Resource Type.");
-      return;
+    if (selectedActivities.length > 0) {
+      list = list.filter((e) =>
+        selectedActivities.every((a) => e.activities.includes(a)),
+      );
     }
 
-    try {
-      setSaving(true);
-
-      await addDoc(collection(db, "resources"), {
-        community,
-        types, // ✅ multi-select
-        name: name.trim(),
-        address: address.trim(),
-        indoorOutdoor,
-        contact: contact.trim(),
-        location: null,
-        createdAt: serverTimestamp(),
-      });
-
-      setSent(true);
-      window.setTimeout(() => setSent(false), 2200);
-
-      setName("");
-      setAddress("");
-      setContact("");
-      setIndoorOutdoor("Both");
-      setTypes(["Park/Trails"]);
-    } catch (err: any) {
-      setError(err?.message || "Failed to save resource. Check Firestore rules.");
-    } finally {
-      setSaving(false);
+    if (q) {
+      list = list.filter((e) =>
+        `${e.title} ${e.description} ${e.venue} ${e.addressLine1} ${e.cityStateZip}`
+          .toLowerCase()
+          .includes(q),
+      );
     }
+
+    if (sortBy === "popular") {
+      list = [...list].sort((a, b) => b.attendees - a.attendees);
+    } else {
+      list = [...list].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      );
+    }
+
+    return list;
+  }, [selectedCategory, selectedActivities, query, sortBy]);
+
+  const toggleActivity = (id: string) =>
+    setSelectedActivities((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+
+  const clearFilters = () => {
+    setSelectedCategory("all");
+    setSelectedActivities([]);
+    setQuery("");
+    setSortBy("upcoming");
   };
 
   return (
-    <AdminShell
-      title="Add Resource"
-      subtitle="Resources are places/services that exist (gym, parks, grocery stores, support services)."
+    <motion.div
+      variants={pageWrap}
+      initial="hidden"
+      animate="show"
+      className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
     >
-      {/* ✅ Back to Home (logs out) */}
-      <div className="mb-4">
-        <motion.button
-          onClick={logoutAndHome}
-          whileHover={{ y: -1 }}
-          whileTap={{ scale: 0.98 }}
-          className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 transition"
-        >
-          <span aria-hidden>←</span>
-          Back to Home
-        </motion.button>
+      {/* =====================
+          COOL BACKGROUND ANIMATION
+      ====================== */}
+      <div className="pointer-events-none absolute inset-0">
+        {/* subtle grid */}
+        <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
+
+        {/* floating blobs */}
+        <motion.div
+          aria-hidden
+          className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-45"
+          style={{
+            background:
+              "radial-gradient(circle at 30% 30%, rgba(37,99,235,0.35), rgba(37,99,235,0) 60%)",
+          }}
+          animate={{ x: [0, 28, 0], y: [0, 18, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: EASE_OUT }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute -bottom-48 -right-48 h-[620px] w-[620px] rounded-full blur-3xl opacity-40"
+          style={{
+            background:
+              "radial-gradient(circle at 40% 40%, rgba(14,165,233,0.30), rgba(14,165,233,0) 62%)",
+          }}
+          animate={{ x: [0, -24, 0], y: [0, -16, 0] }}
+          transition={{ duration: 11.5, repeat: Infinity, ease: EASE_OUT }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute top-[30%] left-[55%] h-[420px] w-[420px] rounded-full blur-3xl opacity-35"
+          style={{
+            background:
+              "radial-gradient(circle at 30% 30%, rgba(99,102,241,0.25), rgba(99,102,241,0) 60%)",
+          }}
+          animate={{ x: [0, 18, 0], y: [0, -22, 0] }}
+          transition={{ duration: 12.2, repeat: Infinity, ease: EASE_OUT }}
+        />
       </div>
 
-      <motion.div variants={sectionAnim} initial="hidden" animate="show">
-        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.45)] overflow-hidden">
-          <div className="p-6 border-b border-white/10">
-            <div className="text-white/80 font-semibold">Subsections</div>
-            <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Resources (types, name, address,
-              indoor/outdoor, contact)
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
+        <motion.header variants={headerUp} className="mb-8">
+          <h1 className="text-4xl font-semibold text-[#143B8C]">
+            Gatherly — Community Events
+          </h1>
+          <p className="mt-2 text-slate-600 max-w-2xl">
+            Discover local volunteering opportunities and community events in Cross Creek.
+          </p>
+        </motion.header>
+
+        <motion.div
+          variants={panelUp}
+          className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
+        >
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
+              <p className="text-sm text-slate-600">Choose what you want to see.</p>
             </div>
+
+            <motion.button
+              onClick={clearFilters}
+              whileTap={{ scale: 0.98 }}
+              className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
+            >
+              Clear
+            </motion.button>
           </div>
 
-          <form
-            onSubmit={onSubmit}
-            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <div className="md:col-span-2">
-              <AnimatePresence>
-                {sent && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
-                    className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
-                  >
-                    ✅ Resource saved to Firestore!
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
-                    className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
-                  >
-                    ❌ {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Community */}
-            <Field label="Community Name">
-              <select
-                value={community}
-                onChange={(e) =>
-                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
-                }
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-              >
-                {COMMUNITIES.map((c) => (
-                  <option key={c} value={c} className="bg-[#0b1020]">
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
-            {/* ✅ Resource Types (multi-select dropdown) */}
-            <Field label="Resource Types (multi-select)">
-              <div ref={typesRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setTypesOpen((v) => !v)}
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-left text-white/90 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="truncate">
-                      {types.length === 0 ? (
-                        <span className="text-white/50">Select types…</span>
-                      ) : (
-                        <span className="text-white">
-                          {types.join(", ")}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-white/60">{typesOpen ? "▲" : "▼"}</span>
-                  </div>
-                </button>
-
-                <AnimatePresence>
-                  {typesOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, filter: "blur(6px)" }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        filter: "blur(0px)",
-                        transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
-                      }}
-                      exit={{
-                        opacity: 0,
-                        y: 6,
-                        filter: "blur(6px)",
-                        transition: { duration: 0.16, ease: [0.16, 1, 0.3, 1] },
-                      }}
-                      className="absolute z-20 mt-2 w-full rounded-2xl border border-white/10 bg-[#070A12]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.65)] p-2"
-                    >
-                      <div className="max-h-56 overflow-auto">
-                        {RESOURCE_TYPES.map((t) => {
-                          const checked = types.includes(t);
-                          return (
-                            <button
-                              key={t}
-                              type="button"
-                              onClick={() => toggleType(t)}
-                              className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition text-left"
-                            >
-                              <span className="text-sm text-white/90">{t}</span>
-                              <span
-                                className={`h-5 w-5 rounded-md border flex items-center justify-center text-xs ${
-                                  checked
-                                    ? "border-blue-400/40 bg-blue-500/20 text-white"
-                                    : "border-white/15 bg-white/5 text-white/40"
-                                }`}
-                              >
-                                {checked ? "✓" : ""}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/10 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => setTypes([])}
-                          className="text-xs px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-white/75 hover:bg-white/10 transition"
-                        >
-                          Clear
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setTypesOpen(false)}
-                          className="text-xs px-3 py-2 rounded-xl bg-blue-600/90 text-white hover:bg-blue-600 transition"
-                        >
-                          Done
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </Field>
-
-            {/* Name */}
-            <Field label="Resource Name">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="Example: Cross Creek Ranch Fitness Center"
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-              />
-            </Field>
-
-            {/* Indoor/Outdoor */}
-            <Field label="Indoor / Outdoor">
-              <div className="grid grid-cols-3 gap-2">
-                {(["Indoor", "Outdoor", "Both"] as const).map((opt) => {
-                  const active = indoorOutdoor === opt;
-                  return (
-                    <motion.button
-                      key={opt}
-                      type="button"
-                      whileHover={{ y: -1 }}
-                      whileTap={{ scale: 0.99 }}
-                      onClick={() => setIndoorOutdoor(opt)}
-                      className={`rounded-2xl px-3 py-3 text-sm border transition ${
-                        active
-                          ? "border-blue-500/40 bg-blue-500/15 text-white"
-                          : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-                      }`}
-                    >
-                      {opt}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </Field>
-
-            {/* Address */}
-            <div className="md:col-span-2">
-              <Field label="Address">
-                <input
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                  placeholder="Street address (recommended) or landmark"
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                />
-              </Field>
-            </div>
-
-            {/* Contact */}
-            <div className="md:col-span-2">
-              <Field label="Contact">
-                <input
-                  value={contact}
-                  onChange={(e) => setContact(e.target.value)}
-                  placeholder="Phone / email / website (optional)"
-                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                />
-              </Field>
-            </div>
-
-            <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
-              <div className="text-xs text-white/55">
-                Saves directly to Firestore collection:{" "}
-                <span className="font-semibold">resources</span>
-              </div>
-
+          {/* Categories */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {categories.map((c) => (
               <motion.button
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.99 }}
-                type="submit"
-                disabled={saving}
-                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold shadow-[0_20px_55px_rgba(37,99,235,0.25)] hover:brightness-110 transition disabled:opacity-60"
+                key={c.id}
+                onClick={() => setSelectedCategory(c.id)}
+                whileTap={{ scale: 0.98 }}
+                className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
+                  selectedCategory === c.id
+                    ? "bg-blue-600 text-white border border-blue-600"
+                    : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
+                }`}
               >
-                {saving ? "Saving..." : "Save Resource"}
+                {c.name}
               </motion.button>
-            </div>
-          </form>
-        </div>
-      </motion.div>
-    </AdminShell>
-  );
-}
+            ))}
+          </div>
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-2">
-      <div className="text-sm font-semibold text-white/85">{label}</div>
-      {children}
-    </div>
+          {/* Activities */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {activities.map((a) => (
+              <motion.button
+                key={a.id}
+                onClick={() => toggleActivity(a.id)}
+                whileTap={{ scale: 0.98 }}
+                className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
+                  selectedActivities.includes(a.id)
+                    ? "bg-blue-600 text-white border border-blue-600"
+                    : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
+                }`}
+              >
+                {a.name}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Search + Sort */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search events..."
+              className="flex-1 bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-600">Sort:</span>
+              <div className="inline-flex rounded-full bg-white border border-blue-200 p-1">
+                {["upcoming", "popular"].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setSortBy(option as "upcoming" | "popular")}
+                    className={`px-4 py-1 text-sm rounded-full transition ${
+                      sortBy === option
+                        ? "bg-blue-600 text-white"
+                        : "text-slate-700 hover:bg-blue-50"
+                    }`}
+                  >
+                    {option === "upcoming" ? "Upcoming" : "Popular"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Cards */}
+        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filtered.map((ev) => {
+              const percent = Math.round((ev.attendees / ev.spots) * 100);
+              const spotsLeft = ev.spots - ev.attendees;
+
+              return (
+                <motion.article
+                  key={ev.id}
+                  layout
+                  variants={cardPop}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                  className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
+                >
+                  <h3 className="text-xl font-semibold mb-1 text-slate-900">{ev.title}</h3>
+
+                  <p className="text-slate-700 text-sm font-medium">{ev.venue}</p>
+                  <p className="text-slate-600 text-sm">
+                    {ev.addressLine1}, {ev.cityStateZip}
+                  </p>
+
+                  <p className="text-slate-700 text-sm mt-1">
+                    {ev.date} • {ev.time}
+                  </p>
+
+                  <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
+
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {ev.activities.map((a) => (
+                      <Chip key={a}>{a}</Chip>
+                    ))}
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percent}%` }}
+                        transition={{ duration: 0.7, ease: EASE_OUT }}
+                        className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-600 mt-1">
+                      <span>{percent}% filled</span>
+                      <span>{spotsLeft} spots left</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-5">
+                    <Link
+                      href={`/events/register?id=${ev.id}`}
+                      className="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
+                    >
+                      Register
+                    </Link>
+
+                    <a
+                      href={mapsHref(ev)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-center bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]"
+                    >
+                      Open in Maps
+                    </a>
+
+                    <button className="col-span-2 bg-white/70 border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]">
+                      Details
+                    </button>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }
