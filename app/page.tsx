@@ -1,8 +1,7 @@
 "use client";
 
-
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, MotionValue } from "framer-motion";
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 
@@ -41,8 +40,8 @@ export default function Home() {
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const orbX = ORBS.map(() => useMotionValue(0));
-  const orbY = ORBS.map(() => useMotionValue(0));
+  const orbX: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
+  const orbY: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
 
   /* ---------------- MOUSE ---------------- */
   useEffect(() => {
@@ -53,17 +52,27 @@ export default function Home() {
 
   /* ---------------- SCROLL RANGE ---------------- */
   useEffect(() => {
-    setScrollRange(document.body.scrollHeight - window.innerHeight);
+    const updateScrollRange = () => {
+      setScrollRange(document.body.scrollHeight - window.innerHeight);
+    };
+    updateScrollRange();
+    window.addEventListener("resize", updateScrollRange);
+
+    return () => window.removeEventListener("resize", updateScrollRange);
+  }, []);
+
+  /* ---------------- ORB SCROLL + MOUSE EFFECT ---------------- */
+  useEffect(() => {
     return scrollY.onChange((y) => {
       ORBS.forEach((orb, i) => {
         orbY[i].set(
-          -200 * orb.speed * (y / (document.body.scrollHeight - window.innerHeight)) +
-          ((mousePos.y / window.innerHeight - 0.5) * 200 * orb.speed)
+          -200 * orb.speed * (y / (scrollRange || 1)) +
+          ((mousePos.y / (window.innerHeight || 1) - 0.5) * 200 * orb.speed)
         );
-        orbX[i].set((mousePos.x / window.innerWidth - 0.5) * 200 * orb.speed);
+        orbX[i].set((mousePos.x / (window.innerWidth || 1) - 0.5) * 200 * orb.speed);
       });
     });
-  }, [scrollY, mousePos]);
+  }, [scrollY, mousePos, scrollRange]);
 
   /* ---------------- CLICK OUTSIDE CALENDAR ---------------- */
   useEffect(() => {
@@ -117,7 +126,7 @@ export default function Home() {
   const calendarDays = generateCalendarDays();
 
   return (
-    <motion.div layoutRoot initial="hidden" animate="show" variants={container} style={{background}} className="min-h-screen overflow-x-hidden text-slate-950">
+    <motion.div initial="hidden" animate="show" variants={container} style={{background}} className="min-h-screen overflow-x-hidden text-slate-950 relative">
 
       {/* FLOATING ORBS */}
       {ORBS.map((orb,i)=>(
@@ -209,7 +218,7 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* ---------- CONTENT SECTIONS + CURVED DIVIDERS ---------- */}
+      {/* CONTENT SECTIONS + CURVED DIVIDERS */}
       {[...Array(8)].map((_,i)=>{
         const align = i%2===0?"left":"right";
         return (
@@ -249,13 +258,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-blue-200 bg-white py-4 text-center text-sm text-blue-700 bg-blue-50 rounded-t-3xl">
-        © {year} Gatherly. All rights reserved.
-      </footer>
-    </motion.div>
-  );
-}
 
 
 
