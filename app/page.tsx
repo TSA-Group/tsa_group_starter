@@ -1,278 +1,163 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  motion,
-  Variants,
-  AnimatePresence,
-  useScroll,
-  useTransform,
-} from "framer-motion";
+import { motion, AnimatePresence, Variants, useScroll, useMotionValue, useTransform } from "framer-motion";
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 
-// Animation variants
+/* ---------------- ANIMATIONS ---------------- */
 const container: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
+  show: { transition: { staggerChildren: 0.1 } },
 };
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 18, filter: "blur(4px)" },
-  show: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
+  hidden: { opacity: 0, y: 50 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
 };
 
 const cardPop: Variants = {
-  hidden: { opacity: 0, y: 10, scale: 0.98 },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.55, ease: "easeOut" },
-  },
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
+/* ---------------- ORB CONFIG ---------------- */
+const ORBS = [
+  { size: 120, color: "rgba(59,130,246,0.35)", top: 10, left: 15, speed: 0.2 },
+  { size: 180, color: "rgba(147,197,253,0.25)", top: 40, left: 70, speed: 0.35 },
+  { size: 80, color: "rgba(15,23,42,0.25)", top: 70, left: 25, speed: 0.15 },
+  { size: 150, color: "rgba(147,197,253,0.15)", top: 20, left: 80, speed: 0.3 },
+  { size: 100, color: "rgba(59,130,246,0.2)", top: 60, left: 50, speed: 0.25 },
+];
+
+/* ---------------- PAGE ---------------- */
 export default function Home() {
   const year = new Date().getFullYear();
+  const { scrollY } = useScroll();
+  const scrollRange = 2500;
+
+  // Motion values for orbs
+  const orbX = ORBS.map(() => useMotionValue(0));
+  const orbY = ORBS.map(() => useMotionValue(0));
+
+  // Mouse position
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouse = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
+
+  // Update orb positions based on scroll + mouse
+  useEffect(() => {
+    return scrollY.onChange((y) => {
+      ORBS.forEach((orb, i) => {
+        orbY[i].set(-200 * orb.speed * (y / scrollRange) + ((mousePos.y / window.innerHeight - 0.5) * 200 * orb.speed));
+        orbX[i].set((mousePos.x / window.innerWidth - 0.5) * 200 * orb.speed);
+      });
+    });
+  }, [scrollY, mousePos]);
+
+  /* ---------------- CALENDAR ---------------- */
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const { scrollY } = useScroll();
-  const [scrollRange, setScrollRange] = useState(0);
-  const calendarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setScrollRange(document.body.scrollHeight - window.innerHeight);
-  }, []);
-
-  // Click outside to close calendar popup
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
-        setSelectedDate(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Scroll-based background and header colors
-  const background = useTransform(scrollY, [0, scrollRange], ["#ffffff", "#EEF4FA"]);
-  const headerColor = useTransform(scrollY, [0, scrollRange], ["#1E3A8A", "#1E3F8A"]);
-
-  // Texas today
-  const now = new Date();
-  const texasToday = new Date(
-    now.toLocaleString("en-US", { timeZone: "America/Chicago" })
-  );
-  texasToday.setHours(0, 0, 0, 0);
-
   const calYear = calendarDate.getFullYear();
   const calMonth = calendarDate.getMonth();
+  const daysOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-
-  const events = [
-    {
-      title: "Neighborhood Meetup",
-      dateString: "2025-12-21T14:00:00",
-      location: "Community Park",
-      details: "Meet local residents and join community discussions.",
-    },
-    {
-      title: "Community Dinner",
-      dateString: "2025-12-21T18:00:00",
-      location: "Downtown Church",
-      details: "Enjoy a free meal and fellowship with neighbors.",
-    },
-    {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes for those in need and volunteer.",
-    },
-  ];
-
-  // Generate calendar days
   const generateCalendarDays = () => {
     const firstDay = new Date(calYear, calMonth, 1).getDay();
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const days: (Date | null)[] = [];
-
     for (let i = 0; i < firstDay; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(calYear, calMonth, i);
-      d.setHours(0, 0, 0, 0);
+      const d = new Date(calYear, calMonth, i); d.setHours(0,0,0,0);
       days.push(d);
     }
     return days;
   };
   const calendarDays = generateCalendarDays();
 
+  const events = [
+    { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", location: "Community Park", details: "Meet local residents and join discussions." },
+    { title: "Community Dinner", dateString: "2025-12-21T18:00:00", location: "Downtown Church", details: "Enjoy a free meal and fellowship." },
+    { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", location: "Westside Center", details: "Donate clothes for those in need." },
+  ];
+
+  /* ---------------- SCROLL GRADIENTS ---------------- */
+  const baseBg = useTransform(scrollY, [0, scrollRange*0.25, scrollRange], ["#ffffff","#EEF3F9","#E5E9EF"]);
+  const greyOverlay = useTransform(scrollY, [scrollRange*0.35, scrollRange*0.6], ["rgba(226,232,240,0)","rgba(203,213,225,0.65)"]);
+  const blueOverlay = useTransform(scrollY, [scrollRange*0.6, scrollRange], ["rgba(15,23,42,0)","rgba(15,23,42,0.15)"]);
+
+  const heroY = useTransform(scrollY,[0,scrollRange*0.5],[0,-120]);
+  const heroTextY = useTransform(scrollY,[0,scrollRange*0.5],[0,-60]);
+
   return (
-    <motion.div
-      layoutRoot
-      initial="hidden"
-      animate="show"
-      variants={container}
-      style={{ background }}
-      className="min-h-screen overflow-x-hidden text-slate-950"
-    >
-      {/* HEADER */}
-      <motion.header
-        layout
-        variants={fadeUp}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10"
-      >
-        <motion.h1
-          layout
-          variants={cardPop}
-          animate={{
-            x: [20, 0, 20],
-            y: [0, -6, 0],
-            transition: { duration: 2.5, ease: "easeInOut" },
-          }}
-          style={{ color: headerColor, fontFamily: "TAN Buster, sans-serif" }}
-          className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight leading-none text-center lg:text-left"
-        >
+    <motion.div style={{background: baseBg}} className="relative min-h-screen overflow-x-hidden text-slate-900">
+
+      {/* FLOATING ORBS */}
+      {ORBS.map((orb,i)=>(
+        <motion.div key={i} style={{x: orbX[i], y: orbY[i], width: orb.size, height: orb.size, top: `${orb.top}%`, left: `${orb.left}%`, backgroundColor: orb.color}} className="absolute rounded-full pointer-events-none -z-10"/>
+      ))}
+
+      {/* OVERLAYS */}
+      <motion.div style={{backgroundColor: greyOverlay}} className="fixed inset-0 pointer-events-none -z-20"/>
+      <motion.div style={{backgroundColor: blueOverlay}} className="fixed inset-0 pointer-events-none -z-20"/>
+
+      {/* HERO */}
+      <motion.header style={{y: heroY}} className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6">
+        <motion.h1 style={{y: heroTextY}} animate={{scale:[1,1.03,1]}} transition={{duration:6,repeat:Infinity,ease:"easeInOut"}} className="text-8xl sm:text-9xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
           GATHERLY
         </motion.h1>
+        <motion.p style={{y: heroTextY}} className="mt-10 max-w-xl text-xl text-blue-800">
+          Discover, connect, and engage with your real community — without the noise.
+        </motion.p>
       </motion.header>
 
-      {/* MAIN ROW */}
-      <motion.main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 flex flex-col lg:flex-row gap-8 lg:gap-10">
-        
-        {/* LEFT COLUMN - QuickActions */}
-        <motion.section className="lg:w-1/3 flex flex-col justify-end">
+      {/* CALENDAR + QUICK ACTIONS */}
+      <motion.main className="max-w-7xl mx-auto px-6 pb-72 flex flex-col lg:flex-row gap-20">
+        <motion.section style={{y: heroTextY}} className="lg:w-1/3">
           <QuickActions />
         </motion.section>
-      
-        {/* RIGHT COLUMN - Calendar */}
-        <motion.section className="lg:w-2/3 flex flex-col justify-end">
-          <motion.div
-            ref={calendarRef}
-            layout
-            variants={cardPop}
-            className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm p-6 w-full"
-          >
-            {/* Calendar Header */}
-            <div className="flex items-center justify-between mb-4">
-              <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
-                className="text-blue-700 text-2xl font-bold"
-              >
-                ❮
-              </button>
-              <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
-                {monthNames[calMonth]} {calYear}
-              </h3>
-              <button
-                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
-                className="text-blue-700 text-2xl font-bold"
-              >
-                ❯
-              </button>
-            </div>
 
-            {/* Days of the Week */}
-            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
-              {daysOfWeek.map((d) => (
-                <div key={d} className="text-center">{d}</div>
-              ))}
+        <motion.section className="lg:w-2/3">
+          <motion.div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_40px_80px_-30px_rgba(30,64,175,0.45)] p-6">
+            <div className="flex justify-between mb-4">
+              <button onClick={()=>setCalendarDate(new Date(calYear,calMonth-1,1))}>❮</button>
+              <h3 className="font-semibold">{monthNames[calMonth]} {calYear}</h3>
+              <button onClick={()=>setCalendarDate(new Date(calYear,calMonth+1,1))}>❯</button>
             </div>
-
-            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 text-center text-sm font-medium text-blue-700 mb-2">
+              {daysOfWeek.map(d=><div key={d}>{d}</div>)}
+            </div>
             <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((date, idx) => {
-                if (!date) return <div key={idx} />;
-
-                const isToday = date.getTime() === texasToday.getTime();
+              {calendarDays.map((date,i)=>{
+                if(!date) return <div key={i}/>;
+                const isToday = date.toDateString() === new Date().toDateString();
                 const isSelected = date.getTime() === selectedDate?.getTime();
-
-                const hasEvent = events.some((event) => {
-                  const eDate = new Date(event.dateString);
-                  return (
-                    eDate.getFullYear() === date.getFullYear() &&
-                    eDate.getMonth() === date.getMonth() &&
-                    eDate.getDate() === date.getDate()
-                  );
-                });
-
+                const hasEvent = events.some(e => new Date(e.dateString).toDateString() === date.toDateString());
                 return (
-                  <div
-                    key={idx}
-                    className={`relative flex flex-col items-center justify-start h-12 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${
-                      isSelected
-                        ? "bg-blue-400 text-white"
-                        : isToday
-                        ? "bg-blue-600 text-white"
-                        : "bg-blue-50 hover:bg-blue-100 text-blue-900"
-                    }`}
-                    onClick={() =>
-                      setSelectedDate((prev) =>
-                        prev && prev.getTime() === date.getTime() ? null : date
-                      )
-                    }
-                  >
-                    <span className="block">{date.getDate()}</span>
-                    {hasEvent && (
-                      <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-                    )}
+                  <div key={i} className={`relative flex flex-col items-center justify-start h-12 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${isSelected?"bg-blue-400 text-white":isToday?"bg-blue-600 text-white":"bg-blue-50 hover:bg-blue-100 text-blue-900"}`} onClick={()=>setSelectedDate(prev => (prev?.getTime()===date.getTime()?null:date))}>
+                    <span>{date.getDate()}</span>
+                    {hasEvent && <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"/>}
                   </div>
-                );
+                )
               })}
             </div>
-
-            {/* Events Popup */}
             <AnimatePresence>
               {selectedDate && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
-                >
-                  <h3 className="font-semibold text-blue-900 mb-2">
-                    Events on {selectedDate.toLocaleDateString()}
-                  </h3>
-
-                  {events.filter((event) => {
-                    const eDate = new Date(event.dateString);
-                    return (
-                      eDate.getFullYear() === selectedDate.getFullYear() &&
-                      eDate.getMonth() === selectedDate.getMonth() &&
-                      eDate.getDate() === selectedDate.getDate()
-                    );
-                  }).length > 0 ? (
-                    <ul className="space-y-3">
-                      {events
-                        .filter((event) => {
-                          const eDate = new Date(event.dateString);
-                          return (
-                            eDate.getFullYear() === selectedDate.getFullYear() &&
-                            eDate.getMonth() === selectedDate.getMonth() &&
-                            eDate.getDate() === selectedDate.getDate()
-                          );
-                        })
-                        .map((event, i) => (
-                          <li key={i} className="border-l-4 border-blue-500 pl-3">
-                            <p className="font-semibold text-blue-800">{event.title}</p>
-                            <p className="text-xs text-blue-700">{event.location}</p>
-                            <p className="text-xs text-blue-700">{event.details}</p>
-                          </li>
-                        ))}
-                    </ul>
-                  ) : (
-                    <p className="text-blue-700 text-sm">No events for this day</p>
-                  )}
+                <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:10}} className="mt-4 bg-white border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96">
+                  <h3 className="font-semibold text-blue-900 mb-2">Events on {selectedDate.toLocaleDateString()}</h3>
+                  {events.filter(e=>new Date(e.dateString).toDateString()===selectedDate.toDateString()).map((event,i)=>(
+                    <div key={i} className="border-l-4 border-blue-500 pl-3 mb-2">
+                      <p className="font-semibold text-blue-800">{event.title}</p>
+                      <p className="text-xs text-blue-700">{event.location}</p>
+                      <p className="text-xs text-blue-700">{event.details}</p>
+                    </div>
+                  ))}
+                  {events.filter(e=>new Date(e.dateString).toDateString()===selectedDate.toDateString()).length===0 && <p className="text-blue-700 text-sm">No events for this day</p>}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -280,94 +165,27 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* IMAGE + TEXT SECTIONS */}
-      <motion.section
-        initial="hidden"
-        variants={container}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 mb-32 space-y-16"
-      >
-        {[
-          {
-            title: "Community Stories",
-            text: "See how neighbors are making a difference together.",
-            href: "/stories",
-            align: "left",
-          },
-          {
-            title: "Local Neighborhoods",
-            text: "Explore different neighborhoods and what they offer.",
-            href: "/neighborhoods",
-            align: "right",
-          },
-          {
-            title: "Get Involved",
-            text: "Find ways to volunteer and support your community.",
-            href: "/volunteer",
-            align: "left",
-          },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            className={`flex ${item.align === "right" ? "justify-end" : "justify-start"}`}
-          >
-            <Link href={item.href} className="block w-full md:w-[48%]">
-              <motion.div
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                className="bg-white rounded-2xl border border-blue-200 ring-1 ring-blue-100 shadow-sm overflow-hidden cursor-pointer"
-              >
-                <div className="h-52 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                  Image Here
-                </div>
-                <div className="p-5 space-y-2">
-                  <h3 className="text-lg font-semibold text-blue-900">{item.title}</h3>
-                  <p className="text-sm text-blue-700">{item.text}</p>
-                  <span className="inline-block mt-2 text-sm font-semibold text-blue-600">
-                    Learn more →
-                  </span>
-                </div>
-              </motion.div>
-            </Link>
+      {/* CONTENT SECTIONS */}
+      <section className="py-24 px-6 space-y-24">
+        {Array.from({length:6}).map((_,i)=>(
+          <motion.div key={i} variants={fadeUp} viewport={{once:true}} className="max-w-4xl mx-auto p-10 bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg flex flex-col md:flex-row items-center gap-6">
+            <div className="w-full md:w-1/2 h-48 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 font-semibold">
+              Image {i+1}
+            </div>
+            <div className="w-full md:w-1/2">
+              <h3 className="text-2xl font-bold text-blue-900 mb-3">Section Title {i+1}</h3>
+              <p className="text-blue-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio.</p>
+            </div>
           </motion.div>
         ))}
-      </motion.section>
-
-      {/* OUR STORY */}
-      <section className="w-full mt-40 mb-40 px-6">
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-12">
-          Our Story!
-        </h2>
-
-        <div className="w-full max-w-4xl mx-auto p-10 rounded-2xl shadow-lg text-blue-900 
-                        bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200">
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2023 – The Idea:</span> The initial concept for Gatherly was formed to give communities a single place to connect.
-          </p>
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2024 – Building the Platform:</span> Core layouts, animations, and interactive features were developed.
-          </p>
-          <p className="mb-6">
-            <span className="font-bold text-blue-700">2025 – Public Launch:</span> Gatherly launched with events, calendars, and community tools.
-          </p>
-          <p>
-            <span className="font-bold text-blue-700">Looking Ahead:</span> Expanding neighborhoods, stories, and ways for people to get involved.
-          </p>
-        </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-blue-200 bg-white">
-        <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
-          © {year} Gatherly. All rights reserved.
-        </div>
-      </footer>
+      <footer className="py-8 text-center text-sm text-slate-700 bg-slate-100">© {year} Gatherly. All rights reserved.</footer>
     </motion.div>
   );
 }
+
+
 
 
 
