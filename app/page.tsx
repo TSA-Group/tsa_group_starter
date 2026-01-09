@@ -1,25 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   motion,
   Variants,
-  AnimatePresence,
   useScroll,
   useTransform,
 } from "framer-motion";
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 
-/* ------------------ MOTION VARIANTS ------------------ */
+/* ---------------- ANIMATIONS ---------------- */
 
 const container: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.18 } },
+  show: { transition: { staggerChildren: 0.15 } },
 };
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
+  hidden: { opacity: 0, y: 50, filter: "blur(8px)" },
   show: {
     opacity: 1,
     y: 0,
@@ -29,7 +28,7 @@ const fadeUp: Variants = {
 };
 
 const cardPop: Variants = {
-  hidden: { opacity: 0, y: 18, scale: 0.96 },
+  hidden: { opacity: 0, y: 30, scale: 0.96 },
   show: {
     opacity: 1,
     y: 0,
@@ -38,249 +37,181 @@ const cardPop: Variants = {
   },
 };
 
-/* ------------------ PAGE ------------------ */
+/* ---------------- PAGE ---------------- */
 
 export default function Home() {
   const year = new Date().getFullYear();
-  const [calendarDate, setCalendarDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const calendarRef = useRef<HTMLDivElement>(null);
-
   const { scrollY } = useScroll();
-  const [scrollRange, setScrollRange] = useState(0);
+  const [scrollRange, setScrollRange] = useState(1);
 
   useEffect(() => {
     setScrollRange(document.body.scrollHeight - window.innerHeight);
   }, []);
 
-  /* ------------------ PARALLAX + COLOR DEPTH ------------------ */
+  /* -------- MULTI-ZONE COLOR SYSTEM -------- */
 
-  const slowY = useTransform(scrollY, [0, scrollRange], [0, -120]);
-  const fastY = useTransform(scrollY, [0, scrollRange], [0, -280]);
-
-  // MULTI-LAYER COLOR ATMOSPHERE
-  const bgMain = useTransform(
+  const baseBg = useTransform(
     scrollY,
-    [0, scrollRange * 0.4, scrollRange],
-    [
-      "linear-gradient(180deg, #FFFFFF 0%, #F3F6FB 60%)",
-      "linear-gradient(180deg, #EEF3F9 0%, #E4EBF4 70%)",
-      "linear-gradient(180deg, #E6EDF5 0%, #D9E3EF 80%)",
-    ]
+    [0, scrollRange * 0.25, scrollRange],
+    ["#ffffff", "#EEF3F9", "#E5E9EF"]
   );
 
-  /* ------------------ CALENDAR DATA ------------------ */
+  const greyChapter = useTransform(
+    scrollY,
+    [scrollRange * 0.35, scrollRange * 0.6],
+    ["rgba(226,232,240,0)", "rgba(203,213,225,0.65)"]
+  );
 
-  const calYear = calendarDate.getFullYear();
-  const calMonth = calendarDate.getMonth();
+  const deepBlueChapter = useTransform(
+    scrollY,
+    [scrollRange * 0.6, scrollRange],
+    ["rgba(15,23,42,0)", "rgba(15,23,42,0.15)"]
+  );
 
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const monthNames = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
+  const slowY = useTransform(scrollY, [0, scrollRange], [0, -140]);
+  const fastY = useTransform(scrollY, [0, scrollRange], [0, -320]);
 
-  const events = [
-    {
-      title: "Neighborhood Meetup",
-      dateString: "2025-12-21T14:00:00",
-      location: "Community Park",
-      details: "Meet local residents and join discussions.",
-    },
-    {
-      title: "Community Dinner",
-      dateString: "2025-12-21T18:00:00",
-      location: "Downtown Church",
-      details: "Free meal and fellowship.",
-    },
-    {
-      title: "Clothing Drive",
-      dateString: "2025-12-22T10:00:00",
-      location: "Westside Center",
-      details: "Donate clothes and volunteer.",
-    },
-  ];
-
-  const generateCalendarDays = () => {
-    const firstDay = new Date(calYear, calMonth, 1).getDay();
-    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-    const days: (Date | null)[] = [];
-    for (let i = 0; i < firstDay; i++) days.push(null);
-    for (let i = 1; i <= daysInMonth; i++) days.push(new Date(calYear, calMonth, i));
-    return days;
-  };
-
-  const calendarDays = generateCalendarDays();
-
-  /* ------------------ JSX ------------------ */
+  /* ---------------- JSX ---------------- */
 
   return (
     <motion.div
-      style={{ background: bgMain }}
+      style={{ background: baseBg }}
       variants={container}
       initial="hidden"
       animate="show"
-      className="min-h-screen overflow-x-hidden text-slate-900"
+      className="relative min-h-screen overflow-x-hidden text-slate-900"
     >
+      {/* COLOR OVERLAYS */}
+      <motion.div
+        style={{ backgroundColor: greyChapter }}
+        className="fixed inset-0 -z-10 pointer-events-none"
+      />
+      <motion.div
+        style={{ backgroundColor: deepBlueChapter }}
+        className="fixed inset-0 -z-10 pointer-events-none"
+      />
 
-      {/* ------------------ HERO ------------------ */}
+      {/* HERO */}
       <motion.header
         style={{ y: slowY }}
-        className="relative min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6"
+        className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6"
       >
-        {/* soft glow layer */}
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_30%,#E6EEFA,transparent_60%)]" />
-
         <motion.h1
-          animate={{ y: [0, -14, 0] }}
-          transition={{ duration: 5, ease: "easeInOut", repeat: Infinity }}
-          className="text-7xl sm:text-8xl lg:text-9xl font-extrabold tracking-tight
+          animate={{ y: [0, -16, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="text-8xl sm:text-9xl font-extrabold tracking-tight
                      text-transparent bg-clip-text
                      bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600"
-          style={{ fontFamily: "TAN Buster, sans-serif" }}
         >
           GATHERLY
         </motion.h1>
 
-        <p className="mt-10 text-xl max-w-xl text-blue-700/90">
-          A calm, beautifully layered space for real communities.
+        <p className="mt-12 max-w-xl text-xl text-blue-800">
+          A calmer way to discover events, connect locally, and exist online
+          without noise.
         </p>
       </motion.header>
 
-      {/* ------------------ CALENDAR + ACTIONS ------------------ */}
-      <motion.main className="relative max-w-7xl mx-auto px-6 pb-72 flex flex-col lg:flex-row gap-20">
-        <motion.section style={{ y: fastY }} className="lg:w-1/3">
+      {/* TOOLS SECTION */}
+      <motion.section className="max-w-7xl mx-auto px-6 pb-72 grid lg:grid-cols-3 gap-20">
+        <motion.div style={{ y: fastY }}>
           <QuickActions />
-        </motion.section>
+        </motion.div>
 
-        <motion.section className="lg:w-2/3">
-          <motion.div
-            ref={calendarRef}
-            variants={cardPop}
-            className="
-              bg-gradient-to-br from-white via-blue-50 to-blue-100
-              rounded-2xl border border-blue-200/70
-              shadow-[0_30px_60px_-20px_rgba(30,64,175,0.25)]
-              p-6
-            "
-          >
-            <div className="flex justify-between mb-4">
-              <button className="text-blue-700" onClick={() => setCalendarDate(new Date(calYear, calMonth - 1))}>❮</button>
-              <h3 className="font-semibold text-blue-900">
-                {monthNames[calMonth]} {calYear}
-              </h3>
-              <button className="text-blue-700" onClick={() => setCalendarDate(new Date(calYear, calMonth + 1))}>❯</button>
-            </div>
+        <motion.div variants={fadeUp} className="lg:col-span-2 space-y-10">
+          {[
+            "Discover events without algorithmic chaos.",
+            "Everything is location-aware and intentional.",
+            "Designed for clarity, not addiction.",
+          ].map((text, i) => (
+            <motion.div
+              key={i}
+              variants={cardPop}
+              className="p-8 rounded-2xl bg-white/70 backdrop-blur-xl
+                         border border-white/40
+                         shadow-[0_40px_80px_-30px_rgba(30,64,175,0.4)]"
+            >
+              <p className="text-xl font-medium text-blue-900">{text}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </motion.section>
 
-            <div className="grid grid-cols-7 text-sm mb-2">
-              {daysOfWeek.map((d) => (
-                <div key={d} className="text-center text-blue-800">{d}</div>
-              ))}
-            </div>
+      {/* IMAGE CHAPTER */}
+      <section className="relative min-h-[120vh] flex items-center">
+        <img
+          src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac"
+          className="absolute inset-0 w-full h-full object-cover"
+          alt=""
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-transparent" />
 
-            <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((date, i) =>
-                date ? (
-                  <div
-                    key={i}
-                    onClick={() => setSelectedDate(date)}
-                    className="
-                      h-12 flex items-center justify-center rounded-lg
-                      bg-gradient-to-br from-blue-50 to-blue-100
-                      hover:from-blue-100 hover:to-blue-200
-                      text-blue-900 cursor-pointer
-                    "
-                  >
-                    {date.getDate()}
-                  </div>
-                ) : (
-                  <div key={i} />
-                )
-              )}
-            </div>
-
-            <AnimatePresence>
-              {selectedDate && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="
-                    mt-4 p-4 rounded-xl
-                    bg-gradient-to-br from-blue-100 via-blue-50 to-white
-                    text-blue-900
-                  "
-                >
-                  Events on {selectedDate.toDateString()}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </motion.section>
-      </motion.main>
-
-      {/* ------------------ STATEMENT ------------------ */}
-      <section className="min-h-[120vh] flex items-center justify-center px-6 bg-gradient-to-b from-transparent to-blue-100/40">
-        <motion.h2
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+        <motion.div
+          variants={fadeUp}
           viewport={{ once: true }}
-          className="text-6xl sm:text-7xl font-extrabold text-blue-950 text-center max-w-4xl"
+          className="relative max-w-3xl mx-auto p-14 bg-white/80 backdrop-blur-xl
+                     rounded-3xl shadow-2xl"
         >
-          Depth isn’t decoration — it’s intention.
-        </motion.h2>
-      </section>
-
-      {/* ------------------ FLOATING INFO ------------------ */}
-      <section className="relative py-80 overflow-hidden">
-        <motion.div
-          style={{ y: slowY }}
-          className="
-            absolute left-10 top-40 w-72 p-6 rounded-2xl
-            bg-gradient-to-br from-white via-blue-50 to-blue-100
-            shadow-[0_25px_50px_-20px_rgba(37,99,235,0.4)]
-          "
-        >
-          <h4 className="font-semibold text-blue-900 mb-2">Layered Design</h4>
-          <p className="text-sm text-blue-700">
-            Multiple tones create emotional depth.
-          </p>
-        </motion.div>
-
-        <motion.div
-          style={{ y: fastY }}
-          className="
-            absolute right-10 top-96 w-72 p-6 rounded-2xl
-            bg-gradient-to-br from-blue-100 via-blue-50 to-white
-            shadow-[0_25px_50px_-20px_rgba(30,64,175,0.45)]
-          "
-        >
-          <h4 className="font-semibold text-blue-900 mb-2">Motion with Purpose</h4>
-          <p className="text-sm text-blue-700">
-            Depth comes from restraint.
+          <h2 className="text-4xl font-extrabold text-blue-950 mb-6">
+            Designed around real places
+          </h2>
+          <p className="text-lg text-blue-800 leading-relaxed">
+            Gatherly focuses on physical proximity and real-world presence,
+            turning digital discovery into real human connection.
           </p>
         </motion.div>
       </section>
 
-      {/* ------------------ STORY ------------------ */}
-      <section className="py-64 px-6 bg-gradient-to-b from-blue-100/30 to-blue-200/40">
-        <h2 className="text-5xl font-extrabold text-center text-blue-950 mb-16">
-          Our Story
+      {/* GREY PHILOSOPHY CHAPTER */}
+      <section className="py-72 px-6 bg-gradient-to-b from-slate-100 via-slate-200/70 to-slate-300/60">
+        <h2 className="text-5xl font-extrabold text-center mb-24 text-slate-900">
+          A slower digital experience
         </h2>
-        <div className="
-          max-w-4xl mx-auto p-12 rounded-2xl
-          bg-gradient-to-br from-white via-blue-50 to-blue-100
-          shadow-[0_40px_80px_-30px_rgba(30,64,175,0.35)]
-        ">
-          <p><strong>2023:</strong> The idea was born.</p>
-          <p className="mt-4"><strong>2024:</strong> The platform took shape.</p>
-          <p className="mt-4"><strong>2025:</strong> Gatherly launched.</p>
+
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-12">
+          {[
+            "No infinite feeds",
+            "No engagement manipulation",
+            "No artificial urgency",
+            "Intentional design",
+            "Local-first discovery",
+            "Human pacing",
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              variants={cardPop}
+              className="p-10 rounded-2xl bg-white/70 backdrop-blur-xl shadow-lg"
+            >
+              <p className="text-lg font-semibold text-slate-800">{item}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* ------------------ FOOTER ------------------ */}
-      <footer className="border-t border-blue-200 bg-gradient-to-b from-blue-50 to-blue-100 py-6 text-center text-sm text-blue-800">
+      {/* FINAL IMAGE + STATEMENT */}
+      <section className="relative min-h-[100vh] flex items-center justify-center px-6">
+        <img
+          src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee"
+          className="absolute inset-0 w-full h-full object-cover"
+          alt=""
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 to-slate-900/20" />
+
+        <motion.div
+          variants={fadeUp}
+          className="relative max-w-2xl text-center text-white"
+        >
+          <h2 className="text-5xl font-extrabold mb-8">
+            Technology should feel human again
+          </h2>
+          <p className="text-xl text-slate-200">
+            Gatherly is built to support real communities — not extract attention.
+          </p>
+        </motion.div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-8 text-center text-sm text-slate-700 bg-slate-100">
         © {year} Gatherly. All rights reserved.
       </footer>
     </motion.div>
