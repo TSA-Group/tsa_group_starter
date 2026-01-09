@@ -8,7 +8,9 @@ import {
   useTransform,
   useMotionValue,
   MotionValue,
+  Variants,
 } from "framer-motion";
+
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 
@@ -43,13 +45,16 @@ const fadeUp = {
   },
 };
 
-const cardPop = {
+const cardPop: Variants = {
   hidden: { opacity: 0, y: 10, scale: 0.98 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.55, ease: "easeOut" },
+    transition: {
+      duration: 0.55,
+      ease: [0.16, 1, 0.3, 1],
+    },
   },
 };
 
