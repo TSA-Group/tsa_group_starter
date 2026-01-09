@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  motion,
-  AnimatePresence,
-  Variants,
-  useScroll,
-  useTransform,
-  useMotionValue,
-} from "framer-motion";
+import { motion, AnimatePresence, Variants, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 
@@ -41,20 +34,27 @@ const ORBS = [
 export default function Home() {
   const year = new Date().getFullYear();
   const { scrollY } = useScroll();
-  const scrollX = useMotionValue(0);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [scrollRange, setScrollRange] = useState(1);
 
   useEffect(() => {
-    setScrollRange(document.body.scrollHeight - window.innerHeight);
     const handleMouse = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY });
     window.addEventListener("mousemove", handleMouse);
     return () => window.removeEventListener("mousemove", handleMouse);
   }, []);
+
+  // Scroll-based colors
+  const scrollRange = 2500; // adjust to your page length
+  const baseBg = useTransform(scrollY, [0, scrollRange * 0.25, scrollRange], ["#ffffff", "#EEF3F9", "#E5E9EF"]);
+  const greyOverlay = useTransform(scrollY, [scrollRange * 0.35, scrollRange * 0.6], ["rgba(226,232,240,0)", "rgba(203,213,225,0.65)"]);
+  const blueOverlay = useTransform(scrollY, [scrollRange * 0.6, scrollRange], ["rgba(15,23,42,0)", "rgba(15,23,42,0.15)"]);
+
+  // Hero parallax
+  const heroY = useTransform(scrollY, [0, scrollRange * 0.5], [0, -120]);
+  const heroTextY = useTransform(scrollY, [0, scrollRange * 0.5], [0, -60]);
 
   // Calendar helpers
   const calYear = calendarDate.getFullYear();
@@ -63,10 +63,10 @@ export default function Home() {
   const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const generateCalendarDays = () => {
     const firstDay = new Date(calYear, calMonth, 1).getDay();
-    const daysInMonth = new Date(calYear, calMonth+1,0).getDate();
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const days: (Date | null)[] = [];
-    for(let i=0;i<firstDay;i++) days.push(null);
-    for(let i=1;i<=daysInMonth;i++){
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let i = 1; i <= daysInMonth; i++) {
       const d = new Date(calYear, calMonth, i); d.setHours(0,0,0,0);
       days.push(d);
     }
@@ -74,75 +74,77 @@ export default function Home() {
   };
   const calendarDays = generateCalendarDays();
 
-  // Events
   const events = [
     { title: "Neighborhood Meetup", dateString: "2025-12-21T14:00:00", location: "Community Park", details: "Meet local residents and join discussions." },
     { title: "Community Dinner", dateString: "2025-12-21T18:00:00", location: "Downtown Church", details: "Enjoy a free meal and fellowship." },
     { title: "Clothing Drive", dateString: "2025-12-22T10:00:00", location: "Westside Center", details: "Donate clothes for those in need." },
   ];
 
-  // Scroll-based colors
-  const baseBg = useTransform(scrollY,[0,scrollRange*0.25,scrollRange],["#ffffff","#EEF3F9","#E5E9EF"]);
-  const greyOverlay = useTransform(scrollY,[scrollRange*0.35,scrollRange*0.6],["rgba(226,232,240,0)","rgba(203,213,225,0.65)"]);
-  const blueOverlay = useTransform(scrollY,[scrollRange*0.6,scrollRange],["rgba(15,23,42,0)","rgba(15,23,42,0.15)"]);
-
-  // Parallax hero
-  const heroY = useTransform(scrollY,[0,scrollRange*0.5],[0,-120]);
-  const heroTextY = useTransform(scrollY,[0,scrollRange*0.5],[0,-60]);
-
   return (
-    <motion.div style={{background: baseBg}} className="relative min-h-screen overflow-x-hidden text-slate-900">
+    <motion.div style={{ background: baseBg }} className="relative min-h-screen overflow-x-hidden text-slate-900">
 
       {/* FLOATING ORBS */}
-      {ORBS.map((orb,i)=>{
-        const orbY = useTransform(scrollY,[0,scrollRange],[0,-200*orb.speed]);
-        const orbX = (mousePos.x/window.innerWidth-0.5)*orb.speed*200;
-        const orbOffsetY = (mousePos.y/window.innerHeight-0.5)*orb.speed*200;
+      {ORBS.map((orb, i) => {
+        const orbY = useTransform(scrollY, [0, scrollRange], [0, -200 * orb.speed]);
+        const orbX = ((mousePos.x / window.innerWidth) - 0.5) * orb.speed * 200;
+        const orbOffsetY = ((mousePos.y / window.innerHeight) - 0.5) * orb.speed * 200;
         return (
-          <motion.div key={i} style={{top:`${orb.top}%`, left:`${orb.left}%`, y: orbY+orbOffsetY, x: orbX, width: orb.size, height: orb.size, backgroundColor: orb.color}} className="absolute rounded-full pointer-events-none -z-10"/>
+          <motion.div
+            key={i}
+            style={{
+              top: `${orb.top}%`,
+              left: `${orb.left}%`,
+              y: orbY + orbOffsetY,
+              x: orbX,
+              width: orb.size,
+              height: orb.size,
+              backgroundColor: orb.color
+            }}
+            className="absolute rounded-full pointer-events-none -z-10"
+          />
         )
       })}
 
       {/* COLOR OVERLAYS */}
-      <motion.div style={{backgroundColor:greyOverlay}} className="fixed inset-0 pointer-events-none -z-20"/>
-      <motion.div style={{backgroundColor:blueOverlay}} className="fixed inset-0 pointer-events-none -z-20"/>
+      <motion.div style={{ backgroundColor: greyOverlay }} className="fixed inset-0 pointer-events-none -z-20"/>
+      <motion.div style={{ backgroundColor: blueOverlay }} className="fixed inset-0 pointer-events-none -z-20"/>
 
       {/* HERO */}
-      <motion.header style={{y: heroY}} className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6">
-        <motion.h1 style={{y: heroTextY}} animate={{scale:[1,1.03,1]}} transition={{duration:6,repeat:Infinity,ease:"easeInOut"}} className="text-8xl sm:text-9xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+      <motion.header style={{ y: heroY }} className="min-h-[95vh] flex flex-col justify-center max-w-7xl mx-auto px-6">
+        <motion.h1 style={{ y: heroTextY }} animate={{ scale: [1,1.03,1] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="text-8xl sm:text-9xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
           GATHERLY
         </motion.h1>
-        <motion.p style={{y: heroTextY}} className="mt-10 max-w-xl text-xl text-blue-800">Discover, connect, and engage with your real community — without the noise.</motion.p>
+        <motion.p style={{ y: heroTextY }} className="mt-10 max-w-xl text-xl text-blue-800">
+          Discover, connect, and engage with your real community — without the noise.
+        </motion.p>
       </motion.header>
 
       {/* CALENDAR + QUICK ACTIONS */}
       <motion.main className="max-w-7xl mx-auto px-6 pb-72 flex flex-col lg:flex-row gap-20">
-        {/* Left QuickActions */}
-        <motion.section style={{y: heroTextY}} className="lg:w-1/3">
+        <motion.section style={{ y: heroTextY }} className="lg:w-1/3">
           <QuickActions />
         </motion.section>
 
-        {/* Right Calendar */}
         <motion.section className="lg:w-2/3">
-          <motion.div ref={calendarRef} variants={cardPop} className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_40px_80px_-30px_rgba(30,64,175,0.45)] p-6">
+          <motion.div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_40px_80px_-30px_rgba(30,64,175,0.45)] p-6">
             <div className="flex justify-between mb-4">
-              <button onClick={()=>setCalendarDate(new Date(calYear,calMonth-1,1))}>❮</button>
+              <button onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}>❮</button>
               <h3 className="font-semibold">{monthNames[calMonth]} {calYear}</h3>
-              <button onClick={()=>setCalendarDate(new Date(calYear,calMonth+1,1))}>❯</button>
+              <button onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}>❯</button>
             </div>
 
             <div className="grid grid-cols-7 text-center text-sm font-medium text-blue-700 mb-2">
-              {daysOfWeek.map(d=><div key={d}>{d}</div>)}
+              {daysOfWeek.map(d => <div key={d}>{d}</div>)}
             </div>
 
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date,i)=>{
                 if(!date) return <div key={i}/>;
-                const isToday = date.toDateString()===new Date().toDateString();
-                const isSelected = date.getTime()===selectedDate?.getTime();
-                const hasEvent = events.some(e=>new Date(e.dateString).toDateString()===date.toDateString());
+                const isToday = date.toDateString() === new Date().toDateString();
+                const isSelected = date.getTime() === selectedDate?.getTime();
+                const hasEvent = events.some(e => new Date(e.dateString).toDateString() === date.toDateString());
                 return (
-                  <div key={i} className={`relative flex flex-col items-center justify-start h-12 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${isSelected?"bg-blue-400 text-white":isToday?"bg-blue-600 text-white":"bg-blue-50 hover:bg-blue-100 text-blue-900"}`} onClick={()=>setSelectedDate(prev=>(prev?.getTime()===date.getTime()?null:date))}>
+                  <div key={i} className={`relative flex flex-col items-center justify-start h-12 w-full rounded-lg text-sm sm:text-base font-semibold cursor-pointer transition-colors ${isSelected?"bg-blue-400 text-white":isToday?"bg-blue-600 text-white":"bg-blue-50 hover:bg-blue-100 text-blue-900"}`} onClick={()=>setSelectedDate(prev => (prev?.getTime() === date.getTime()?null:date))}>
                     <span>{date.getDate()}</span>
                     {hasEvent && <span className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"/>}
                   </div>
@@ -169,40 +171,27 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* ADDITIONAL SECTIONS */}
-      <section className="relative min-h-[120vh] flex items-center">
-        <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac" className="absolute inset-0 w-full h-full object-cover" alt="" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-transparent"/>
-        <motion.div variants={fadeUp} viewport={{once:true}} className="relative max-w-3xl mx-auto p-14 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl">
-          <h2 className="text-4xl font-extrabold text-blue-950 mb-6">Built around real places</h2>
-          <p className="text-lg text-blue-800 leading-relaxed">Gatherly focuses on physical proximity and real-world presence, turning digital discovery into real human connection.</p>
-        </motion.div>
-      </section>
-
-      <section className="py-72 px-6 bg-gradient-to-b from-slate-100 via-slate-200/70 to-slate-300/60">
-        <h2 className="text-5xl font-extrabold text-center mb-24 text-slate-900">A slower digital experience</h2>
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-12">
-          {["No infinite feeds","No engagement manipulation","No artificial urgency","Intentional design","Local-first discovery","Human pacing"].map((item,i)=>(
-            <motion.div key={i} variants={cardPop} className="p-10 rounded-2xl bg-white/70 backdrop-blur-xl shadow-lg">
-              <p className="text-lg font-semibold text-slate-800">{item}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="relative min-h-[100vh] flex items-center justify-center px-6">
-        <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee" className="absolute inset-0 w-full h-full object-cover" alt="" />
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 to-slate-900/20"/>
-        <motion.div variants={fadeUp} className="relative max-w-2xl text-center text-white">
-          <h2 className="text-5xl font-extrabold mb-8">Technology should feel human again</h2>
-          <p className="text-xl text-slate-200">Gatherly is built to support real communities — not extract attention.</p>
-        </motion.div>
+      {/* SECTIONS, CARDS & IMAGES */}
+      <section className="py-24 px-6 space-y-24">
+        {Array.from({length:6}).map((_,i)=>(
+          <motion.div key={i} variants={fadeUp} viewport={{once:true}} className="max-w-4xl mx-auto p-10 bg-white/70 backdrop-blur-xl rounded-3xl shadow-lg flex flex-col md:flex-row items-center gap-6">
+            <div className="w-full md:w-1/2 h-48 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center text-blue-700 font-semibold">
+              Image {i+1}
+            </div>
+            <div className="w-full md:w-1/2">
+              <h3 className="text-2xl font-bold text-blue-900 mb-3">Section Title {i+1}</h3>
+              <p className="text-blue-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio.</p>
+            </div>
+          </motion.div>
+        ))}
       </section>
 
       <footer className="py-8 text-center text-sm text-slate-700 bg-slate-100">© {year} Gatherly. All rights reserved.</footer>
+
     </motion.div>
   );
 }
+
 
 
 
