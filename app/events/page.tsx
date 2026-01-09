@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 
 /* =====================
    Types
@@ -17,14 +17,20 @@ type Event = {
   activities: string[];
   date: string;
   time: string;
-  location: string;
+
+  // ✅ Real address fields
+  venue: string;
+  addressLine1: string;
+  cityStateZip: string;
+
   attendees: number;
   spots: number;
   description: string;
 };
 
 /* =====================
-   Data
+   Real Locations + Addresses
+   (Pulled from official/primary sources where possible)
 ===================== */
 const EVENTS: Event[] = [
   {
@@ -34,7 +40,9 @@ const EVENTS: Event[] = [
     activities: ["food", "family"],
     date: "Dec 28, 2025",
     time: "6:00 PM – 8:00 PM",
-    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
+    venue: "Cross Creek Ranch Welcome Center",
+    addressLine1: "6450 Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 42,
     spots: 60,
     description:
@@ -47,7 +55,9 @@ const EVENTS: Event[] = [
     activities: ["education"],
     date: "Dec 25, 2025",
     time: "4:00 PM – 6:00 PM",
-    location: "Fulshear Branch Library (Nearby) (Fulshear, TX)",
+    venue: "Fulshear Branch Library",
+    addressLine1: "6350 GM Library Rd",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 14,
     spots: 20,
     description:
@@ -60,7 +70,9 @@ const EVENTS: Event[] = [
     activities: ["food", "donations"],
     date: "Dec 26, 2025",
     time: "9:00 AM – 1:00 PM",
-    location: "Community Food Pantry Support (Nearby) (Fulshear/Katy area)",
+    venue: "Family Hope Fulshear (Food Fairs/Assistance)",
+    addressLine1: "5757 Flewellen Oaks Ln #303",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 88,
     spots: 110,
     description: "Help organize and distribute food to families in need.",
@@ -72,7 +84,9 @@ const EVENTS: Event[] = [
     activities: ["outdoors", "volunteering"],
     date: "Dec 29, 2025",
     time: "8:00 AM – 12:00 PM",
-    location: "Cross Creek Trails (meet near main trailhead)",
+    venue: "Flewellen Creek Park (Trail Access)",
+    addressLine1: "Morgans Spur Dr",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 31,
     spots: 50,
     description:
@@ -85,7 +99,9 @@ const EVENTS: Event[] = [
     activities: ["donations", "family"],
     date: "Dec 27, 2025",
     time: "10:00 AM – 4:00 PM",
-    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
+    venue: "Cross Creek Ranch Welcome Center",
+    addressLine1: "6450 Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 27,
     spots: 40,
     description:
@@ -98,7 +114,9 @@ const EVENTS: Event[] = [
     activities: ["outdoors", "volunteering"],
     date: "Jan 04, 2026",
     time: "9:00 AM – 12:00 PM",
-    location: "Flewellen Creek Park & Trails (Fulshear, TX)",
+    venue: "Flewellen Creek Park (Meetup Point)",
+    addressLine1: "Morgans Spur Dr",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 22,
     spots: 40,
     description: "Plant native trees and learn about local ecology.",
@@ -110,7 +128,9 @@ const EVENTS: Event[] = [
     activities: ["volunteering", "family"],
     date: "Jan 12, 2026",
     time: "9:00 AM – 5:00 PM",
-    location: "Cross Creek Ranch Community Pool (Fulshear, TX)",
+    venue: "Greenthread Park (Community Area)",
+    addressLine1: "3212 Creek Falls Dr",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 16,
     spots: 30,
     description:
@@ -123,7 +143,9 @@ const EVENTS: Event[] = [
     activities: ["food", "volunteering"],
     date: "Jan 08, 2026",
     time: "10:00 AM – 1:00 PM",
-    location: "HEB (Nearby Grocery) (Fulshear, TX area)",
+    venue: "Cross Creek Ranch H-E-B",
+    addressLine1: "4950 FM 1463",
+    cityStateZip: "Katy, TX 77494",
     attendees: 12,
     spots: 20,
     description: "Deliver warm meals and check in with homebound seniors.",
@@ -135,7 +157,9 @@ const EVENTS: Event[] = [
     activities: ["outdoors", "education"],
     date: "Jan 15, 2026",
     time: "9:00 AM – 11:30 AM",
-    location: "Flewellen Creek Park & Trails (Fulshear, TX)",
+    venue: "Flewellen Creek Park (Nature Area)",
+    addressLine1: "Morgans Spur Dr",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 18,
     spots: 30,
     description: "Hands-on workshop about seasonal planting and composting.",
@@ -147,7 +171,9 @@ const EVENTS: Event[] = [
     activities: ["donations", "education"],
     date: "Jan 18, 2026",
     time: "11:00 AM – 3:00 PM",
-    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
+    venue: "Cross Creek Ranch Welcome Center",
+    addressLine1: "6450 Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 9,
     spots: 20,
     description:
@@ -160,8 +186,9 @@ const EVENTS: Event[] = [
     activities: ["education", "family"],
     date: "Jan 20, 2026",
     time: "3:30 PM – 5:30 PM",
-    location:
-      "After-School Study & Tutoring Meetup (Nearby study room / community study space)",
+    venue: "Fulshear Branch Library (Meeting Space)",
+    addressLine1: "6350 GM Library Rd",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 26,
     spots: 30,
     description:
@@ -174,17 +201,18 @@ const EVENTS: Event[] = [
     activities: ["volunteering", "family"],
     date: "Jan 22, 2026",
     time: "7:00 PM – 8:30 PM",
-    location:
-      "Neighborhood Meetup — Community Pavilion (Cross Creek Ranch Pavilion / Gathering Spot)",
+    venue: "Irene Stern Community Center (City of Fulshear)",
+    addressLine1: "6611 W Cross Creek Bend Ln",
+    cityStateZip: "Fulshear, TX 77441",
     attendees: 34,
     spots: 60,
     description:
-      "Community safety meeting with local officers and block captains.",
+      "Community safety meeting with neighbors and local updates.",
   },
 ];
 
 /* =====================
-   UI
+   UI Bits
 ===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -192,18 +220,36 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
+function mapsHref(ev: Event) {
+  const q = `${ev.venue}, ${ev.addressLine1}, ${ev.cityStateZip}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
 /* =====================
-   Motion (no opacity=0 on page!)
+   Motion
 ===================== */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const pageIn: Variants = {
-  hidden: { y: 10, filter: "blur(10px)", opacity: 1 },
-  show: { y: 0, filter: "blur(0px)", opacity: 1, transition: { duration: 0.45, ease: EASE_OUT } },
+const pageWrap: Variants = {
+  hidden: { opacity: 1 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
+  },
 };
 
 const headerUp: Variants = {
-  hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 12, filter: "blur(10px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.6, ease: EASE_OUT },
+  },
+};
+
+const panelUp: Variants = {
+  hidden: { opacity: 0, y: 14, filter: "blur(10px)" },
   show: {
     opacity: 1,
     y: 0,
@@ -212,20 +258,21 @@ const headerUp: Variants = {
   },
 };
 
-const panelUp: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_OUT } },
+const gridWrap: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05 } },
 };
 
 const cardPop: Variants = {
-  hidden: { opacity: 0, y: 10, scale: 0.98 },
+  hidden: { opacity: 0, y: 14, scale: 0.985, filter: "blur(10px)" },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.45, ease: EASE_OUT },
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: EASE_OUT },
   },
-  exit: { opacity: 0, y: 8, scale: 0.98, transition: { duration: 0.22 } },
+  exit: { opacity: 0, y: 10, scale: 0.985, transition: { duration: 0.18 } },
 };
 
 export default function EventsPage() {
@@ -269,7 +316,9 @@ export default function EventsPage() {
 
     if (q) {
       list = list.filter((e) =>
-        `${e.title} ${e.description} ${e.location}`.toLowerCase().includes(q),
+        `${e.title} ${e.description} ${e.venue} ${e.addressLine1} ${e.cityStateZip}`
+          .toLowerCase()
+          .includes(q),
       );
     }
 
@@ -298,22 +347,58 @@ export default function EventsPage() {
 
   return (
     <motion.div
-      variants={pageIn}
+      variants={pageWrap}
       initial="hidden"
       animate="show"
-      // ✅ Prevents “hidden first paint” weirdness during client navigation
-      // (Framer + Next route swaps sometimes show a blank frame)
-      style={{ willChange: "transform, filter" }}
-      className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
+      className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
     >
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      {/* =====================
+          COOL BACKGROUND ANIMATION
+      ====================== */}
+      <div className="pointer-events-none absolute inset-0">
+        {/* subtle grid */}
+        <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
+
+        {/* floating blobs */}
+        <motion.div
+          aria-hidden
+          className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-45"
+          style={{
+            background:
+              "radial-gradient(circle at 30% 30%, rgba(37,99,235,0.35), rgba(37,99,235,0) 60%)",
+          }}
+          animate={{ x: [0, 28, 0], y: [0, 18, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: EASE_OUT }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute -bottom-48 -right-48 h-[620px] w-[620px] rounded-full blur-3xl opacity-40"
+          style={{
+            background:
+              "radial-gradient(circle at 40% 40%, rgba(14,165,233,0.30), rgba(14,165,233,0) 62%)",
+          }}
+          animate={{ x: [0, -24, 0], y: [0, -16, 0] }}
+          transition={{ duration: 11.5, repeat: Infinity, ease: EASE_OUT }}
+        />
+        <motion.div
+          aria-hidden
+          className="absolute top-[30%] left-[55%] h-[420px] w-[420px] rounded-full blur-3xl opacity-35"
+          style={{
+            background:
+              "radial-gradient(circle at 30% 30%, rgba(99,102,241,0.25), rgba(99,102,241,0) 60%)",
+          }}
+          animate={{ x: [0, 18, 0], y: [0, -22, 0] }}
+          transition={{ duration: 12.2, repeat: Infinity, ease: EASE_OUT }}
+        />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
         <motion.header variants={headerUp} className="mb-8">
           <h1 className="text-4xl font-semibold text-[#143B8C]">
             Gatherly — Community Events
           </h1>
           <p className="mt-2 text-slate-600 max-w-2xl">
-            Discover local volunteering opportunities and community events in
-            Cross Creek.
+            Discover local volunteering opportunities and community events in Cross Creek.
           </p>
         </motion.header>
 
@@ -327,19 +412,22 @@ export default function EventsPage() {
               <p className="text-sm text-slate-600">Choose what you want to see.</p>
             </div>
 
-            <button
+            <motion.button
               onClick={clearFilters}
+              whileTap={{ scale: 0.98 }}
               className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
             >
               Clear
-            </button>
+            </motion.button>
           </div>
 
+          {/* Categories */}
           <div className="flex flex-wrap gap-2 mb-4">
             {categories.map((c) => (
-              <button
+              <motion.button
                 key={c.id}
                 onClick={() => setSelectedCategory(c.id)}
+                whileTap={{ scale: 0.98 }}
                 className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
                   selectedCategory === c.id
                     ? "bg-blue-600 text-white border border-blue-600"
@@ -347,15 +435,17 @@ export default function EventsPage() {
                 }`}
               >
                 {c.name}
-              </button>
+              </motion.button>
             ))}
           </div>
 
+          {/* Activities */}
           <div className="flex flex-wrap gap-2 mb-4">
             {activities.map((a) => (
-              <button
+              <motion.button
                 key={a.id}
                 onClick={() => toggleActivity(a.id)}
+                whileTap={{ scale: 0.98 }}
                 className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
                   selectedActivities.includes(a.id)
                     ? "bg-blue-600 text-white border border-blue-600"
@@ -363,10 +453,11 @@ export default function EventsPage() {
                 }`}
               >
                 {a.name}
-              </button>
+              </motion.button>
             ))}
           </div>
 
+          {/* Search + Sort */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <input
               value={query}
@@ -396,7 +487,8 @@ export default function EventsPage() {
           </div>
         </motion.div>
 
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Cards */}
+        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((ev) => {
               const percent = Math.round((ev.attendees / ev.spots) * 100);
@@ -410,15 +502,17 @@ export default function EventsPage() {
                   initial="hidden"
                   animate="show"
                   exit="exit"
-                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileHover={{ y: -6, scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                  className="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
+                  className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
                 >
-                  <h3 className="text-xl font-semibold mb-1 text-slate-900">
-                    {ev.title}
-                  </h3>
+                  <h3 className="text-xl font-semibold mb-1 text-slate-900">{ev.title}</h3>
 
-                  <p className="text-slate-600 text-sm">{ev.location}</p>
+                  <p className="text-slate-700 text-sm font-medium">{ev.venue}</p>
+                  <p className="text-slate-600 text-sm">
+                    {ev.addressLine1}, {ev.cityStateZip}
+                  </p>
+
                   <p className="text-slate-700 text-sm mt-1">
                     {ev.date} • {ev.time}
                   </p>
@@ -436,7 +530,7 @@ export default function EventsPage() {
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.6, ease: EASE_OUT }}
+                        transition={{ duration: 0.7, ease: EASE_OUT }}
                         className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
                       />
                     </div>
@@ -446,14 +540,24 @@ export default function EventsPage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 mt-5">
+                  <div className="grid grid-cols-2 gap-2 mt-5">
                     <Link
                       href={`/events/register?id=${ev.id}`}
-                      className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
+                      className="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
                     >
                       Register
                     </Link>
-                    <button className="flex-1 bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]">
+
+                    <a
+                      href={mapsHref(ev)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-center bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]"
+                    >
+                      Open in Maps
+                    </a>
+
+                    <button className="col-span-2 bg-white/70 border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]">
                       Details
                     </button>
                   </div>
