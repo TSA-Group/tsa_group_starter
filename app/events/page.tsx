@@ -184,7 +184,7 @@ const EVENTS: Event[] = [
 ];
 
 /* =====================
-   UI bits
+   UI
 ===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
@@ -193,14 +193,13 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 /* =====================
-   Motion helpers (TS-safe easing)
+   Motion (no opacity=0 on page!)
 ===================== */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-// ✅ FIX: don't go fully transparent to avoid white flash during route change
-const pageFade: Variants = {
-  hidden: { opacity: 0.01 },
-  show: { opacity: 1, transition: { duration: 0.45, ease: EASE_OUT } },
+const pageIn: Variants = {
+  hidden: { y: 10, filter: "blur(10px)", opacity: 1 },
+  show: { y: 0, filter: "blur(0px)", opacity: 1, transition: { duration: 0.45, ease: EASE_OUT } },
 };
 
 const headerUp: Variants = {
@@ -299,12 +298,14 @@ export default function EventsPage() {
 
   return (
     <motion.div
-      variants={pageFade}
+      variants={pageIn}
       initial="hidden"
       animate="show"
+      // ✅ Prevents “hidden first paint” weirdness during client navigation
+      // (Framer + Next route swaps sometimes show a blank frame)
+      style={{ willChange: "transform, filter" }}
       className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
     >
-      {/* Keep fonts simple here (layout already handles fonts) */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <motion.header variants={headerUp} className="mb-8">
           <h1 className="text-4xl font-semibold text-[#143B8C]">
