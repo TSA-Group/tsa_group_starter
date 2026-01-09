@@ -30,18 +30,27 @@ const ORBS = [
 ];
 
 /* ---------------- VARIANTS ---------------- */
-const container = {
+const container: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
+  show: {
+    transition: { staggerChildren: 0.12 },
+  },
 };
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 18, filter: "blur(4px)" },
+const fadeUp: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+    filter: "blur(4px)",
+  },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.6, ease: "easeOut" },
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
   },
 };
 
