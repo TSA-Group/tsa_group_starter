@@ -257,6 +257,16 @@ export default function Home() {
           <p><span className="font-bold text-blue-700">Looking Ahead:</span> Expanding neighborhoods, stories, and ways for people to get involved.</p>
         </div>
       </section>
+      
+      {/* FOOTER */}
+      <footer className="border-t border-blue-200 bg-white">
+        <div className="text-center text-sm text-blue-700 py-4 bg-blue-50">
+          © {year} Gatherly. All rights reserved.
+        </div>
+      </footer>
+    </motion.div> {/* <-- THIS WAS MISSING */}
+  );
+}
 
 
 
