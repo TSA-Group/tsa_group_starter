@@ -218,7 +218,7 @@ export default function Page() {
   const [directoryQuery, setDirectoryQuery] = useState("");
 
   // Active marker
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, ] = useState<string | null>(null);
 
   /** ---------- Filters ---------- */
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
@@ -287,7 +287,7 @@ export default function Page() {
     (directoryQuery.trim() ? 1 : 0);
 
   const handleCenter = (loc: LocationItem) => {
-    setActiveId(loc.id);
+    (loc.id);
     setCenter(loc.position);
     setZoom(15);
     setSelectedPlace(loc.position);
