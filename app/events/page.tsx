@@ -5,17 +5,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 
 import { db } from "@/lib/firebase";
-import {
-  collection,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  writeBatch,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
 
 /* =====================
    Types
@@ -30,7 +20,6 @@ type EventDoc = {
   category: string;
   activities: string[];
 
-  // display strings
   date: string;
   time: string;
 
@@ -42,13 +31,8 @@ type EventDoc = {
   spots: number;
   description: string;
 
-  // for sorting
   startAt?: Timestamp;
-
-  createdAt?: Timestamp;
 };
-
-
 
 /* =====================
    UI Bits
@@ -117,10 +101,6 @@ const cardPop: Variants = {
 export default function EventsPage() {
   const [events, setEvents] = useState<EventDoc[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // seed button state
-  const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState<string | null>(null);
 
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
@@ -213,40 +193,6 @@ export default function EventsPage() {
     setSortBy("upcoming");
   };
 
-  // ✅ SEED BUTTON HANDLER (click once)
-  const seedOnce = async () => {
-    try {
-      setSeedMsg(null);
-      setSeeding(true);
-
-      // if any doc exists, don't seed again
-      const existing = await getDocs(query(collection(db, "events"), limit(1)));
-      if (!existing.empty) {
-        setSeedMsg("Events already exist — seeding skipped.");
-        setSeeding(false);
-        return;
-      }
-
-      const batch = writeBatch(db);
-      const colRef = collection(db, "events");
-
-      for (const ev of SEED_EVENTS) {
-        const docRef = (await import("firebase/firestore")).doc(colRef);
-        batch.set(docRef, {
-          ...ev,
-          createdAt: serverTimestamp(),
-        });
-      }
-
-      await batch.commit();
-      setSeedMsg("✅ Seeded events successfully. Delete the seed code now.");
-    } catch (err: any) {
-      setSeedMsg(err?.message ?? "Seeding failed.");
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   return (
     <motion.div
       variants={pageWrap}
@@ -295,7 +241,8 @@ export default function EventsPage() {
             Gatherly — Community Events
           </h1>
           <p className="mt-2 text-slate-600 max-w-2xl">
-            Discover local volunteering opportunities and community events in Cross Creek.
+            Discover local volunteering opportunities and community events in Cross
+            Creek.
           </p>
         </motion.header>
 
@@ -303,40 +250,20 @@ export default function EventsPage() {
           variants={panelUp}
           className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
         >
-          <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+          <div className="flex items-center justify-between gap-4 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
-              <p className="text-sm text-slate-600">
-                Choose what you want to see.
-              </p>
+              <p className="text-sm text-slate-600">Choose what you want to see.</p>
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* ✅ one-time seed button */}
-              <motion.button
-                onClick={seedOnce}
-                disabled={seeding}
-                whileTap={{ scale: 0.98 }}
-                className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition disabled:opacity-60"
-              >
-                {seeding ? "Seeding..." : "Seed Events (one time)"}
-              </motion.button>
-
-              <motion.button
-                onClick={clearFilters}
-                whileTap={{ scale: 0.98 }}
-                className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
-              >
-                Clear
-              </motion.button>
-            </div>
+            <motion.button
+              onClick={clearFilters}
+              whileTap={{ scale: 0.98 }}
+              className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
+            >
+              Clear
+            </motion.button>
           </div>
-
-          {seedMsg && (
-            <div className="mb-4 text-sm rounded-xl border border-blue-200 bg-white px-4 py-3 text-slate-700">
-              {seedMsg}
-            </div>
-          )}
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2 mb-4">
@@ -405,10 +332,7 @@ export default function EventsPage() {
         </motion.div>
 
         {/* Cards */}
-        <motion.div
-          variants={gridWrap}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
+        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence mode="popLayout">
             {loading ? (
               <motion.div
@@ -444,13 +368,9 @@ export default function EventsPage() {
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
                     className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
                   >
-                    <h3 className="text-xl font-semibold mb-1 text-slate-900">
-                      {ev.title}
-                    </h3>
+                    <h3 className="text-xl font-semibold mb-1 text-slate-900">{ev.title}</h3>
 
-                    <p className="text-slate-700 text-sm font-medium">
-                      {ev.venue}
-                    </p>
+                    <p className="text-slate-700 text-sm font-medium">{ev.venue}</p>
                     <p className="text-slate-600 text-sm">
                       {ev.addressLine1}, {ev.cityStateZip}
                     </p>
@@ -459,9 +379,7 @@ export default function EventsPage() {
                       {ev.date} • {ev.time}
                     </p>
 
-                    <p className="text-slate-700 text-sm mt-3">
-                      {ev.description}
-                    </p>
+                    <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
 
                     <div className="flex flex-wrap gap-2 mt-3">
                       {(ev.activities || []).map((a) => (
