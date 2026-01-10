@@ -1102,16 +1102,25 @@ function HoverMarker({
         setHovered(false);
         setActiveId(null);
       }}
-      onClick={() => onCenter(location)}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isActive) {
+          setActiveId(null);
+        } else {
+          onCenter(location);
+        }
+      }}
       style={{
         transform: "translate(-50%, -100%)",
         cursor: "pointer",
+        // Dynamic z-index: active/hovered markers appear above others
         zIndex: isExpanded ? 9999 : 1,
         position: 'relative',
       }}
     >
       <AnimatePresence mode="wait">
         {!isExpanded ? (
+          // Compact marker pin with your original icon
           <motion.div
             key="pin"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -1129,28 +1138,15 @@ function HoverMarker({
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 
-                         shadow-lg border-2 border-white flex items-center justify-center"
+              className="w-8 h-8"
             >
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <Image
+                src="/marker.png"
+                alt={location.title}
+                width={32}
+                height={32}
+                priority
+              />
             </motion.div>
             
             {/* Pulsing ring */}
@@ -1169,6 +1165,7 @@ function HoverMarker({
             />
           </motion.div>
         ) : (
+          // Expanded card (morphs from pin) - SMALLER SIZE
           <motion.div
             key="card"
             layoutId={`marker-${location.id}`}
@@ -1181,23 +1178,23 @@ function HoverMarker({
               damping: 25,
             }}
             className="absolute left-1/2 bottom-full mb-3 -translate-x-1/2
-                       w-72 pointer-events-none"
+                       w-56 pointer-events-none"
             style={{ zIndex: 10000 }}
           >
             <div className="relative">
               {/* Card content */}
-              <div className="rounded-2xl bg-white shadow-2xl border border-blue-100 overflow-hidden">
+              <div className="rounded-xl bg-white shadow-2xl border border-blue-100 overflow-hidden">
                 {/* Header with gradient */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 text-white">
                   <motion.div
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <div className="text-xs font-semibold uppercase tracking-wider opacity-90 mb-1">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider opacity-90 mb-0.5">
                       {location.eventType}
                     </div>
-                    <div className="text-base font-bold leading-tight">
+                    <div className="text-sm font-bold leading-tight">
                       {location.title}
                     </div>
                   </motion.div>
@@ -1208,12 +1205,12 @@ function HoverMarker({
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.15 }}
-                  className="p-4 space-y-3"
+                  className="p-3 space-y-2"
                 >
                   {/* Time badge */}
                   <div className="flex items-center gap-2">
                     <svg
-                      className="w-4 h-4 text-blue-600 flex-shrink-0"
+                      className="w-3.5 h-3.5 text-blue-600 flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -1225,7 +1222,7 @@ function HoverMarker({
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span className="text-sm text-slate-700 font-medium">
+                    <span className="text-xs text-slate-700 font-medium">
                       {location.when}
                     </span>
                   </div>
@@ -1234,7 +1231,7 @@ function HoverMarker({
                   {location.host && (
                     <div className="flex items-center gap-2">
                       <svg
-                        className="w-4 h-4 text-blue-600 flex-shrink-0"
+                        className="w-3.5 h-3.5 text-blue-600 flex-shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1246,18 +1243,18 @@ function HoverMarker({
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                         />
                       </svg>
-                      <span className="text-sm text-slate-600">
+                      <span className="text-xs text-slate-600">
                         {location.host}
                       </span>
                     </div>
                   )}
 
                   {/* Activities */}
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {location.activities.slice(0, 3).map((activity) => (
                       <span
                         key={activity}
-                        className="text-xs px-2 py-1 rounded-full bg-blue-50 
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 
                                    text-blue-700 border border-blue-200 font-medium"
                       >
                         {activity}
@@ -1266,10 +1263,10 @@ function HoverMarker({
                   </div>
 
                   {/* Click hint */}
-                  <div className="pt-2 border-t border-slate-100">
-                    <div className="text-xs text-slate-500 flex items-center gap-1">
+                  <div className="pt-1.5 border-t border-slate-100">
+                    <div className="text-[10px] text-slate-500 flex items-center gap-1">
                       <svg
-                        className="w-3 h-3"
+                        className="w-2.5 h-2.5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1289,7 +1286,7 @@ function HoverMarker({
 
               {/* Arrow pointer */}
               <div
-                className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-4 h-4 
+                className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-3 h-3 
                            bg-white border-r border-b border-blue-100 rotate-45"
               />
             </div>
