@@ -1076,6 +1076,7 @@ function SearchBox({
 }
 
 /** ---------- Marker ---------- */
+/** ---------- Enhanced Marker with Image Morph ---------- */
 function HoverMarker({
   location,
   activeId,
@@ -1089,6 +1090,7 @@ function HoverMarker({
 }) {
   const [hovered, setHovered] = useState(false);
   const isActive = activeId === location.id;
+  const isExpanded = hovered || isActive;
 
   return (
     <div
@@ -1104,57 +1106,199 @@ function HoverMarker({
       style={{
         transform: "translate(-50%, -100%)",
         cursor: "pointer",
-        zIndex: hovered || isActive ? 999 : 1,
+        zIndex: isExpanded ? 9999 : 1,
+        position: 'relative',
       }}
     >
-      <motion.div
-        animate={{
-          scale: hovered || isActive ? 1.25 : 1,
-          rotate: hovered || isActive ? 0 : 360,
-        }}
-        transition={{
-          rotate: {
-            repeat: Infinity,
-            duration: 6,
-            ease: "linear",
-          },
-          scale: {
-            type: "spring",
-            stiffness: 260,
-            damping: 18,
-          },
-        }}
-        className="w-8 h-8"
-      >
-        <Image
-          src="/marker.png" // <-- put your image in /public
-          alt={location.title}
-          width={32}
-          height={32}
-          priority
-        />
-      </motion.div>
-
-      <AnimatePresence>
-        {(hovered || isActive) && (
+      <AnimatePresence mode="wait">
+        {!isExpanded ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2
-                       bg-blue-700 text-white text-xs rounded-2xl px-3 py-2 shadow-xl w-60 pointer-events-none"
+            key="pin"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="relative"
           >
-            <div className="font-semibold leading-tight">{location.title}</div>
-            <div className="mt-0.5 opacity-90">{location.when}</div>
-            <div className="opacity-90">{location.eventType}</div>
+            <motion.div
+              animate={{
+                y: [0, -4, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 
+                         shadow-lg border-2 border-white flex items-center justify-center"
+            >
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </motion.div>
+            
+            {/* Pulsing ring */}
+            <motion.div
+              animate={{
+                scale: [1, 1.4, 1],
+                opacity: [0.5, 0, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+              }}
+              className="absolute inset-0 rounded-full bg-blue-400"
+              style={{ zIndex: -1 }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="card"
+            layoutId={`marker-${location.id}`}
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 10 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 25,
+            }}
+            className="absolute left-1/2 bottom-full mb-3 -translate-x-1/2
+                       w-72 pointer-events-none"
+            style={{ zIndex: 10000 }}
+          >
+            <div className="relative">
+              {/* Card content */}
+              <div className="rounded-2xl bg-white shadow-2xl border border-blue-100 overflow-hidden">
+                {/* Header with gradient */}
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
+                  <motion.div
+                    initial={{ x: -10, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <div className="text-xs font-semibold uppercase tracking-wider opacity-90 mb-1">
+                      {location.eventType}
+                    </div>
+                    <div className="text-base font-bold leading-tight">
+                      {location.title}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Body */}
+                <motion.div
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.15 }}
+                  className="p-4 space-y-3"
+                >
+                  {/* Time badge */}
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4 text-blue-600 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="text-sm text-slate-700 font-medium">
+                      {location.when}
+                    </span>
+                  </div>
+
+                  {/* Host */}
+                  {location.host && (
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4 text-blue-600 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                      <span className="text-sm text-slate-600">
+                        {location.host}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Activities */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {location.activities.slice(0, 3).map((activity) => (
+                      <span
+                        key={activity}
+                        className="text-xs px-2 py-1 rounded-full bg-blue-50 
+                                   text-blue-700 border border-blue-200 font-medium"
+                      >
+                        {activity}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Click hint */}
+                  <div className="pt-2 border-t border-slate-100">
+                    <div className="text-xs text-slate-500 flex items-center gap-1">
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                        />
+                      </svg>
+                      Click to center on map
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Arrow pointer */}
+              <div
+                className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-4 h-4 
+                           bg-white border-r border-b border-blue-100 rotate-45"
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
-
 /** ---------- Suggest Resource Form ---------- */
 function SuggestResourceForm() {
   const [name, setName] = useState("");
