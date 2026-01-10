@@ -218,7 +218,7 @@ export default function Page() {
   const [directoryQuery, setDirectoryQuery] = useState("");
 
   // Active marker
-  const [activeId, ] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   /** ---------- Filters ---------- */
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
