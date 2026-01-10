@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { db } from "@/components/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   addDoc,
   collection,
