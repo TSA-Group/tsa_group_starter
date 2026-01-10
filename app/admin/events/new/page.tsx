@@ -1,17 +1,19 @@
 "use client";
- 
+
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AdminShell from "../../_components/AdminShell";
 
+// ✅ IMPORTANT: match YOUR firebase file path:
 import { db } from "@/lib/firebase";
+
 import {
   addDoc,
   collection,
   serverTimestamp,
-  type Timestamp,
+  Timestamp,
 } from "firebase/firestore";
 
 /* =====================
@@ -55,27 +57,40 @@ const ACTIVITIES = [
 export type EventDoc = {
   community: (typeof COMMUNITIES)[number];
 
-  // ✅ multi select
+  // multi select
   types: (typeof EVENT_TYPES)[number][];
   activities: (typeof ACTIVITIES)[number][];
 
   title: string;
 
-  // keep simple strings for now (works well in Firestore + UI)
+  // strings for UI
   date: string; // yyyy-mm-dd
   startTime: string; // HH:MM
   endTime: string; // HH:MM
+
+  // ✅ timestamps for sorting/querying
+  startAt: Timestamp;
+  endAt: Timestamp;
 
   venue: string;
   address: string;
 
   indoorOutdoor: "Indoor" | "Outdoor" | "Both";
   contact: string;
-
   description: string;
 
-  createdAt: Timestamp | null;
+  createdAt: any; // serverTimestamp
 };
+
+/* =====================
+   Helpers
+===================== */
+function toTimestamp(date: string, time: string) {
+  // date = "2026-01-09", time = "18:30"
+  // Build a local Date object:
+  const d = new Date(`${date}T${time}:00`);
+  return Timestamp.fromDate(d);
+}
 
 /* =====================
    Page
@@ -91,7 +106,7 @@ export default function AddEventPage() {
     "Cross Creek Ranch",
   );
 
-  // ✅ Multi selects
+  // Multi selects
   const [types, setTypes] = React.useState<(typeof EVENT_TYPES)[number][]>([
     "Community",
   ]);
@@ -120,7 +135,7 @@ export default function AddEventPage() {
   const [contact, setContact] = React.useState("");
   const [description, setDescription] = React.useState("");
 
-  // ✅ close dropdowns when clicking outside
+  // close dropdowns when clicking outside
   React.useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -144,20 +159,34 @@ export default function AddEventPage() {
     e.preventDefault();
     setError(null);
 
-    // basic validation
+    // validation
     if (!title.trim()) return setError("Please enter an Event Title.");
     if (!date) return setError("Please select an Event Date.");
     if (!startTime || !endTime) return setError("Please select Start + End time.");
     if (!venue.trim() || !address.trim())
       return setError("Please fill out Venue and Address.");
     if (types.length === 0) return setError("Please select at least 1 Event Type.");
-    if (activities.length === 0)
-      return setError("Please select at least 1 Activity.");
+    if (activities.length === 0) return setError("Please select at least 1 Activity.");
+
+    // ✅ build timestamps (so Events page can sort/query)
+    let startAt: Timestamp;
+    let endAt: Timestamp;
+
+    try {
+      startAt = toTimestamp(date, startTime);
+      endAt = toTimestamp(date, endTime);
+
+      if (endAt.toMillis() <= startAt.toMillis()) {
+        return setError("End time must be after start time.");
+      }
+    } catch {
+      return setError("Invalid date/time. Please re-check fields.");
+    }
 
     try {
       setSaving(true);
 
-      await addDoc(collection(db, "events"), {
+      const payload: Omit<EventDoc, "createdAt"> & { createdAt: any } = {
         community,
         types,
         activities,
@@ -167,6 +196,9 @@ export default function AddEventPage() {
         startTime,
         endTime,
 
+        startAt,
+        endAt,
+
         venue: venue.trim(),
         address: address.trim(),
 
@@ -175,7 +207,9 @@ export default function AddEventPage() {
         description: description.trim(),
 
         createdAt: serverTimestamp(),
-      });
+      };
+
+      await addDoc(collection(db, "events"), payload);
 
       setSent(true);
       window.setTimeout(() => setSent(false), 2200);
@@ -204,7 +238,6 @@ export default function AddEventPage() {
       title="Add Event"
       subtitle="Create community events that appear on the public Events page."
     >
-      {/* Back to home (logs out) */}
       <div className="mb-4">
         <motion.button
           onClick={logoutAndHome}
@@ -222,27 +255,18 @@ export default function AddEventPage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community → Event (types + activities multi-select, title, date/time, venue/address, indoor/outdoor, contact, description)
+              Community → Event (types + activities, title, date/time, venue/address, indoor/outdoor, contact, description)
             </div>
           </div>
 
           <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Alerts */}
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }}
+                    exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
                     ✅ Event saved to Firestore!
@@ -254,16 +278,8 @@ export default function AddEventPage() {
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }}
+                    exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
                     className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
                   >
                     ❌ {error}
@@ -272,13 +288,10 @@ export default function AddEventPage() {
               </AnimatePresence>
             </div>
 
-            {/* Community */}
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) =>
-                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
-                }
+                onChange={(e) => setCommunity(e.target.value as (typeof COMMUNITIES)[number])}
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
@@ -289,7 +302,6 @@ export default function AddEventPage() {
               </select>
             </Field>
 
-            {/* Event Types (multi-select) */}
             <Field label="Event Types (multi-select)">
               <MultiSelect
                 refEl={typesRef}
@@ -303,7 +315,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Activities (multi-select) */}
             <Field label="Activities (multi-select)">
               <MultiSelect
                 refEl={actsRef}
@@ -317,7 +328,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Indoor/Outdoor */}
             <Field label="Indoor / Outdoor">
               <div className="grid grid-cols-3 gap-2">
                 {(["Indoor", "Outdoor", "Both"] as const).map((opt) => {
@@ -342,7 +352,6 @@ export default function AddEventPage() {
               </div>
             </Field>
 
-            {/* Title */}
             <div className="md:col-span-2">
               <Field label="Event Title">
                 <input
@@ -355,7 +364,6 @@ export default function AddEventPage() {
               </Field>
             </div>
 
-            {/* Date */}
             <Field label="Date">
               <input
                 type="date"
@@ -366,7 +374,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Time */}
             <Field label="Start / End Time">
               <div className="grid grid-cols-2 gap-2">
                 <input
@@ -386,7 +393,6 @@ export default function AddEventPage() {
               </div>
             </Field>
 
-            {/* Venue */}
             <Field label="Venue Name">
               <input
                 value={venue}
@@ -397,7 +403,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Address */}
             <Field label="Address">
               <input
                 value={address}
@@ -408,7 +413,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Contact */}
             <div className="md:col-span-2">
               <Field label="Contact (optional)">
                 <input
@@ -420,7 +424,6 @@ export default function AddEventPage() {
               </Field>
             </div>
 
-            {/* Description */}
             <div className="md:col-span-2">
               <Field label="Description (optional)">
                 <textarea
@@ -432,11 +435,9 @@ export default function AddEventPage() {
               </Field>
             </div>
 
-            {/* Submit */}
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
               <div className="text-xs text-white/55">
-                Saves directly to Firestore collection:{" "}
-                <span className="font-semibold">events</span>
+                Saves to Firestore: <span className="font-semibold">events</span>
               </div>
 
               <motion.button
