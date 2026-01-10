@@ -1,8 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
+
+import { db } from "@/components/lib/firebase";
+import {
+  collection,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  writeBatch,
+  Timestamp,
+} from "firebase/firestore";
 
 /* =====================
    Types
@@ -10,15 +23,17 @@ import { AnimatePresence, motion, type Variants } from "framer-motion";
 type Category = { id: string; name: string };
 type Activity = { id: string; name: string };
 
-type Event = {
-  id: number;
+type EventDoc = {
+  id: string;
+
   title: string;
   category: string;
   activities: string[];
+
+  // display strings
   date: string;
   time: string;
 
-  // ✅ Real address fields
   venue: string;
   addressLine1: string;
   cityStateZip: string;
@@ -26,15 +41,19 @@ type Event = {
   attendees: number;
   spots: number;
   description: string;
+
+  // for sorting
+  startAt?: Timestamp;
+
+  createdAt?: Timestamp;
 };
 
 /* =====================
-   Real Locations + Addresses
-   (Pulled from official/primary sources where possible)
+   Seed data (one-time)
+   Delete after seeding
 ===================== */
-const EVENTS: Event[] = [
+const SEED_EVENTS: Omit<EventDoc, "id">[] = [
   {
-    id: 1,
     title: "Community Dinner Night",
     category: "community",
     activities: ["food", "family"],
@@ -47,9 +66,10 @@ const EVENTS: Event[] = [
     spots: 60,
     description:
       "A welcoming dinner bringing neighbors together for conversation and connection.",
+    startAt: Timestamp.fromDate(new Date("2025-12-28T18:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 2,
     title: "Literacy Tutoring Session",
     category: "tutoring",
     activities: ["education"],
@@ -62,9 +82,10 @@ const EVENTS: Event[] = [
     spots: 20,
     description:
       "Volunteer to help young students improve reading and writing skills.",
+    startAt: Timestamp.fromDate(new Date("2025-12-25T16:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 3,
     title: "Food Pantry Distribution",
     category: "pantry",
     activities: ["food", "donations"],
@@ -76,9 +97,10 @@ const EVENTS: Event[] = [
     attendees: 88,
     spots: 110,
     description: "Help organize and distribute food to families in need.",
+    startAt: Timestamp.fromDate(new Date("2025-12-26T09:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 4,
     title: "River Cleanup Day",
     category: "cleanup",
     activities: ["outdoors", "volunteering"],
@@ -91,9 +113,10 @@ const EVENTS: Event[] = [
     spots: 50,
     description:
       "Protect local wildlife by helping clean up trails and public spaces.",
+    startAt: Timestamp.fromDate(new Date("2025-12-29T08:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 5,
     title: "Holiday Clothing Drive",
     category: "clothing",
     activities: ["donations", "family"],
@@ -106,9 +129,10 @@ const EVENTS: Event[] = [
     spots: 40,
     description:
       "Sort and organize donated winter clothing for families in need.",
+    startAt: Timestamp.fromDate(new Date("2025-12-27T10:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 6,
     title: "Park Tree Planting",
     category: "cleanup",
     activities: ["outdoors", "volunteering"],
@@ -120,9 +144,10 @@ const EVENTS: Event[] = [
     attendees: 22,
     spots: 40,
     description: "Plant native trees and learn about local ecology.",
+    startAt: Timestamp.fromDate(new Date("2026-01-04T09:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 7,
     title: "Neighborhood Mural Project",
     category: "meetup",
     activities: ["volunteering", "family"],
@@ -135,9 +160,10 @@ const EVENTS: Event[] = [
     spots: 30,
     description:
       "Assist local artists in painting a community mural; no experience required.",
+    startAt: Timestamp.fromDate(new Date("2026-01-12T09:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 8,
     title: "Senior Meal Delivery",
     category: "community",
     activities: ["food", "volunteering"],
@@ -149,9 +175,10 @@ const EVENTS: Event[] = [
     attendees: 12,
     spots: 20,
     description: "Deliver warm meals and check in with homebound seniors.",
+    startAt: Timestamp.fromDate(new Date("2026-01-08T10:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 9,
     title: "Community Garden Workshop",
     category: "meetup",
     activities: ["outdoors", "education"],
@@ -163,9 +190,10 @@ const EVENTS: Event[] = [
     attendees: 18,
     spots: 30,
     description: "Hands-on workshop about seasonal planting and composting.",
+    startAt: Timestamp.fromDate(new Date("2026-01-15T09:00:00")),
+    createdAt: undefined,
   },
   {
-    id: 10,
     title: "Clothing Repair Pop-up",
     category: "clothing",
     activities: ["donations", "education"],
@@ -178,36 +206,8 @@ const EVENTS: Event[] = [
     spots: 20,
     description:
       "Learn basic mending skills and repair donated garments for reuse.",
-  },
-  {
-    id: 11,
-    title: "After-school STEM Club",
-    category: "tutoring",
-    activities: ["education", "family"],
-    date: "Jan 20, 2026",
-    time: "3:30 PM – 5:30 PM",
-    venue: "Fulshear Branch Library (Meeting Space)",
-    addressLine1: "6350 GM Library Rd",
-    cityStateZip: "Fulshear, TX 77441",
-    attendees: 26,
-    spots: 30,
-    description:
-      "Volunteer mentors lead hands-on STEM projects for middle schoolers.",
-  },
-  {
-    id: 12,
-    title: "Neighborhood Watch Meeting",
-    category: "meetup",
-    activities: ["volunteering", "family"],
-    date: "Jan 22, 2026",
-    time: "7:00 PM – 8:30 PM",
-    venue: "Irene Stern Community Center (City of Fulshear)",
-    addressLine1: "6611 W Cross Creek Bend Ln",
-    cityStateZip: "Fulshear, TX 77441",
-    attendees: 34,
-    spots: 60,
-    description:
-      "Community safety meeting with neighbors and local updates.",
+    startAt: Timestamp.fromDate(new Date("2026-01-18T11:00:00")),
+    createdAt: undefined,
   },
 ];
 
@@ -220,7 +220,7 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-function mapsHref(ev: Event) {
+function mapsHref(ev: EventDoc) {
   const q = `${ev.venue}, ${ev.addressLine1}, ${ev.cityStateZip}`;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
@@ -276,9 +276,16 @@ const cardPop: Variants = {
 };
 
 export default function EventsPage() {
+  const [events, setEvents] = useState<EventDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // seed button state
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState<string | null>(null);
+
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
-  const [query, setQuery] = useState("");
+  const [queryText, setQueryText] = useState("");
   const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
 
   const categories: Category[] = [
@@ -300,17 +307,36 @@ export default function EventsPage() {
     { id: "family", name: "Family" },
   ];
 
+  // ✅ live read from Firestore
+  useEffect(() => {
+    const qy = query(collection(db, "events"), orderBy("startAt", "asc"));
+    const unsub = onSnapshot(
+      qy,
+      (snap) => {
+        const list: EventDoc[] = snap.docs.map((d) => {
+          const data = d.data() as Omit<EventDoc, "id">;
+          return { id: d.id, ...data };
+        });
+        setEvents(list);
+        setLoading(false);
+      },
+      () => setLoading(false),
+    );
+
+    return () => unsub();
+  }, []);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = queryText.trim().toLowerCase();
 
     let list =
       selectedCategory === "all"
-        ? EVENTS
-        : EVENTS.filter((e) => e.category === selectedCategory);
+        ? events
+        : events.filter((e) => e.category === selectedCategory);
 
     if (selectedActivities.length > 0) {
       list = list.filter((e) =>
-        selectedActivities.every((a) => e.activities.includes(a)),
+        selectedActivities.every((a) => (e.activities || []).includes(a)),
       );
     }
 
@@ -323,15 +349,18 @@ export default function EventsPage() {
     }
 
     if (sortBy === "popular") {
-      list = [...list].sort((a, b) => b.attendees - a.attendees);
+      list = [...list].sort((a, b) => (b.attendees || 0) - (a.attendees || 0));
     } else {
-      list = [...list].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      );
+      // upcoming: prefer startAt timestamp, fallback to date string
+      list = [...list].sort((a, b) => {
+        const ta = a.startAt?.toMillis?.() ?? new Date(a.date).getTime();
+        const tb = b.startAt?.toMillis?.() ?? new Date(b.date).getTime();
+        return ta - tb;
+      });
     }
 
     return list;
-  }, [selectedCategory, selectedActivities, query, sortBy]);
+  }, [events, selectedCategory, selectedActivities, queryText, sortBy]);
 
   const toggleActivity = (id: string) =>
     setSelectedActivities((prev) =>
@@ -341,8 +370,42 @@ export default function EventsPage() {
   const clearFilters = () => {
     setSelectedCategory("all");
     setSelectedActivities([]);
-    setQuery("");
+    setQueryText("");
     setSortBy("upcoming");
+  };
+
+  // ✅ SEED BUTTON HANDLER (click once)
+  const seedOnce = async () => {
+    try {
+      setSeedMsg(null);
+      setSeeding(true);
+
+      // if any doc exists, don't seed again
+      const existing = await getDocs(query(collection(db, "events"), limit(1)));
+      if (!existing.empty) {
+        setSeedMsg("Events already exist — seeding skipped.");
+        setSeeding(false);
+        return;
+      }
+
+      const batch = writeBatch(db);
+      const colRef = collection(db, "events");
+
+      for (const ev of SEED_EVENTS) {
+        const docRef = (await import("firebase/firestore")).doc(colRef);
+        batch.set(docRef, {
+          ...ev,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+      setSeedMsg("✅ Seeded events successfully. Delete the seed code now.");
+    } catch (err: any) {
+      setSeedMsg(err?.message ?? "Seeding failed.");
+    } finally {
+      setSeeding(false);
+    }
   };
 
   return (
@@ -352,14 +415,9 @@ export default function EventsPage() {
       animate="show"
       className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
     >
-      {/* =====================
-          COOL BACKGROUND ANIMATION
-      ====================== */}
+      {/* background */}
       <div className="pointer-events-none absolute inset-0">
-        {/* subtle grid */}
         <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
-
-        {/* floating blobs */}
         <motion.div
           aria-hidden
           className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-45"
@@ -406,20 +464,40 @@ export default function EventsPage() {
           variants={panelUp}
           className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
         >
-          <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
             <div>
               <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
-              <p className="text-sm text-slate-600">Choose what you want to see.</p>
+              <p className="text-sm text-slate-600">
+                Choose what you want to see.
+              </p>
             </div>
 
-            <motion.button
-              onClick={clearFilters}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
-            >
-              Clear
-            </motion.button>
+            <div className="flex items-center gap-2">
+              {/* ✅ one-time seed button */}
+              <motion.button
+                onClick={seedOnce}
+                disabled={seeding}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition disabled:opacity-60"
+              >
+                {seeding ? "Seeding..." : "Seed Events (one time)"}
+              </motion.button>
+
+              <motion.button
+                onClick={clearFilters}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
+              >
+                Clear
+              </motion.button>
+            </div>
           </div>
+
+          {seedMsg && (
+            <div className="mb-4 text-sm rounded-xl border border-blue-200 bg-white px-4 py-3 text-slate-700">
+              {seedMsg}
+            </div>
+          )}
 
           {/* Categories */}
           <div className="flex flex-wrap gap-2 mb-4">
@@ -460,8 +538,8 @@ export default function EventsPage() {
           {/* Search + Sort */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={queryText}
+              onChange={(e) => setQueryText(e.target.value)}
               placeholder="Search events..."
               className="flex-1 bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -488,82 +566,106 @@ export default function EventsPage() {
         </motion.div>
 
         {/* Cards */}
-        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div
+          variants={gridWrap}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           <AnimatePresence mode="popLayout">
-            {filtered.map((ev) => {
-              const percent = Math.round((ev.attendees / ev.spots) * 100);
-              const spotsLeft = ev.spots - ev.attendees;
+            {loading ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full rounded-2xl border border-blue-200 bg-white/90 p-6 text-slate-700"
+              >
+                Loading events...
+              </motion.div>
+            ) : filtered.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full rounded-2xl border border-blue-200 bg-white/90 p-6 text-slate-700"
+              >
+                No events found.
+              </motion.div>
+            ) : (
+              filtered.map((ev) => {
+                const percent =
+                  ev.spots > 0 ? Math.round((ev.attendees / ev.spots) * 100) : 0;
+                const spotsLeft = (ev.spots || 0) - (ev.attendees || 0);
 
-              return (
-                <motion.article
-                  key={ev.id}
-                  layout
-                  variants={cardPop}
-                  initial="hidden"
-                  animate="show"
-                  exit="exit"
-                  whileHover={{ y: -6, scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                  className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
-                >
-                  <h3 className="text-xl font-semibold mb-1 text-slate-900">{ev.title}</h3>
+                return (
+                  <motion.article
+                    key={ev.id}
+                    layout
+                    variants={cardPop}
+                    initial="hidden"
+                    animate="show"
+                    exit="exit"
+                    whileHover={{ y: -6, scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                    className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
+                  >
+                    <h3 className="text-xl font-semibold mb-1 text-slate-900">
+                      {ev.title}
+                    </h3>
 
-                  <p className="text-slate-700 text-sm font-medium">{ev.venue}</p>
-                  <p className="text-slate-600 text-sm">
-                    {ev.addressLine1}, {ev.cityStateZip}
-                  </p>
+                    <p className="text-slate-700 text-sm font-medium">
+                      {ev.venue}
+                    </p>
+                    <p className="text-slate-600 text-sm">
+                      {ev.addressLine1}, {ev.cityStateZip}
+                    </p>
 
-                  <p className="text-slate-700 text-sm mt-1">
-                    {ev.date} • {ev.time}
-                  </p>
+                    <p className="text-slate-700 text-sm mt-1">
+                      {ev.date} • {ev.time}
+                    </p>
 
-                  <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
+                    <p className="text-slate-700 text-sm mt-3">
+                      {ev.description}
+                    </p>
 
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {ev.activities.map((a) => (
-                      <Chip key={a}>{a}</Chip>
-                    ))}
-                  </div>
-
-                  <div className="mt-4">
-                    <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percent}%` }}
-                        transition={{ duration: 0.7, ease: EASE_OUT }}
-                        className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
-                      />
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {(ev.activities || []).map((a) => (
+                        <Chip key={a}>{a}</Chip>
+                      ))}
                     </div>
-                    <div className="flex justify-between text-xs text-slate-600 mt-1">
-                      <span>{percent}% filled</span>
-                      <span>{spotsLeft} spots left</span>
+
+                    <div className="mt-4">
+                      <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+                          transition={{ duration: 0.7, ease: EASE_OUT }}
+                          className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-slate-600 mt-1">
+                        <span>{percent}% filled</span>
+                        <span>{spotsLeft} spots left</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2 mt-5">
-                    <Link
-                      href={`/events/register?id=${ev.id}`}
-                      className="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
-                    >
-                      Register
-                    </Link>
+                    <div className="grid grid-cols-2 gap-2 mt-5">
+                      <Link
+                        href={`/events/register?id=${ev.id}`}
+                        className="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
+                      >
+                        Register
+                      </Link>
 
-                    <a
-                      href={mapsHref(ev)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-center bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]"
-                    >
-                      Open in Maps
-                    </a>
-
-                    <button className="col-span-2 bg-white/70 border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]">
-                      Details
-                    </button>
-                  </div>
-                </motion.article>
-              );
-            })}
+                      <a
+                        href={mapsHref(ev)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-center bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]"
+                      >
+                        Open in Maps
+                      </a>
+                    </div>
+                  </motion.article>
+                );
+              })
+            )}
           </AnimatePresence>
         </motion.div>
       </div>
