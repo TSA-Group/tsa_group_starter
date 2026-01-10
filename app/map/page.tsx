@@ -1075,7 +1075,6 @@ function SearchBox({
   );
 }
 
-/** ---------- Marker ---------- */
 /** ---------- Enhanced Marker with Image Morph ---------- */
 function HoverMarker({
   location,
@@ -1092,24 +1091,26 @@ function HoverMarker({
   const isActive = activeId === location.id;
   const isExpanded = hovered || isActive;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isActive) {
+      // If already active, close it
+      setActiveId(null);
+    } else {
+      // Otherwise, activate and center
+      onCenter(location);
+    }
+  };
+
   return (
     <div
       onMouseEnter={() => {
         setHovered(true);
-        setActiveId(location.id);
       }}
       onMouseLeave={() => {
         setHovered(false);
-        setActiveId(null);
       }}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (isActive) {
-          setActiveId(null);
-        } else {
-          onCenter(location);
-        }
-      }}
+      onClick={handleClick}
       style={{
         transform: "translate(-50%, -100%)",
         cursor: "pointer",
@@ -1178,7 +1179,7 @@ function HoverMarker({
               damping: 25,
             }}
             className="absolute left-1/2 bottom-full mb-3 -translate-x-1/2
-                       w-56 pointer-events-none"
+                       w-56 pointer-events-auto"
             style={{ zIndex: 10000 }}
           >
             <div className="relative">
@@ -1278,7 +1279,7 @@ function HoverMarker({
                           d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
                         />
                       </svg>
-                      Click to center on map
+                      Click again to close
                     </div>
                   </div>
                 </motion.div>
