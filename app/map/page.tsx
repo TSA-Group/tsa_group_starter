@@ -509,7 +509,7 @@ export default function Page() {
                       zoom={zoom}
                       gestureHandling="greedy"
                       disableDefaultUI={false}
-                      onClick={() => activeId(null)}
+                      onClick={() => setActiveId(null)}
                       className="w-full h-full"
                     >
                       {filteredLocations.map((loc) => (
