@@ -4,7 +4,7 @@ import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 
-import { db } from "@/components/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   collection,
   getDocs,
