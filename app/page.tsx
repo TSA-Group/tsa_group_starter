@@ -1,5 +1,5 @@
 "use client";
- 
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { QuickActions } from "./QuickActions";
@@ -17,18 +17,7 @@ import {
   useVelocity,
 } from "framer-motion";
 
-/**
- * Optional (recommended) smooth-scroll like Abetka:
- *   npm i lenis
- *
- * If you don't install Lenis, everything still works — it just won’t be as “buttery”.
- */
-type LenisLike = {
-  raf: (t: number) => void;
-  destroy: () => void;
-  on?: (evt: string, cb: (...args: any[]) => void) => void;
-};
-
+/* ---------------- Variants ---------------- */
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12, delayChildren: 0.08 } },
@@ -60,75 +49,66 @@ const shimmerIn: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
+/* ---------------- Helpers ---------------- */
+function clamp(n: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, n));
+}
+
+/**
+ * Smooth scrolling fallback (NO external libraries needed).
+ * This just enables native smooth scrolling.
+ */
+function useSmoothScrollFallback(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const html = document.documentElement;
+    const prev = html.style.scrollBehavior;
+    html.style.scrollBehavior = "smooth";
+
+    return () => {
+      html.style.scrollBehavior = prev || "";
+    };
+  }, [enabled]);
+}
+
+/* ---------------- Orbs ---------------- */
 const ORBS = [
   { size: 220, color: "rgba(59,130,246,0.18)", top: 12, left: 8, speed: 0.22 },
-  { size: 320, color: "rgba(147,197,253,0.16)", top: 45, left: 75, speed: 0.35 },
+  {
+    size: 320,
+    color: "rgba(147,197,253,0.16)",
+    top: 45,
+    left: 75,
+    speed: 0.35,
+  },
   { size: 180, color: "rgba(15,23,42,0.12)", top: 70, left: 18, speed: 0.15 },
   { size: 260, color: "rgba(147,197,253,0.10)", top: 18, left: 82, speed: 0.3 },
   { size: 200, color: "rgba(59,130,246,0.14)", top: 62, left: 52, speed: 0.25 },
 ];
 
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
-
-function useLenisSmoothScroll(enabled: boolean) {
-  useEffect(() => {
-    if (!enabled) return;
-
-    let lenis: LenisLike | null = null;
-    let rafId = 0;
-
-    (async () => {
-      try {
-        const mod: any = await import("lenis");
-        const Lenis = mod?.default ?? mod?.Lenis;
-        if (!Lenis) return;
-
-        lenis = new Lenis({
-          // keep it subtle and “premium”
-          lerp: 0.08,
-          wheelMultiplier: 0.9,
-          smoothWheel: true,
-          smoothTouch: false,
-        });
-
-        const raf = (time: number) => {
-          lenis?.raf(time);
-          rafId = requestAnimationFrame(raf);
-        };
-        rafId = requestAnimationFrame(raf);
-      } catch {
-        // Lenis not installed — ignore
-      }
-    })();
-
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      lenis?.destroy?.();
-    };
-  }, [enabled]);
-}
-
 /* ---------------- MAIN PAGE ---------------- */
 export default function Home() {
   const reduce = useReducedMotion();
 
-  // Optional smooth scroll (turns off automatically if user prefers reduced motion)
-  useLenisSmoothScroll(!reduce);
+  // Smooth scroll fallback (no Lenis)
+  useSmoothScrollFallback(!reduce);
 
   const year = new Date().getFullYear();
 
-  // Scroll
+  /* ---- Scroll ---- */
   const { scrollY, scrollYProgress } = useScroll();
-  const scrollProgSmooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+  const scrollProgSmooth = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+  });
 
-  // velocity-reactive micro motion
+  // velocity reactive micro-tilt
   const vel = useVelocity(scrollY);
   const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
   const tilt = useTransform(velSmooth, [-1800, 0, 1800], [-1.8, 0, 1.8]);
 
-  // Cursor (for “responses to movement”)
+  /* ---- Cursor ---- */
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -143,50 +123,60 @@ export default function Home() {
     return () => window.removeEventListener("mousemove", onMove);
   }, [mx, my]);
 
-  // Background palette transitions (same scheme, more fluid)
-  const bg = useTransform(scrollProgSmooth, [0, 0.35, 0.7, 1], ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"]);
-  const softGrey = useTransform(scrollProgSmooth, [0.25, 0.55], ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"]);
-  const navyWash = useTransform(scrollProgSmooth, [0.62, 1], ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"]);
+  /* ---- Background palette transitions ---- */
+  const bg = useTransform(
+    scrollProgSmooth,
+    [0, 0.35, 0.7, 1],
+    ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"],
+  );
+  const softGrey = useTransform(
+    scrollProgSmooth,
+    [0.25, 0.55],
+    ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"],
+  );
+  const navyWash = useTransform(
+    scrollProgSmooth,
+    [0.62, 1],
+    ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"],
+  );
 
-  // Cursor spotlight / “ink” glow
+  /* ---- Cursor spotlight ---- */
   const glowX = useTransform(mx, (v) => `${v}px`);
   const glowY = useTransform(my, (v) => `${v}px`);
 
-  // Orbs (parallax + cursor drift)
+  /* ---- Orbs ---- */
   const orbX: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
   const orbY: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
 
-  // Better: drive orb updates from scrollY changes (and use latest mouse coords)
   useMotionValueEvent(scrollY, "change", (y) => {
     const h = window.innerHeight || 1;
     const w = window.innerWidth || 1;
-    const scrollRange = (document.body.scrollHeight - h) || 1;
+    const scrollRange = document.body.scrollHeight - h || 1;
 
     ORBS.forEach((orb, i) => {
       const mouseFx = (mouse.x / w - 0.5) * 220 * orb.speed;
       const mouseFy = (mouse.y / h - 0.5) * 220 * orb.speed;
       const scrollFy = -260 * orb.speed * (y / scrollRange);
 
-      // Springy “follow”
       orbX[i].set(mouseFx);
       orbY[i].set(scrollFy + mouseFy);
     });
   });
 
-  // Hero parallax / scale
+  /* ---- Hero parallax ---- */
   const heroY = useTransform(scrollProgSmooth, [0, 0.4], [0, -120]);
   const heroScale = useTransform(scrollProgSmooth, [0, 0.4], [1, 1.04]);
   const heroTextY = useTransform(scrollProgSmooth, [0, 0.35], [0, -64]);
   const heroBlur = useTransform(scrollProgSmooth, [0, 0.28], ["blur(0px)", "blur(1.5px)"]);
 
-  // Intro loader (Abetka-ish “cinematic” entry)
+  /* ---- Intro overlay ---- */
   const [intro, setIntro] = useState(true);
   useEffect(() => {
-    const t = window.setTimeout(() => setIntro(false), reduce ? 500 : 1400);
+    const t = window.setTimeout(() => setIntro(false), reduce ? 350 : 1200);
     return () => window.clearTimeout(t);
   }, [reduce]);
 
-  // Calendar state (kept, but motion improved)
+  /* ---- Calendar ---- */
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -202,7 +192,9 @@ export default function Home() {
   }, []);
 
   const now = new Date();
-  const texasToday = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  const texasToday = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Chicago" }),
+  );
   texasToday.setHours(0, 0, 0, 0);
 
   const calYear = calendarDate.getFullYear();
@@ -211,8 +203,18 @@ export default function Home() {
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = useMemo(
     () => [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December",
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ],
     [],
   );
@@ -266,10 +268,10 @@ export default function Home() {
     });
   }, [events, selectedDate]);
 
-  // Scroll progress “ink bar”
+  /* ---- Scroll progress bar ---- */
   const progScaleX = useTransform(scrollProgSmooth, [0, 1], [0.06, 1]);
 
-  // Subtle “grain” animation
+  /* ---- Grain drift ---- */
   const grainX = useTransform(scrollY, [0, 1200], [0, -120]);
   const grainY = useTransform(scrollY, [0, 1200], [0, -90]);
 
@@ -281,13 +283,13 @@ export default function Home() {
       style={{ background: bg }}
       className="min-h-screen overflow-x-hidden text-slate-950 relative"
     >
-      {/* Top progress bar */}
+      {/* Progress bar */}
       <motion.div
         style={{ scaleX: progScaleX }}
         className="fixed left-0 top-0 h-1 w-full origin-left bg-gradient-to-r from-blue-900 via-blue-600 to-blue-300 z-[60]"
       />
 
-      {/* Cursor spotlight (movement reactive) */}
+      {/* Cursor spotlight */}
       <motion.div
         aria-hidden
         style={{
@@ -298,14 +300,10 @@ export default function Home() {
         className="fixed inset-0 pointer-events-none -z-30"
       />
 
-      {/* Grain layer */}
+      {/* Grain */}
       <motion.div
         aria-hidden
-        style={{
-          x: grainX,
-          y: grainY,
-          opacity: reduce ? 0.06 : 0.09,
-        }}
+        style={{ x: grainX, y: grainY, opacity: reduce ? 0.06 : 0.09 }}
         className="fixed inset-0 pointer-events-none -z-30"
       >
         <div
@@ -317,7 +315,7 @@ export default function Home() {
         />
       </motion.div>
 
-      {/* Floating Orbs */}
+      {/* Floating orbs */}
       {ORBS.map((orb, i) => (
         <motion.div
           key={i}
@@ -338,7 +336,7 @@ export default function Home() {
       <motion.div style={{ backgroundColor: softGrey }} className="fixed inset-0 pointer-events-none -z-20" />
       <motion.div style={{ backgroundColor: navyWash }} className="fixed inset-0 pointer-events-none -z-20" />
 
-      {/* Intro overlay (cinematic entry) */}
+      {/* Intro */}
       <AnimatePresence>
         {intro && !reduce && (
           <motion.div
@@ -396,59 +394,46 @@ export default function Home() {
 
       {/* HERO */}
       <motion.header
-        style={{ y: heroY, scale: heroScale, rotate: reduce ? 0 : tilt, filter: heroBlur }}
+        style={{
+          y: heroY,
+          scale: heroScale,
+          rotate: reduce ? 0 : tilt,
+          filter: heroBlur,
+        }}
         className="min-h-[96vh] relative flex flex-col justify-center max-w-7xl mx-auto px-6"
       >
-        {/* big soft canvas */}
         <div className="absolute -top-20 left-0 w-full h-[72vh] bg-gradient-to-br from-blue-100 via-blue-50 to-blue-200 rounded-b-[80px] shadow-lg -z-10" />
 
-        {/* “glass rail” */}
         <motion.div
           variants={shimmerIn}
           className="mx-auto w-full max-w-3xl rounded-[28px] border border-blue-200 bg-white/55 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] px-6 sm:px-10 py-8"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.7 }}
-            className="text-xs sm:text-sm font-semibold text-blue-700 text-center tracking-[0.25em]"
-          >
+          <div className="text-xs sm:text-sm font-semibold text-blue-700 text-center tracking-[0.25em]">
             DISCOVER • CONNECT • ENGAGE
-          </motion.div>
+          </div>
 
           <motion.h1
             style={{ y: heroTextY }}
-            animate={reduce ? undefined : { backgroundPositionX: ["0%", "100%", "0%"] }}
-            transition={reduce ? undefined : { duration: 10, repeat: Infinity, ease: "easeInOut" }}
             className="mt-3 text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 text-center"
           >
             GATHERLY
           </motion.h1>
 
-          <motion.p
-            style={{ y: heroTextY }}
-            className="mt-5 max-w-2xl text-base sm:text-lg text-blue-800 text-center mx-auto"
-          >
+          <motion.p style={{ y: heroTextY }} className="mt-5 max-w-2xl text-base sm:text-lg text-blue-800 text-center mx-auto">
             A calm, community-first hub for events, support, and local resources — without the noise.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.75 }}
-            className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3"
-          >
+          <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
             <MagneticButton href="/resources" label="Explore Resources" primary />
             <MagneticButton href="/events" label="Browse Events" />
-          </motion.div>
+          </div>
         </motion.div>
 
-        {/* small hint */}
         <motion.div
           className="mt-10 flex items-center justify-center text-blue-700/80 text-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.45, duration: 0.7 }}
+          transition={{ delay: 0.35, duration: 0.7 }}
         >
           <motion.span
             className="inline-flex items-center gap-2"
@@ -462,7 +447,7 @@ export default function Home() {
         </motion.div>
       </motion.header>
 
-      {/* MAIN: QuickActions + Calendar */}
+      {/* MAIN */}
       <motion.main className="max-w-7xl mx-auto px-6 pb-28 flex flex-col lg:flex-row gap-10 lg:gap-14 mt-16">
         <motion.section
           initial={{ opacity: 0, x: -30, filter: "blur(10px)" }}
@@ -489,7 +474,6 @@ export default function Home() {
             viewport={{ once: true, margin: "-60px" }}
             className="bg-white/70 backdrop-blur-xl rounded-3xl border border-blue-200 shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6"
           >
-            {/* Calendar Header */}
             <div className="flex items-center justify-between mb-4">
               <motion.button
                 whileHover={{ scale: 1.06 }}
@@ -519,7 +503,6 @@ export default function Home() {
               </motion.button>
             </div>
 
-            {/* Days of Week */}
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map((d) => (
                 <div key={d} className="text-center">
@@ -528,7 +511,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx} />;
@@ -564,7 +546,9 @@ export default function Home() {
                       "outline-none",
                     ].join(" ")}
                     onClick={() =>
-                      setSelectedDate((prev) => (prev && prev.getTime() === date.getTime() ? null : date))
+                      setSelectedDate((prev) =>
+                        prev && prev.getTime() === date.getTime() ? null : date,
+                      )
                     }
                   >
                     <span className="block">{date.getDate()}</span>
@@ -582,7 +566,6 @@ export default function Home() {
               })}
             </div>
 
-            {/* Events Popup */}
             <AnimatePresence>
               {selectedDate && (
                 <motion.div
@@ -631,7 +614,7 @@ export default function Home() {
         </motion.section>
       </motion.main>
 
-      {/* FEATURE STRIP (scroll-reactive, Abetka-ish “editorial” rhythm) */}
+      {/* Feature strip */}
       <motion.section className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
@@ -641,17 +624,28 @@ export default function Home() {
           className="rounded-[34px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6 sm:p-10"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <FeatureStat title="Curated resources" value="Local-first" desc="Support services, food, fitness, and more." />
-            <FeatureStat title="Community events" value="Real-time" desc="Find what’s happening near you." />
-            <FeatureStat title="Trust & clarity" value="No noise" desc="Just what helps your neighborhood thrive." />
+            <FeatureStat
+              title="Curated resources"
+              value="Local-first"
+              desc="Support services, food, fitness, and more."
+            />
+            <FeatureStat
+              title="Community events"
+              value="Real-time"
+              desc="Find what’s happening near you."
+            />
+            <FeatureStat
+              title="Trust & clarity"
+              value="No noise"
+              desc="Just what helps your neighborhood thrive."
+            />
           </div>
         </motion.div>
       </motion.section>
 
-      {/* CONTENT SECTIONS (more “fluid editorial” + parallax cards + curved dividers) */}
+      {/* Content sections */}
       {[...Array(8)].map((_, i) => {
         const alignRight = i % 2 === 1;
-
         return (
           <React.Fragment key={i}>
             <motion.section
@@ -671,7 +665,6 @@ export default function Home() {
               </motion.div>
             </motion.section>
 
-            {/* Curved divider */}
             <div className="-mt-14">
               <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-20">
                 <path
@@ -684,7 +677,7 @@ export default function Home() {
         );
       })}
 
-      {/* OUR STORY (scroll reveal) */}
+      {/* Our story */}
       <motion.section
         className="w-full mt-32 mb-40 px-6"
         initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
@@ -705,7 +698,6 @@ export default function Home() {
           whileHover={reduce ? undefined : { y: -4 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
         >
-          {/* internal glow */}
           <div className="absolute -top-20 -left-16 w-[380px] h-[380px] rounded-full bg-blue-300/20 blur-3xl" />
           <div className="absolute -bottom-24 -right-16 w-[420px] h-[420px] rounded-full bg-blue-500/10 blur-3xl" />
 
@@ -735,7 +727,7 @@ export default function Home() {
   );
 }
 
-/* ---------------- Components ---------------- */
+/* ---------------- Subcomponents ---------------- */
 
 function MagneticButton({
   href,
@@ -836,7 +828,6 @@ function ParallaxCard({ index, alignRight }: { index: number; alignRight: boolea
   const { scrollY } = useScroll();
   const offset = index * 0.12;
 
-  // Tiny per-card parallax
   const y = useTransform(scrollY, [0, 1600], [0 + offset * 16, -24 + offset * 16]);
   const rotate = useTransform(scrollY, [0, 1600], [alignRight ? 0.35 : -0.35, 0]);
 
