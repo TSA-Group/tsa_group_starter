@@ -4,8 +4,16 @@ import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 
+// ✅ FIXED: your firebase file is here
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
+
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  Timestamp,
+} from "firebase/firestore";
 
 /* =====================
    Types
@@ -16,22 +24,26 @@ type Activity = { id: string; name: string };
 type EventDoc = {
   id: string;
 
-  title: string;
-  category: string;
-  activities: string[];
+  title?: string;
+  community?: string;
 
-  date: string;
-  time: string;
+  // from your admin form
+  activities?: string[];
+  types?: string[];
 
-  venue: string;
-  addressLine1: string;
-  cityStateZip: string;
-
-  attendees: number;
-  spots: number;
-  description: string;
+  date?: string; // "2026-01-17"
+  startTime?: string; // "10:13"
+  endTime?: string; // "22:14"
 
   startAt?: Timestamp;
+  endAt?: Timestamp;
+
+  venue?: string;
+  address?: string;
+
+  attendees?: number;
+  spots?: number;
+  description?: string;
 };
 
 /* =====================
@@ -44,8 +56,61 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 );
 
 function mapsHref(ev: EventDoc) {
-  const q = `${ev.venue}, ${ev.addressLine1}, ${ev.cityStateZip}`;
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+  const q = `${ev.venue ?? ""}, ${ev.address ?? ""}`.trim();
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    q,
+  )}`;
+}
+
+function formatDateLabel(ev: EventDoc) {
+  if (ev.startAt) {
+    return ev.startAt.toDate().toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  if (ev.date) {
+    const d = new Date(`${ev.date}T00:00:00`);
+    return Number.isNaN(d.getTime())
+      ? ev.date
+      : d.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+  }
+
+  return "";
+}
+
+function formatTimeRange(ev: EventDoc) {
+  // Prefer Firestore timestamps if present
+  if (ev.startAt && ev.endAt) {
+    const s = ev.startAt
+      .toDate()
+      .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const e = ev.endAt
+      .toDate()
+      .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    return `${s} – ${e}`;
+  }
+
+  // Fallback to time strings saved by form
+  if (ev.startTime && ev.endTime) {
+    const s = new Date(`1970-01-01T${ev.startTime}:00`).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    const e = new Date(`1970-01-01T${ev.endTime}:00`).toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    return `${s} – ${e}`;
+  }
+
+  return "";
 }
 
 /* =====================
@@ -107,28 +172,35 @@ export default function EventsPage() {
   const [queryText, setQueryText] = useState("");
   const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
 
+  // These IDs MUST match what you store in Firestore `types`
   const categories: Category[] = [
     { id: "all", name: "All" },
-    { id: "community", name: "Community" },
-    { id: "meetup", name: "Meetups" },
-    { id: "clothing", name: "Clothing" },
-    { id: "tutoring", name: "Tutoring" },
-    { id: "pantry", name: "Food Pantry" },
-    { id: "cleanup", name: "Cleanup" },
+    { id: "Community", name: "Community" },
+    { id: "Meetup", name: "Meetups" },
+    { id: "Clothing", name: "Clothing" },
+    { id: "Tutoring", name: "Tutoring" },
+    { id: "Food Pantry", name: "Food Pantry" },
+    { id: "Cleanup", name: "Cleanup" },
+    { id: "Workshop", name: "Workshop" },
+    { id: "Other", name: "Other" },
   ];
 
+  // These IDs MUST match what you store in Firestore `activities`
   const activities: Activity[] = [
-    { id: "food", name: "Food" },
-    { id: "volunteering", name: "Volunteering" },
-    { id: "education", name: "Education" },
-    { id: "donations", name: "Donations" },
-    { id: "outdoors", name: "Outdoors" },
-    { id: "family", name: "Family" },
+    { id: "Food", name: "Food" },
+    { id: "Volunteering", name: "Volunteering" },
+    { id: "Education", name: "Education" },
+    { id: "Donations", name: "Donations" },
+    { id: "Outdoors", name: "Outdoors" },
+    { id: "Family", name: "Family" },
   ];
 
   // ✅ live read from Firestore
   useEffect(() => {
+    // orderBy startAt if it exists on docs, otherwise Firestore will error.
+    // Your screenshot shows startAt exists, so this is correct.
     const qy = query(collection(db, "events"), orderBy("startAt", "asc"));
+
     const unsub = onSnapshot(
       qy,
       (snap) => {
@@ -139,7 +211,10 @@ export default function EventsPage() {
         setEvents(list);
         setLoading(false);
       },
-      () => setLoading(false),
+      (err) => {
+        console.error("Firestore read error:", err);
+        setLoading(false);
+      },
     );
 
     return () => unsub();
@@ -148,32 +223,39 @@ export default function EventsPage() {
   const filtered = useMemo(() => {
     const q = queryText.trim().toLowerCase();
 
+    // ✅ category filter now uses Firestore `types` (array)
     let list =
       selectedCategory === "all"
         ? events
-        : events.filter((e) => e.category === selectedCategory);
+        : events.filter((e) => (e.types || []).includes(selectedCategory));
 
+    // ✅ activities filter matches Firestore `activities` (array)
     if (selectedActivities.length > 0) {
       list = list.filter((e) =>
         selectedActivities.every((a) => (e.activities || []).includes(a)),
       );
     }
 
+    // ✅ search uses the fields you actually store
     if (q) {
       list = list.filter((e) =>
-        `${e.title} ${e.description} ${e.venue} ${e.addressLine1} ${e.cityStateZip}`
+        `${e.title ?? ""} ${e.description ?? ""} ${e.venue ?? ""} ${
+          e.address ?? ""
+        }`
           .toLowerCase()
           .includes(q),
       );
     }
 
     if (sortBy === "popular") {
-      list = [...list].sort((a, b) => (b.attendees || 0) - (a.attendees || 0));
+      list = [...list].sort(
+        (a, b) => (b.attendees ?? 0) - (a.attendees ?? 0),
+      );
     } else {
       // upcoming: prefer startAt timestamp, fallback to date string
       list = [...list].sort((a, b) => {
-        const ta = a.startAt?.toMillis?.() ?? new Date(a.date).getTime();
-        const tb = b.startAt?.toMillis?.() ?? new Date(b.date).getTime();
+        const ta = a.startAt?.toMillis?.() ?? new Date(a.date || "").getTime();
+        const tb = b.startAt?.toMillis?.() ?? new Date(b.date || "").getTime();
         return ta - tb;
       });
     }
@@ -203,6 +285,7 @@ export default function EventsPage() {
       {/* background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
+
         <motion.div
           aria-hidden
           className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-45"
@@ -241,8 +324,8 @@ export default function EventsPage() {
             Gatherly — Community Events
           </h1>
           <p className="mt-2 text-slate-600 max-w-2xl">
-            Discover local volunteering opportunities and community events in Cross
-            Creek.
+            Discover local volunteering opportunities and community events in
+            Cross Creek.
           </p>
         </motion.header>
 
@@ -253,7 +336,9 @@ export default function EventsPage() {
           <div className="flex items-center justify-between gap-4 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
-              <p className="text-sm text-slate-600">Choose what you want to see.</p>
+              <p className="text-sm text-slate-600">
+                Choose what you want to see.
+              </p>
             </div>
 
             <motion.button
@@ -316,7 +401,9 @@ export default function EventsPage() {
                 {["upcoming", "popular"].map((option) => (
                   <button
                     key={option}
-                    onClick={() => setSortBy(option as "upcoming" | "popular")}
+                    onClick={() =>
+                      setSortBy(option as "upcoming" | "popular")
+                    }
                     className={`px-4 py-1 text-sm rounded-full transition ${
                       sortBy === option
                         ? "bg-blue-600 text-white"
@@ -332,7 +419,10 @@ export default function EventsPage() {
         </motion.div>
 
         {/* Cards */}
-        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div
+          variants={gridWrap}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           <AnimatePresence mode="popLayout">
             {loading ? (
               <motion.div
@@ -352,9 +442,13 @@ export default function EventsPage() {
               </motion.div>
             ) : (
               filtered.map((ev) => {
-                const percent =
-                  ev.spots > 0 ? Math.round((ev.attendees / ev.spots) * 100) : 0;
-                const spotsLeft = (ev.spots || 0) - (ev.attendees || 0);
+                const attendees = ev.attendees ?? 0;
+                const spots = ev.spots ?? 0;
+                const percent = spots > 0 ? Math.round((attendees / spots) * 100) : 0;
+                const spotsLeft = Math.max(0, spots - attendees);
+
+                const dateLabel = formatDateLabel(ev);
+                const timeLabel = formatTimeRange(ev);
 
                 return (
                   <motion.article
@@ -368,18 +462,30 @@ export default function EventsPage() {
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
                     className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
                   >
-                    <h3 className="text-xl font-semibold mb-1 text-slate-900">{ev.title}</h3>
+                    <h3 className="text-xl font-semibold mb-1 text-slate-900">
+                      {ev.title ?? "Untitled Event"}
+                    </h3>
 
-                    <p className="text-slate-700 text-sm font-medium">{ev.venue}</p>
-                    <p className="text-slate-600 text-sm">
-                      {ev.addressLine1}, {ev.cityStateZip}
+                    <p className="text-slate-700 text-sm font-medium">
+                      {ev.venue ?? ""}
                     </p>
 
-                    <p className="text-slate-700 text-sm mt-1">
-                      {ev.date} • {ev.time}
-                    </p>
+                    {ev.address ? (
+                      <p className="text-slate-600 text-sm">{ev.address}</p>
+                    ) : null}
 
-                    <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
+                    {(dateLabel || timeLabel) && (
+                      <p className="text-slate-700 text-sm mt-1">
+                        {dateLabel}
+                        {timeLabel ? ` • ${timeLabel}` : ""}
+                      </p>
+                    )}
+
+                    {ev.description ? (
+                      <p className="text-slate-700 text-sm mt-3">
+                        {ev.description}
+                      </p>
+                    ) : null}
 
                     <div className="flex flex-wrap gap-2 mt-3">
                       {(ev.activities || []).map((a) => (
@@ -391,7 +497,12 @@ export default function EventsPage() {
                       <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+                          animate={{
+                            width: `${Math.min(
+                              100,
+                              Math.max(0, percent),
+                            )}%`,
+                          }}
                           transition={{ duration: 0.7, ease: EASE_OUT }}
                           className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
                         />
