@@ -1,8 +1,9 @@
+// app/resources/resources-client.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { collection, onSnapshot, orderBy, query, type Timestamp } from "firebase/firestore";
+import { collection, onSnapshot, type Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 type ResourceDoc = {
@@ -11,10 +12,9 @@ type ResourceDoc = {
   community?: string;
   contact?: string;
   indoorOutdoor?: "Indoor" | "Outdoor" | "Both" | string;
-  types?: string[];         // what your admin saves (multi-select)
-  createdAt?: Timestamp;
-  // location?: any;         // you have location: null currently; we won't rely on it
-  description?: string;     // optional (if you add later)
+  types?: string[];
+  createdAt?: Timestamp | any;
+  description?: string;
 };
 
 type ResourceUI = {
@@ -41,32 +41,32 @@ function safeStr(v: unknown, fallback = "") {
 function safeArr(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
 }
+function toMs(createdAt: any) {
+  return (
+    createdAt?.toMillis?.() ??
+    (typeof createdAt?.seconds === "number" ? createdAt.seconds * 1000 : 0)
+  );
+}
 
 export default function ResourcesClient() {
   const [rows, setRows] = useState<ResourceUI[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
-  // simple filter/search like your UI
   const [q, setQ] = useState("");
   const [activeType, setActiveType] = useState<string>("All");
 
   useEffect(() => {
-    // IMPORTANT: this must match EXACTLY where admin writes: collection(db, "resources")
+    setLoading(true);
+    setErrMsg(null);
+
     const ref = collection(db, "resources");
-    const qy = query(ref, orderBy("createdAt", "desc"));
 
     const unsub = onSnapshot(
-      qy,
+      ref,
       (snap) => {
         const next: ResourceUI[] = snap.docs.map((d) => {
           const data = d.data() as ResourceDoc;
-
-          const createdAtMs =
-            (data.createdAt as any)?.toMillis?.() ??
-            (typeof (data.createdAt as any)?.seconds === "number"
-              ? (data.createdAt as any).seconds * 1000
-              : 0);
-
           const types = safeArr(data.types);
 
           return {
@@ -78,15 +78,19 @@ export default function ResourcesClient() {
             indoorOutdoor: safeStr(data.indoorOutdoor, ""),
             types,
             description: safeStr(data.description, ""),
-            createdAtMs,
+            createdAtMs: toMs(data.createdAt),
           };
         });
+
+        // sort newest first (without depending on Firestore orderBy)
+        next.sort((a, b) => b.createdAtMs - a.createdAtMs);
 
         setRows(next);
         setLoading(false);
       },
       (err) => {
         console.error("Failed to read resources:", err);
+        setErrMsg(err?.message || "Failed to read resources.");
         setRows([]);
         setLoading(false);
       }
@@ -106,7 +110,6 @@ export default function ResourcesClient() {
 
     return rows.filter((r) => {
       const typePass = activeType === "All" || r.types.includes(activeType);
-
       if (!needle) return typePass;
 
       const hay = [
@@ -133,7 +136,6 @@ export default function ResourcesClient() {
         animate="show"
         className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 py-8 sm:py-10"
       >
-        {/* Header */}
         <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
@@ -150,7 +152,6 @@ export default function ResourcesClient() {
                 <motion.div
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
                   className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
                 >
                   Showing {filtered.length} resource{filtered.length === 1 ? "" : "s"}
@@ -158,9 +159,17 @@ export default function ResourcesClient() {
               )}
             </AnimatePresence>
           </div>
+
+          {errMsg && (
+            <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+              ❌ {errMsg}
+              <div className="mt-1 text-xs text-rose-800">
+                This usually means Firestore rules blocked read access OR the app is pointing to a different Firebase project.
+              </div>
+            </div>
+          )}
         </motion.div>
 
-        {/* Controls */}
         <motion.section
           variants={fadeUp}
           className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5 mb-6"
@@ -195,8 +204,10 @@ export default function ResourcesClient() {
           </div>
         </motion.section>
 
-        {/* Tiles */}
-        <motion.section variants={fadeUp} className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5">
+        <motion.section
+          variants={fadeUp}
+          className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5"
+        >
           {loading ? (
             <div className="rounded-2xl border border-blue-200 bg-white p-5 text-slate-700">
               Loading…
@@ -212,7 +223,6 @@ export default function ResourcesClient() {
                   key={r.id}
                   className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  {/* Top label = first type */}
                   <div className="text-sm font-semibold text-blue-900">
                     {r.types[0] ?? "Resource"}
                   </div>
@@ -221,25 +231,16 @@ export default function ResourcesClient() {
                     {r.name}
                   </div>
 
-                  {/* Address */}
-                  {r.address ? (
-                    <div className="mt-2 text-sm text-slate-600">
-                      {r.address}
-                    </div>
-                  ) : (
-                    <div className="mt-2 text-sm text-slate-400">
-                      No address provided
-                    </div>
-                  )}
+                  <div className="mt-2 text-sm text-slate-600">
+                    {r.address || "No address provided"}
+                  </div>
 
-                  {/* Description (optional) */}
                   {r.description ? (
                     <div className="mt-3 text-sm text-slate-700">
                       {r.description}
                     </div>
                   ) : null}
 
-                  {/* Chips */}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {r.types.slice(0, 6).map((t) => (
                       <span
@@ -249,15 +250,12 @@ export default function ResourcesClient() {
                         {t}
                       </span>
                     ))}
-
                     {r.indoorOutdoor ? (
                       <span className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50">
                         {r.indoorOutdoor}
                       </span>
                     ) : null}
                   </div>
-
-                  {/* (Removed the “time/when” badge completely, per your request) */}
                 </div>
               ))}
             </div>
