@@ -420,7 +420,7 @@ export default function Home() {
           </motion.h1>
 
           <motion.p style={{ y: heroTextY }} className="mt-5 max-w-2xl text-base sm:text-lg text-blue-800 text-center mx-auto">
-            A calm, community-first hub for events, support, and local resources — without the noise.
+            Explore Cross Creek and all it has to offer! Sign up for local community events and explore new parts of our community.
           </motion.p>
 
           <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
