@@ -1,7 +1,8 @@
+// app/map/page.tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   APIProvider,
   Map,
@@ -10,17 +11,8 @@ import {
 } from "@vis.gl/react-google-maps";
 import Image from "next/image";
 
-// ✅ Firestore
 import { db } from "@/lib/firebase";
-import {
-  collection,
-  doc,
-  onSnapshot,
-  serverTimestamp,
-  setDoc,
-  writeBatch,
-  type Timestamp,
-} from "firebase/firestore";
+import { collection, onSnapshot, type DocumentData } from "firebase/firestore";
 
 /** ---------- Types ---------- */
 interface LatLng {
@@ -36,7 +28,8 @@ type EventType =
   | "Library"
   | "Support Services"
   | "Food Pantry"
-  | "Volunteer Opportunity";
+  | "Volunteer Opportunity"
+  | "Other";
 
 type ActivityType =
   | "Family"
@@ -49,17 +42,20 @@ type ActivityType =
   | "Shopping";
 
 type ResourceDoc = {
-  id: string;
   title: string;
   address: string;
   position: LatLng;
+
   eventType: EventType;
   activities: ActivityType[];
+
   host?: string;
   description?: string;
   featured?: boolean;
-  seedKey?: string; // used to avoid duplicates for the "seed" button
-  createdAt?: Timestamp;
+};
+
+type LocationItem = ResourceDoc & {
+  id: string; // Firestore doc id
 };
 
 /** ---------- Motion ---------- */
@@ -83,6 +79,7 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
+/** ---------- Options ---------- */
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
   "Park & Trails",
@@ -92,6 +89,7 @@ const EVENT_OPTIONS: EventType[] = [
   "Support Services",
   "Food Pantry",
   "Volunteer Opportunity",
+  "Other",
 ];
 
 const ACTIVITY_OPTIONS: ActivityType[] = [
@@ -105,83 +103,19 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
   "Shopping",
 ];
 
-/** ---------- Seed (NOT hard-coded addresses)
- * We only hard-code place QUERIES. Google Places returns the real formatted address + lat/lng.
- * Clicking the button writes them into Firestore collection: "resources"
- */
-const SEED_PLACES: Array<{
-  seedKey: string;
-  query: string;
-  title: string;
-  eventType: EventType;
-  activities: ActivityType[];
-  host?: string;
-  description?: string;
-  featured?: boolean;
-}> = [
-  {
-    seedKey: "fulshear_library",
-    query: "Fulshear Branch Library, Fulshear TX",
-    title: "Fulshear Branch Library",
-    eventType: "Library",
-    activities: ["Education", "Family"],
-    host: "Public Library",
-    featured: true,
-    description: "Books, study space, and community programs for residents.",
-  },
-  {
-    seedKey: "fulshear_heb",
-    query: "H-E-B near Fulshear TX",
-    title: "H-E-B (Grocery)",
-    eventType: "Grocery",
-    activities: ["Shopping", "Food", "Family"],
-    host: "HEB",
-    featured: true,
-    description: "Nearby grocery for essentials, pantry staples, and meals.",
-  },
-  {
-    seedKey: "cross_creek_ranch",
-    query: "Cross Creek Ranch, Fulshear TX",
-    title: "Cross Creek Ranch (Community Area)",
-    eventType: "Community Event",
-    activities: ["Family", "Support"],
-    host: "Cross Creek Ranch",
-    featured: true,
-    description: "Community area with events, meetups, and resident resources.",
-  },
-  {
-    seedKey: "fulshear_park",
-    query: "park near Cross Creek Ranch Fulshear TX",
-    title: "Nearby Park & Trails",
-    eventType: "Park & Trails",
-    activities: ["Outdoors", "Family"],
-    host: "Community Parks",
-    description: "Outdoor trails and green space for walking and family time.",
-  },
-  {
-    seedKey: "food_pantry_katy_fulshear",
-    query: "food pantry near Fulshear TX",
-    title: "Food Pantry Support (Nearby)",
-    eventType: "Food Pantry",
-    activities: ["Food", "Support", "Family"],
-    host: "Community Partner",
-    description: "Local food assistance options for residents who need help.",
-  },
-];
-
 /** ---------- Page ---------- */
 export default function Page() {
-  // ✅ Use env (don’t hard-code keys in code)
+  // ✅ Use env var. Put this in .env.local and Vercel env:
+  // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxxxx
   const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
-  // Cross Creek Ranch-ish default center (map stays the same)
+  // Cross Creek Ranch-ish default center
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
 
   // Places autocomplete (map search)
-  const [predictions, setPredictions] = useState<
-    google.maps.places.AutocompletePrediction[]
-  >([]);
+  type Prediction = { description: string; place_id: string };
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
@@ -191,74 +125,72 @@ export default function Page() {
   // Active marker
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  // Firestore resources
+  const [locations, setLocations] = useState<LocationItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dbError, setDbError] = useState<string | null>(null);
+
+  /** ---------- Load resources from Firestore (NO seed button) ---------- */
+  useEffect(() => {
+    setLoading(true);
+    setDbError(null);
+
+    const unsub = onSnapshot(
+      collection(db, "resources"),
+      (snap) => {
+        const next: LocationItem[] = [];
+        snap.forEach((doc) => {
+          const data = doc.data() as DocumentData;
+
+          // Soft-validate required fields
+          const title = String(data?.title ?? "").trim();
+          const address = String(data?.address ?? "").trim();
+          const pos = data?.position;
+
+          const lat = Number(pos?.lat);
+          const lng = Number(pos?.lng);
+
+          if (!title || !address || Number.isNaN(lat) || Number.isNaN(lng)) {
+            return;
+          }
+
+          next.push({
+            id: doc.id,
+            title,
+            address,
+            position: { lat, lng },
+            eventType: (data?.eventType as EventType) ?? "Other",
+            activities: Array.isArray(data?.activities)
+              ? (data.activities as ActivityType[])
+              : [],
+            host: typeof data?.host === "string" ? data.host : undefined,
+            description:
+              typeof data?.description === "string" ? data.description : undefined,
+            featured: Boolean(data?.featured),
+          });
+        });
+
+        setLocations(next);
+        setLoading(false);
+      },
+      (err) => {
+        setDbError(err?.message || "Failed to read from Firestore.");
+        setLoading(false);
+      },
+    );
+
+    return () => unsub();
+  }, []);
+
   /** ---------- Filters ---------- */
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
   const [activityFilters, setActivityFilters] = useState<ActivityType[]>([]);
   const [radiusMode, setRadiusMode] = useState<"All" | "Near Center">("All");
 
-  /** ---------- Firestore Resources ---------- */
-  const [resources, setResources] = useState<ResourceDoc[]>([]);
-  const [loadingResources, setLoadingResources] = useState(true);
-
-  // Seed button states
-  const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    const colRef = collection(db, "resources");
-    const unsub = onSnapshot(
-      colRef,
-      (snap) => {
-        const next: ResourceDoc[] = snap.docs
-          .map((d) => {
-            const data = d.data() as Omit<ResourceDoc, "id">;
-            return {
-              id: d.id,
-              title: data.title,
-              address: data.address,
-              position: data.position,
-              eventType: data.eventType,
-              activities: data.activities ?? [],
-              host: data.host,
-              description: data.description,
-              featured: data.featured ?? false,
-              seedKey: data.seedKey,
-              createdAt: data.createdAt,
-            };
-          })
-          .filter(
-            (r) =>
-              !!r.title &&
-              !!r.address &&
-              !!r.position &&
-              typeof r.position.lat === "number" &&
-              typeof r.position.lng === "number",
-          );
-
-        // small sort: featured first, then title
-        next.sort((a, b) => {
-          const fa = a.featured ? 1 : 0;
-          const fb = b.featured ? 1 : 0;
-          if (fa !== fb) return fb - fa;
-          return a.title.localeCompare(b.title);
-        });
-
-        setResources(next);
-        setLoadingResources(false);
-      },
-      (err) => {
-        console.error("Firestore resources read error:", err);
-        setResources([]);
-        setLoadingResources(false);
-      },
-    );
-    return () => unsub();
-  }, []);
-
   const filteredLocations = useMemo(() => {
     const q = directoryQuery.trim().toLowerCase();
 
-    const passQuery = (loc: ResourceDoc) => {
+    const passQuery = (loc: LocationItem) => {
       if (!q) return true;
       const haystack = [
         loc.title,
@@ -266,21 +198,21 @@ export default function Page() {
         loc.eventType,
         loc.host ?? "",
         loc.description ?? "",
-        ...(loc.activities ?? []),
+        ...loc.activities,
       ]
         .join(" ")
         .toLowerCase();
       return haystack.includes(q);
     };
 
-    const passEvent = (loc: ResourceDoc) =>
+    const passEvent = (loc: LocationItem) =>
       eventFilters.length === 0 || eventFilters.includes(loc.eventType);
 
-    const passActivity = (loc: ResourceDoc) =>
+    const passActivity = (loc: LocationItem) =>
       activityFilters.length === 0 ||
-      activityFilters.every((a) => (loc.activities ?? []).includes(a));
+      activityFilters.every((a) => loc.activities.includes(a));
 
-    const passRadius = (loc: ResourceDoc) => {
+    const passRadius = (loc: LocationItem) => {
       if (radiusMode === "All") return true;
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
@@ -288,14 +220,26 @@ export default function Page() {
       return dist < 0.09; // "nearby"
     };
 
-    return resources.filter(
-      (loc) => passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
+    return locations.filter(
+      (loc) =>
+        passQuery(loc) &&
+        passEvent(loc) &&
+        passActivity(loc) &&
+        passRadius(loc),
     );
-  }, [resources, directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
+  }, [
+    directoryQuery,
+    eventFilters,
+    activityFilters,
+    radiusMode,
+    center.lat,
+    center.lng,
+    locations,
+  ]);
 
   const featured = useMemo(
-    () => resources.filter((l) => l.featured).slice(0, 3),
-    [resources],
+    () => locations.filter((l) => l.featured).slice(0, 3),
+    [locations],
   );
 
   const activeCount =
@@ -304,11 +248,26 @@ export default function Page() {
     (radiusMode === "Near Center" ? 1 : 0) +
     (directoryQuery.trim() ? 1 : 0);
 
-  const handleCenter = (loc: ResourceDoc) => {
+  const handleCenter = (loc: LocationItem) => {
     setCenter(loc.position);
     setZoom(15);
     setSelectedPlace(loc.position);
   };
+
+  if (!apiKey) {
+    return (
+      <div className="min-h-screen bg-white text-slate-900 flex items-center justify-center px-6">
+        <div className="max-w-xl w-full rounded-2xl border border-rose-200 bg-rose-50 p-5">
+          <div className="text-lg font-bold text-rose-900">Missing Maps API key</div>
+          <div className="mt-2 text-sm text-rose-800">
+            Set <span className="font-semibold">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</span>{" "}
+            in <span className="font-semibold">.env.local</span> (and in Vercel
+            Environment Variables).
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <APIProvider apiKey={apiKey} libraries={["places"]}>
@@ -332,46 +291,36 @@ export default function Page() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 flex-wrap">
-                <AnimatePresence>
-                  {activeCount > 0 && (
-                    <motion.div
-                      variants={pop}
-                      initial="hidden"
-                      animate="show"
-                      exit={{ opacity: 0, y: -6 }}
-                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
-                    >
-                      {activeCount} filter{activeCount === 1 ? "" : "s"} active
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* ✅ One-click seed button */}
-                <SeedResourcesButton
-                  seeding={seeding}
-                  setSeeding={setSeeding}
-                  seedMsg={seedMsg}
-                  setSeedMsg={setSeedMsg}
-                />
-              </div>
+              <AnimatePresence>
+                {activeCount > 0 && (
+                  <motion.div
+                    variants={pop}
+                    initial="hidden"
+                    animate="show"
+                    exit={{ opacity: 0, y: -6 }}
+                    className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
+                  >
+                    {activeCount} filter{activeCount === 1 ? "" : "s"} active
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <AnimatePresence>
-              {seedMsg && (
+              {dbError && (
                 <motion.div
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 text-blue-900 px-4 py-3 text-sm"
+                  className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
                 >
-                  {seedMsg}
+                  ❌ {dbError}
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
-          {/* Featured / Highlights */}
+          {/* Spotlight Resources */}
           <motion.section
             variants={fadeUp}
             className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
@@ -382,7 +331,7 @@ export default function Page() {
                   Spotlight Resources
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  A quick look at key resources in the community.
+                  Featured items from your Firestore resources collection.
                 </p>
               </div>
             </div>
@@ -392,13 +341,14 @@ export default function Page() {
                 Featured resources
               </div>
 
-              {loadingResources ? (
+              {loading ? (
                 <div className="rounded-2xl border border-blue-200 bg-white p-4 text-sm text-slate-600">
                   Loading resources…
                 </div>
               ) : featured.length === 0 ? (
                 <div className="rounded-2xl border border-blue-200 bg-white p-4 text-sm text-slate-600">
-                  No featured resources yet. Use the “Save starter resources” button to add some.
+                  No featured resources yet. (Set <span className="font-semibold">featured: true</span> on a
+                  resource doc.)
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -420,7 +370,6 @@ export default function Page() {
                         {loc.description ?? loc.address}
                       </div>
                       <div className="mt-3 text-xs text-slate-600">
-                        <span className="font-semibold text-slate-700">Address:</span>{" "}
                         {loc.address}
                       </div>
                     </motion.button>
@@ -452,7 +401,7 @@ export default function Page() {
 
             {/* Map + Search + List */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Map Card — DO NOT CHANGE MAP */}
+              {/* Map Card — unchanged */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
@@ -480,7 +429,6 @@ export default function Page() {
                 </div>
 
                 <div className="p-4 sm:p-5">
-                  {/* Map container keeps overflow-hidden */}
                   <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
                     <Map
                       mapId="8859a83a13a834f6eeef1c63"
@@ -502,7 +450,6 @@ export default function Page() {
                         </AdvancedMarker>
                       ))}
 
-                      {/* Selected place pin (from map search) */}
                       {selectedPlace && (
                         <AdvancedMarker position={selectedPlace}>
                           <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
@@ -511,12 +458,11 @@ export default function Page() {
                     </Map>
                   </div>
 
-                  {/* Search */}
                   <div className="mt-4 relative z-50">
                     <SearchBox
                       directoryQuery={directoryQuery}
                       setDirectoryQuery={setDirectoryQuery}
-                      directoryResults={resources}
+                      directoryResults={locations}
                       onDirectoryPick={(loc) => handleCenter(loc)}
                       input={input}
                       setInput={setInput}
@@ -532,7 +478,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Results List (tiles like before) */}
+              {/* Results List (tiles) */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
@@ -547,86 +493,107 @@ export default function Page() {
                 </div>
 
                 <div className="p-4 sm:p-5">
-                  <AnimatePresence mode="popLayout">
-                    {loadingResources ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="rounded-2xl border border-blue-200 bg-white p-5 text-slate-700"
-                      >
-                        Loading resources…
-                      </motion.div>
-                    ) : filteredLocations.length === 0 ? (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
-                      >
-                        No matches. Try removing a filter or changing your search.
-                      </motion.div>
-                    ) : (
-                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {filteredLocations.map((loc) => (
-                          <motion.button
-                            key={loc.id}
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            whileHover={{ y: -2 }}
-                            whileTap={{ scale: 0.99 }}
-                            onClick={() => handleCenter(loc)}
-                            className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <div className="text-sm font-semibold text-blue-900">
-                                  {loc.eventType}
-                                </div>
-                                <div className="mt-1 text-base font-bold text-slate-900">
-                                  {loc.title}
-                                </div>
+                  {loading ? (
+                    <div className="rounded-2xl border border-blue-200 bg-white p-5 text-slate-600">
+                      Loading resources…
+                    </div>
+                  ) : (
+                    <AnimatePresence mode="popLayout">
+                      {filteredLocations.length === 0 ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
+                        >
+                          No matches. Try removing a filter or changing your search.
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          layout
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                        >
+                          {filteredLocations.map((loc) => (
+                            <motion.button
+                              key={loc.id}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              whileHover={{ y: -2 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => handleCenter(loc)}
+                              className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                            >
+                              <div className="text-sm font-semibold text-blue-900">
+                                {loc.eventType}
+                              </div>
+                              <div className="mt-1 text-base font-bold text-slate-900">
+                                {loc.title}
                               </div>
 
-                              {loc.featured ? (
-                                <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
-                                  Featured
-                                </span>
-                              ) : null}
-                            </div>
-
-                            <div className="mt-2 text-sm text-slate-600">{loc.address}</div>
-
-                            {loc.description && (
                               <div className="mt-2 text-sm text-slate-600">
-                                {loc.description}
+                                {loc.address}
                               </div>
-                            )}
 
-                            {loc.host ? (
-                              <div className="mt-3 text-xs text-slate-600">
-                                <span className="font-semibold text-slate-700">Host:</span>{" "}
-                                {loc.host}
-                              </div>
-                            ) : null}
+                              {loc.description ? (
+                                <div className="mt-2 text-sm text-slate-600">
+                                  {loc.description}
+                                </div>
+                              ) : null}
 
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {(loc.activities ?? []).slice(0, 6).map((a) => (
-                                <span
-                                  key={a}
-                                  className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50"
-                                >
-                                  {a}
-                                </span>
-                              ))}
-                            </div>
-                          </motion.button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                              {loc.activities.length > 0 ? (
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  {loc.activities.slice(0, 6).map((a) => (
+                                    <span
+                                      key={a}
+                                      className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50"
+                                    >
+                                      {a}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : null}
+                            </motion.button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
+                </div>
+              </motion.section>
+
+              {/* Helpful Info */}
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Helpful Info
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Tips for using the hub + quick guidance for residents.
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoCard
+                    title="How to use this hub"
+                    lines={[
+                      "Use Filters to narrow by category and activities.",
+                      "Use Search directory to find resources by keyword.",
+                      "Use Search map to jump to any place by typing an address/place name.",
+                      "Tap any resource card to center it on the map.",
+                    ]}
+                  />
+                  <InfoCard
+                    title="Emergency & urgent needs"
+                    lines={[
+                      "If this is an emergency, call local emergency services.",
+                      "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
+                      "For after-hours info, use the community Welcome Center during business hours for guidance.",
+                    ]}
+                  />
                 </div>
               </motion.section>
             </div>
@@ -634,127 +601,6 @@ export default function Page() {
         </motion.div>
       </div>
     </APIProvider>
-  );
-}
-
-/** ---------- One-click Seed Button ----------
- * Writes docs into Firestore "resources" using Places textSearch result:
- * - formatted_address (real address)
- * - geometry.location (real lat/lng)
- * Uses seedKey as doc id so you can’t duplicate by clicking twice.
- */
-function SeedResourcesButton({
-  seeding,
-  setSeeding,
-  seedMsg,
-  setSeedMsg,
-}: {
-  seeding: boolean;
-  setSeeding: (v: boolean) => void;
-  seedMsg: string | null;
-  setSeedMsg: (v: string | null) => void;
-}) {
-  const placesLib = useMapsLibrary("places");
-
-  const runSeed = async () => {
-    if (!placesLib) {
-      setSeedMsg("Places library is not ready yet. Try again in a second.");
-      return;
-    }
-
-    setSeeding(true);
-    setSeedMsg(null);
-
-    try {
-      // Use PlacesService textSearch to get real formatted addresses + lat/lng
-      const svc = new placesLib.PlacesService(document.createElement("div"));
-
-      const resolvePlace = (q: string) =>
-        new Promise<google.maps.places.PlaceResult | null>((resolve) => {
-          svc.textSearch({ query: q }, (results, status) => {
-            if (
-              status === google.maps.places.PlacesServiceStatus.OK &&
-              results &&
-              results.length > 0
-            ) {
-              resolve(results[0]);
-            } else {
-              resolve(null);
-            }
-          });
-        });
-
-      const batch = writeBatch(db);
-      const failures: string[] = [];
-
-      for (const item of SEED_PLACES) {
-        const place = await resolvePlace(item.query);
-
-        if (!place?.geometry?.location || !place.formatted_address) {
-          failures.push(item.title);
-          continue;
-        }
-
-        const position = {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-        };
-
-        const ref = doc(db, "resources", item.seedKey); // ✅ prevents duplicates
-        batch.set(
-          ref,
-          {
-            seedKey: item.seedKey,
-            title: item.title,
-            address: place.formatted_address, // ✅ real address from Google
-            position,
-            eventType: item.eventType,
-            activities: item.activities,
-            host: item.host ?? "",
-            description: item.description ?? "",
-            featured: !!item.featured,
-            createdAt: serverTimestamp(),
-          },
-          { merge: true },
-        );
-      }
-
-      await batch.commit();
-
-      if (failures.length > 0) {
-        setSeedMsg(
-          `Saved starter resources ✅ (Some could not be resolved: ${failures.join(
-            ", ",
-          )})`,
-        );
-      } else {
-        setSeedMsg("Saved starter resources ✅");
-      }
-    } catch (e) {
-      console.error(e);
-      setSeedMsg("Could not save starter resources. Check console for details.");
-    } finally {
-      setSeeding(false);
-      // auto-clear message after a bit
-      window.setTimeout(() => setSeedMsg(null), 3500);
-    }
-  };
-
-  return (
-    <motion.button
-      whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.99 }}
-      onClick={runSeed}
-      disabled={seeding}
-      className={`px-4 py-2 rounded-xl border text-sm transition ${
-        seeding
-          ? "border-slate-200 bg-white text-slate-400 cursor-not-allowed"
-          : "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
-      }`}
-      title="Adds a starter set of resources to Firestore (resources collection) using Places results."
-    >
-      {seeding ? "Saving…" : "Save starter resources"}
-    </motion.button>
   );
 }
 
@@ -789,7 +635,9 @@ function FilterBox({
       <div className="p-4 sm:p-5 border-b border-blue-200/60">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">Filter</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+              Filter
+            </h2>
             <p className="text-sm text-slate-600">Choose what you want to see.</p>
           </div>
 
@@ -835,7 +683,7 @@ function FilterBox({
           </div>
         </div>
 
-        {/* Event Type */}
+        {/* Category */}
         <div>
           <div className="text-sm font-semibold text-slate-900">Category</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -894,9 +742,7 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (Directory + Places) ----------
- * (kept the same UX, but now searches Firestore-loaded resources)
- */
+/** ---------- SearchBox (Directory + Places) ---------- */
 function SearchBox({
   directoryQuery,
   setDirectoryQuery,
@@ -911,33 +757,32 @@ function SearchBox({
 }: {
   directoryQuery: string;
   setDirectoryQuery: (val: string) => void;
-  directoryResults: ResourceDoc[];
-  onDirectoryPick: (loc: ResourceDoc) => void;
+  directoryResults: LocationItem[];
+  onDirectoryPick: (loc: LocationItem) => void;
 
   input: string;
   setInput: (val: string) => void;
-  predictions: google.maps.places.AutocompletePrediction[];
-  setPredictions: (preds: google.maps.places.AutocompletePrediction[]) => void;
+  predictions: { description: string; place_id: string }[];
+  setPredictions: (preds: { description: string; place_id: string }[]) => void;
   setCenter: (loc: LatLng) => void;
   setSelectedPlace: (loc: LatLng | null) => void;
 }) {
   const placesLib = useMapsLibrary("places");
-  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const serviceRef = useRef<any>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"directory" | "places">("directory");
 
-  // init service
   useEffect(() => {
     if (placesLib && !serviceRef.current) {
-      serviceRef.current = new placesLib.AutocompleteService();
+      serviceRef.current = new (placesLib as any).AutocompleteService();
     }
   }, [placesLib]);
 
-  // fetch predictions
   useEffect(() => {
     if (mode !== "places") return;
+
     const q = input.trim();
     if (!serviceRef.current || q.length < 2 || !open) {
       setPredictions([]);
@@ -945,15 +790,19 @@ function SearchBox({
     }
 
     const handle = window.setTimeout(() => {
-      serviceRef.current?.getPlacePredictions({ input: q }, (res) => {
-        setPredictions(res || []);
+      serviceRef.current?.getPlacePredictions({ input: q }, (res: any[]) => {
+        const mapped =
+          (res || []).map((p) => ({
+            description: String(p?.description ?? ""),
+            place_id: String(p?.place_id ?? ""),
+          })) ?? [];
+        setPredictions(mapped.filter((p) => p.description && p.place_id));
       });
     }, 120);
 
     return () => window.clearTimeout(handle);
   }, [mode, input, open, setPredictions]);
 
-  // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
@@ -964,7 +813,6 @@ function SearchBox({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // directory results
   const dirMatches = useMemo(() => {
     const q = directoryQuery.trim().toLowerCase();
     if (!q) return [];
@@ -976,7 +824,7 @@ function SearchBox({
           loc.eventType,
           loc.host ?? "",
           loc.description ?? "",
-          ...(loc.activities ?? []),
+          ...loc.activities,
         ]
           .join(" ")
           .toLowerCase();
@@ -987,9 +835,12 @@ function SearchBox({
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
-    const detailsService = new placesLib.PlacesService(document.createElement("div"));
 
-    detailsService.getDetails({ placeId }, (place) => {
+    const detailsService = new (placesLib as any).PlacesService(
+      document.createElement("div"),
+    );
+
+    detailsService.getDetails({ placeId }, (place: any) => {
       if (place?.geometry?.location) {
         const loc = {
           lat: place.geometry.location.lat(),
@@ -1141,19 +992,17 @@ function SearchBox({
   );
 }
 
-/** ---------- Marker ----------
- * ✅ Removed the time section everywhere (no "when" field at all now)
- */
+/** ---------- Enhanced Marker (time removed) ---------- */
 function HoverMarker({
   location,
   activeId,
   setActiveId,
   onCenter,
 }: {
-  location: ResourceDoc;
+  location: LocationItem;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
-  onCenter: (loc: ResourceDoc) => void;
+  onCenter: (loc: LocationItem) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const isActive = activeId === location.id;
@@ -1189,10 +1038,20 @@ function HoverMarker({
           >
             <motion.div
               animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               className="w-8 h-8"
             >
-              <Image src="/marker.png" alt={location.title} width={32} height={32} priority />
+              <Image
+                src="/marker.png"
+                alt={location.title}
+                width={32}
+                height={32}
+                priority
+              />
             </motion.div>
 
             <motion.div
@@ -1219,35 +1078,38 @@ function HoverMarker({
                   <div className="text-[10px] font-semibold uppercase tracking-wider opacity-90 mb-0.5">
                     {location.eventType}
                   </div>
-                  <div className="text-sm font-bold leading-tight">{location.title}</div>
+                  <div className="text-sm font-bold leading-tight">
+                    {location.title}
+                  </div>
                 </div>
 
                 <div className="p-3 space-y-2">
-                  <div className="text-xs text-slate-700">
-                    <span className="font-semibold">Address:</span> {location.address}
+                  <div className="text-xs text-slate-700 font-medium">
+                    {location.address}
                   </div>
 
                   {location.host ? (
-                    <div className="text-xs text-slate-600">
-                      <span className="font-semibold text-slate-700">Host:</span>{" "}
-                      {location.host}
+                    <div className="text-xs text-slate-600">{location.host}</div>
+                  ) : null}
+
+                  {location.activities.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {location.activities.slice(0, 3).map((activity) => (
+                        <span
+                          key={activity}
+                          className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50
+                                     text-blue-700 border border-blue-200 font-medium"
+                        >
+                          {activity}
+                        </span>
+                      ))}
                     </div>
                   ) : null}
 
-                  <div className="flex flex-wrap gap-1">
-                    {(location.activities ?? []).slice(0, 3).map((activity) => (
-                      <span
-                        key={activity}
-                        className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50
-                                   text-blue-700 border border-blue-200 font-medium"
-                      >
-                        {activity}
-                      </span>
-                    ))}
-                  </div>
-
                   <div className="pt-1.5 border-t border-slate-100">
-                    <div className="text-[10px] text-slate-500">Click again to close</div>
+                    <div className="text-[10px] text-slate-500">
+                      Click again to close
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1260,6 +1122,19 @@ function HoverMarker({
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function InfoCard({ title, lines }: { title: string; lines: string[] }) {
+  return (
+    <div className="rounded-2xl border border-blue-200 bg-white p-4">
+      <div className="text-base font-bold text-[#1E3A8A]">{title}</div>
+      <ul className="mt-2 space-y-1 text-sm text-slate-600 list-disc pl-5">
+        {lines.map((l) => (
+          <li key={l}>{l}</li>
+        ))}
+      </ul>
     </div>
   );
 }
