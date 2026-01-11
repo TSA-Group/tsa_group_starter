@@ -311,7 +311,7 @@ export default function Page() {
   };
 
   return (
-    <APIProvider apiKey={AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM} libraries={["places"]}>
+    <APIProvider apiKey={apiKey} libraries={["places"]}>
       {/* LIGHT THEME */}
       <div className="min-h-screen bg-white text-slate-900">
         <motion.div
