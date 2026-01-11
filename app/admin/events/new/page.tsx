@@ -6,7 +6,7 @@ import type { Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AdminShell from "../../_components/AdminShell";
 
-// ✅ IMPORTANT: match YOUR firebase file path:
+// ✅ IMPORTANT: your firebase file path (change if needed)
 import { db } from "@/lib/firebase";
 
 import {
@@ -68,7 +68,7 @@ export type EventDoc = {
   startTime: string; // HH:MM
   endTime: string; // HH:MM
 
-  // ✅ timestamps for sorting/querying
+  // timestamps for sorting/querying
   startAt: Timestamp;
   endAt: Timestamp;
 
@@ -79,6 +79,10 @@ export type EventDoc = {
   contact: string;
   description: string;
 
+  // ✅ registration capacity + current attendees
+  spots: number;
+  attendees: number;
+
   createdAt: any; // serverTimestamp
 };
 
@@ -87,7 +91,6 @@ export type EventDoc = {
 ===================== */
 function toTimestamp(date: string, time: string) {
   // date = "2026-01-09", time = "18:30"
-  // Build a local Date object:
   const d = new Date(`${date}T${time}:00`);
   return Timestamp.fromDate(d);
 }
@@ -135,6 +138,9 @@ export default function AddEventPage() {
   const [contact, setContact] = React.useState("");
   const [description, setDescription] = React.useState("");
 
+  // ✅ NEW: capacity / spots
+  const [spots, setSpots] = React.useState<number>(30);
+
   // close dropdowns when clicking outside
   React.useEffect(() => {
     const onDown = (e: MouseEvent) => {
@@ -167,8 +173,10 @@ export default function AddEventPage() {
       return setError("Please fill out Venue and Address.");
     if (types.length === 0) return setError("Please select at least 1 Event Type.");
     if (activities.length === 0) return setError("Please select at least 1 Activity.");
+    if (!Number.isFinite(spots) || spots <= 0)
+      return setError("Please enter a valid capacity (spots) greater than 0.");
 
-    // ✅ build timestamps (so Events page can sort/query)
+    // build timestamps (so Events page can sort/query)
     let startAt: Timestamp;
     let endAt: Timestamp;
 
@@ -206,6 +214,10 @@ export default function AddEventPage() {
         contact: contact.trim(),
         description: description.trim(),
 
+        // ✅ NEW saved fields
+        spots,
+        attendees: 0,
+
         createdAt: serverTimestamp(),
       };
 
@@ -226,6 +238,7 @@ export default function AddEventPage() {
       setDescription("");
       setTypes(["Community"]);
       setActivities(["Volunteering"]);
+      setSpots(30);
     } catch (err: any) {
       setError(err?.message || "Failed to save event. Check Firestore rules.");
     } finally {
@@ -255,18 +268,30 @@ export default function AddEventPage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community → Event (types + activities, title, date/time, venue/address, indoor/outdoor, contact, description)
+              Community → Event (types + activities, title, date/time, venue/address,
+              indoor/outdoor, contact, description, capacity)
             </div>
           </div>
 
-          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form
+            onSubmit={onSubmit}
+            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }}
-                    exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+                    }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
                     ✅ Event saved to Firestore!
@@ -278,8 +303,16 @@ export default function AddEventPage() {
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }}
-                    exit={{ opacity: 0, y: -6, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -6,
+                      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+                    }}
                     className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
                   >
                     ❌ {error}
@@ -291,7 +324,9 @@ export default function AddEventPage() {
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) => setCommunity(e.target.value as (typeof COMMUNITIES)[number])}
+                onChange={(e) =>
+                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
@@ -391,6 +426,20 @@ export default function AddEventPage() {
                   className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </div>
+            </Field>
+
+            {/* ✅ NEW: capacity */}
+            <Field label="Registration Capacity (spots)">
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={spots}
+                onChange={(e) => setSpots(Number(e.target.value))}
+                required
+                placeholder="Example: 60"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+              />
             </Field>
 
             <Field label="Venue Name">
