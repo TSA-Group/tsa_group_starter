@@ -73,6 +73,8 @@ export default function ResourcesClient() {
     setErrMsg(null);
 
     const ref = collection(db, "resources");
+    console.log("FIREBASE PROJECT:", (db as any)?._databaseId?.projectId);
+
 
     const unsub = onSnapshot(
       ref,
