@@ -1,4 +1,4 @@
-// app/admin/add-resource/page.tsx
+// app/admin/resources/new/page.tsx
 "use client";
 
 import React from "react";
@@ -8,7 +8,13 @@ import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
 import { db } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp, type Timestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+  type Timestamp,
+  type FieldValue,
+} from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
 const sectionAnim: Variants = {
@@ -24,9 +30,7 @@ const sectionAnim: Variants = {
 const COMMUNITIES = ["Cross Creek Ranch"] as const;
 
 /**
- * ✅ These MUST match what your MAP page expects:
- * eventType: "Community Event" | "Park & Trails" | ...
- * activities: "Family" | "Outdoors" | ...
+ * ✅ Map filters expect THESE exact values
  */
 const EVENT_OPTIONS = [
   "Community Event",
@@ -52,8 +56,7 @@ const ACTIVITY_OPTIONS = [
 ] as const;
 
 /**
- * ✅ Keep your existing "types" for the /resources page (admin tiles).
- * We'll still write "types" exactly like before.
+ * ✅ Resources tab (admin tiles) expects these "types"
  */
 const RESOURCE_TYPES = [
   "Gym/Fitness",
@@ -77,9 +80,11 @@ export type ResourceDoc = {
   indoorOutdoor: "Indoor" | "Outdoor" | "Both";
   contact: string;
   location?: { lat: number; lng: number } | null;
-  createdAt: Timestamp | null;
 
-  // ✅ fields your MAP page reads
+  // ✅ FIX: serverTimestamp() is FieldValue, not Timestamp
+  createdAt: Timestamp | FieldValue | null;
+
+  // fields your MAP page reads
   title: string;
   position: LatLng;
   eventType: (typeof EVENT_OPTIONS)[number];
@@ -119,22 +124,22 @@ async function geocodeAddress(address: string, apiKey: string): Promise<LatLng |
 export default function AddResourcePage() {
   const router = useRouter();
 
-  // ✅ Put this in .env.local (and Vercel env):
-  // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxxxx
   const mapsKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
   const [sent, setSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
 
-  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>("Cross Creek Ranch");
+  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
+    "Cross Creek Ranch",
+  );
 
-  // existing multi-select (for /resources page)
+  // resources tab types
   const [types, setTypes] = React.useState<(typeof RESOURCE_TYPES)[number][]>(["Park/Trails"]);
   const [typesOpen, setTypesOpen] = React.useState(false);
   const typesRef = React.useRef<HTMLDivElement | null>(null);
 
-  // ✅ NEW: map category + activities
+  // map fields
   const [eventType, setEventType] = React.useState<(typeof EVENT_OPTIONS)[number]>("Other");
 
   const [activities, setActivities] = React.useState<(typeof ACTIVITY_OPTIONS)[number][]>([]);
@@ -148,11 +153,9 @@ export default function AddResourcePage() {
   const [indoorOutdoor, setIndoorOutdoor] = React.useState<"Indoor" | "Outdoor" | "Both">("Both");
   const [contact, setContact] = React.useState("");
 
-  // optional extras for map cards
   const [host, setHost] = React.useState("");
   const [description, setDescription] = React.useState("");
 
-  // ✅ close dropdowns when clicking outside
   React.useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (typesRef.current && !typesRef.current.contains(e.target as Node)) setTypesOpen(false);
@@ -168,7 +171,6 @@ export default function AddResourcePage() {
   };
 
   const toggleActivity = (a: (typeof ACTIVITY_OPTIONS)[number]) => {
-    // ✅ NOTE: default is [], so "Family" won't be auto-selected unless you click it
     setActivities((prev) => (prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]));
   };
 
@@ -197,18 +199,14 @@ export default function AddResourcePage() {
     try {
       setSaving(true);
 
-      // ✅ Convert address -> lat/lng so MAP page can show marker
       const pos = await geocodeAddress(address.trim(), mapsKey);
       if (!pos) {
         setError("Could not convert that address to coordinates. Try a more specific address.");
         return;
       }
 
-      // ✅ Write BOTH formats:
-      // - old fields for /resources page
-      // - new fields for /map page
       await addDoc(collection(db, "resources"), {
-        // /resources page fields (keep exactly)
+        // /resources page fields
         community,
         types,
         name: name.trim(),
@@ -216,13 +214,13 @@ export default function AddResourcePage() {
         indoorOutdoor,
         contact: contact.trim(),
         location: null,
-        createdAt: serverTimestamp(),
+        createdAt: serverTimestamp(), // ✅ now allowed by type
 
         // /map page fields
-        title: name.trim(), // map reads "title"
-        position: pos, // map reads "position" {lat,lng}
-        eventType, // map reads "eventType"
-        activities, // map reads "activities"
+        title: name.trim(),
+        position: pos,
+        eventType,
+        activities,
         host: host.trim() || undefined,
         description: description.trim() || undefined,
         featured,
@@ -231,12 +229,12 @@ export default function AddResourcePage() {
       setSent(true);
       window.setTimeout(() => setSent(false), 2200);
 
-      // reset
       setName("");
       setAddress("");
       setContact("");
       setIndoorOutdoor("Both");
       setTypes(["Park/Trails"]);
+
       setEventType("Other");
       setActivities([]); // ✅ prevents “Family auto on”
       setHost("");
@@ -254,7 +252,6 @@ export default function AddResourcePage() {
       title="Add Resource"
       subtitle="Resources are places/services that exist (gym, parks, grocery stores, support services)."
     >
-      {/* ✅ Back to Home (logs out) */}
       <div className="mb-4">
         <motion.button
           onClick={logoutAndHome}
@@ -322,11 +319,12 @@ export default function AddResourcePage() {
               </AnimatePresence>
             </div>
 
-            {/* Community */}
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) => setCommunity(e.target.value as (typeof COMMUNITIES)[number])}
+                onChange={(e) =>
+                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
@@ -337,11 +335,12 @@ export default function AddResourcePage() {
               </select>
             </Field>
 
-            {/* ✅ MAP Category (eventType) */}
             <Field label="Category (for Map filters)">
               <select
                 value={eventType}
-                onChange={(e) => setEventType(e.target.value as (typeof EVENT_OPTIONS)[number])}
+                onChange={(e) =>
+                  setEventType(e.target.value as (typeof EVENT_OPTIONS)[number])
+                }
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {EVENT_OPTIONS.map((opt) => (
@@ -352,7 +351,6 @@ export default function AddResourcePage() {
               </select>
             </Field>
 
-            {/* ✅ Resource Types (kept for /resources page) */}
             <Field label="Resource Types (for Resources tab, multi-select)">
               <div ref={typesRef} className="relative">
                 <button
@@ -437,7 +435,6 @@ export default function AddResourcePage() {
               </div>
             </Field>
 
-            {/* ✅ Activities (for Map filters, multi-select) */}
             <Field label="Activities (for Map filters, multi-select)">
               <div ref={activitiesRef} className="relative">
                 <button
@@ -522,7 +519,6 @@ export default function AddResourcePage() {
               </div>
             </Field>
 
-            {/* Name */}
             <Field label="Resource Name">
               <input
                 value={name}
@@ -533,7 +529,6 @@ export default function AddResourcePage() {
               />
             </Field>
 
-            {/* Indoor/Outdoor */}
             <Field label="Indoor / Outdoor">
               <div className="grid grid-cols-3 gap-2">
                 {(["Indoor", "Outdoor", "Both"] as const).map((opt) => {
@@ -558,7 +553,6 @@ export default function AddResourcePage() {
               </div>
             </Field>
 
-            {/* Address */}
             <div className="md:col-span-2">
               <Field label="Address (will be converted to marker coords)">
                 <input
@@ -571,7 +565,6 @@ export default function AddResourcePage() {
               </Field>
             </div>
 
-            {/* Contact */}
             <div className="md:col-span-2">
               <Field label="Contact">
                 <input
@@ -583,7 +576,6 @@ export default function AddResourcePage() {
               </Field>
             </div>
 
-            {/* Optional: Host + Description */}
             <Field label="Host (optional)">
               <input
                 value={host}
@@ -602,7 +594,6 @@ export default function AddResourcePage() {
               />
             </Field>
 
-            {/* Featured */}
             <div className="md:col-span-2">
               <Field label="Featured (shows in Spotlight on map page)">
                 <button
