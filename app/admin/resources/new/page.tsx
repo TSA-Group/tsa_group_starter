@@ -1,20 +1,15 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import AdminShell from "../../_components/AdminShell";
 
 import { db } from "@/lib/firebase";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-  type Timestamp,
-} from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, type Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 
+/** ---------------- Motion ---------------- */
 const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
   show: {
@@ -25,6 +20,7 @@ const sectionAnim: Variants = {
   },
 };
 
+/** ---------------- Admin UI Options ---------------- */
 const COMMUNITIES = ["Cross Creek Ranch"] as const;
 
 const RESOURCE_TYPES = [
@@ -38,47 +34,131 @@ const RESOURCE_TYPES = [
   "Other",
 ] as const;
 
+/** ---------------- Map schema types (must match app/map/page.tsx) ---------------- */
+type LatLng = { lat: number; lng: number };
+
+type EventType =
+  | "Community Event"
+  | "Park & Trails"
+  | "Fitness"
+  | "Grocery"
+  | "Library"
+  | "Support Services"
+  | "Food Pantry"
+  | "Volunteer Opportunity"
+  | "Other";
+
+type ActivityType =
+  | "Family"
+  | "Outdoors"
+  | "Food"
+  | "Education"
+  | "Health"
+  | "Support"
+  | "Volunteering"
+  | "Shopping";
+
+/** ---------------- Your original admin doc type (kept) ---------------- */
 export type ResourceDoc = {
   community: (typeof COMMUNITIES)[number];
-
-  // ✅ changed: multi-select
   types: (typeof RESOURCE_TYPES)[number][];
-
   name: string;
   address: string;
   indoorOutdoor: "Indoor" | "Outdoor" | "Both";
   contact: string;
-
   location?: { lat: number; lng: number } | null;
   createdAt: Timestamp | null;
 };
 
+/** ---------------- Helpers ---------------- */
+function pickEventType(types: (typeof RESOURCE_TYPES)[number][]): EventType {
+  // choose a single main category for the map cards/labels
+  if (types.includes("Park/Trails")) return "Park & Trails";
+  if (types.includes("Gym/Fitness")) return "Fitness";
+  if (types.includes("Grocery")) return "Grocery";
+  if (types.includes("Library")) return "Library";
+  if (types.includes("Support Services")) return "Support Services";
+  if (types.includes("Clinic/Health")) return "Support Services"; // closest match in your map types
+  if (types.includes("Non-Profit")) return "Volunteer Opportunity";
+  return "Other";
+}
+
+function pickActivities(types: (typeof RESOURCE_TYPES)[number][]): ActivityType[] {
+  const set = new Set<ActivityType>();
+
+  if (types.includes("Park/Trails")) {
+    set.add("Outdoors");
+    set.add("Family");
+  }
+  if (types.includes("Gym/Fitness") || types.includes("Clinic/Health")) {
+    set.add("Health");
+  }
+  if (types.includes("Grocery")) {
+    set.add("Shopping");
+    set.add("Food");
+  }
+  if (types.includes("Library")) {
+    set.add("Education");
+    set.add("Family");
+  }
+  if (types.includes("Support Services") || types.includes("Clinic/Health")) {
+    set.add("Support");
+  }
+  if (types.includes("Non-Profit")) {
+    set.add("Volunteering");
+    set.add("Support");
+  }
+
+  // fallback
+  if (set.size === 0) set.add("Family");
+
+  return Array.from(set);
+}
+
+async function geocodeAddress(address: string, apiKey: string): Promise<LatLng> {
+  const url =
+    "https://maps.googleapis.com/maps/api/geocode/json" +
+    `?address=${encodeURIComponent(address)}` +
+    `&key=${encodeURIComponent(apiKey)}`;
+
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Geocoding request failed.");
+  const json = await res.json();
+
+  const loc = json?.results?.[0]?.geometry?.location;
+  const lat = Number(loc?.lat);
+  const lng = Number(loc?.lng);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    throw new Error("Could not find a valid lat/lng for that address.");
+  }
+
+  return { lat, lng };
+}
+
+/** ---------------- Page ---------------- */
 export default function AddResourcePage() {
   const router = useRouter();
+
+  // ✅ Put this in .env.local and Vercel env:
+  // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxxxx
+  const MAPS_KEY = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
   const [sent, setSent] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
 
-  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>(
-    "Cross Creek Ranch",
-  );
+  const [community, setCommunity] = React.useState<(typeof COMMUNITIES)[number]>("Cross Creek Ranch");
 
-  // ✅ multi-select state
-  const [types, setTypes] = React.useState<(typeof RESOURCE_TYPES)[number][]>([
-    "Park/Trails",
-  ]);
+  const [types, setTypes] = React.useState<(typeof RESOURCE_TYPES)[number][]>(["Park/Trails"]);
   const [typesOpen, setTypesOpen] = React.useState(false);
   const typesRef = React.useRef<HTMLDivElement | null>(null);
 
   const [name, setName] = React.useState("");
   const [address, setAddress] = React.useState("");
-  const [indoorOutdoor, setIndoorOutdoor] = React.useState<
-    "Indoor" | "Outdoor" | "Both"
-  >("Both");
+  const [indoorOutdoor, setIndoorOutdoor] = React.useState<"Indoor" | "Outdoor" | "Both">("Both");
   const [contact, setContact] = React.useState("");
 
-  // ✅ close dropdown when clicking outside
   React.useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (!typesRef.current) return;
@@ -89,14 +169,10 @@ export default function AddResourcePage() {
   }, []);
 
   const toggleType = (t: (typeof RESOURCE_TYPES)[number]) => {
-    setTypes((prev) => {
-      if (prev.includes(t)) return prev.filter((x) => x !== t);
-      return [...prev, t];
-    });
+    setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
   };
 
   const logoutAndHome = () => {
-    // ✅ auto logout
     localStorage.removeItem("admin_authed");
     router.push("/");
   };
@@ -113,19 +189,44 @@ export default function AddResourcePage() {
       setError("Please select at least 1 Resource Type.");
       return;
     }
+    if (!MAPS_KEY) {
+      setError("Missing NEXT_PUBLIC_GOOGLE_MAPS_API_KEY. Add it to .env.local and Vercel env vars.");
+      return;
+    }
 
     try {
       setSaving(true);
 
+      // ✅ Get coordinates so your MAP/Resources tab can place a marker
+      const position = await geocodeAddress(address.trim(), MAPS_KEY);
+
+      // ✅ Derive the fields that app/map/page.tsx expects
+      const eventType = pickEventType(types);
+      const activities = pickActivities(types);
+
       await addDoc(collection(db, "resources"), {
+        // ----------------
+        // Keep your existing admin fields (so you don't “change the database”)
         community,
-        types, // ✅ multi-select
+        types,
         name: name.trim(),
         address: address.trim(),
         indoorOutdoor,
         contact: contact.trim(),
-        location: null,
+        location: position,            // no longer null (still your field)
         createdAt: serverTimestamp(),
+
+        // ----------------
+        // ALSO write the map/resources-tab schema fields
+        title: name.trim(),            // map expects "title"
+        position,                      // map expects "position"
+        eventType,                     // map expects "eventType"
+        activities,                    // map expects "activities"
+
+        // optional extras your map code supports
+        host: community,
+        description: contact.trim() ? `Contact: ${contact.trim()}` : undefined,
+        featured: false,
       });
 
       setSent(true);
@@ -137,7 +238,7 @@ export default function AddResourcePage() {
       setIndoorOutdoor("Both");
       setTypes(["Park/Trails"]);
     } catch (err: any) {
-      setError(err?.message || "Failed to save resource. Check Firestore rules.");
+      setError(err?.message || "Failed to save resource. Check Firestore rules + API key restrictions.");
     } finally {
       setSaving(false);
     }
@@ -148,7 +249,6 @@ export default function AddResourcePage() {
       title="Add Resource"
       subtitle="Resources are places/services that exist (gym, parks, grocery stores, support services)."
     >
-      {/* ✅ Back to Home (logs out) */}
       <div className="mb-4">
         <motion.button
           onClick={logoutAndHome}
@@ -166,30 +266,18 @@ export default function AddResourcePage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community Name (dropdown) → Resources (types, name, address,
-              indoor/outdoor, contact)
+              Community Name (dropdown) → Resources (types, name, address, indoor/outdoor, contact)
             </div>
           </div>
 
-          <form
-            onSubmit={onSubmit}
-            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
+          <form onSubmit={onSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
+                    animate={{ opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 } }}
+                    exit={{ opacity: 0, y: -6, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 } }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
                     ✅ Resource saved to Firestore!
@@ -201,16 +289,8 @@ export default function AddResourcePage() {
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 },
-                    }}
+                    animate={{ opacity: 1, y: 0, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.25 } }}
+                    exit={{ opacity: 0, y: -6, transition: { ease: [0.16, 1, 0.3, 1], duration: 0.2 } }}
                     className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
                   >
                     ❌ {error}
@@ -223,9 +303,7 @@ export default function AddResourcePage() {
             <Field label="Community Name">
               <select
                 value={community}
-                onChange={(e) =>
-                  setCommunity(e.target.value as (typeof COMMUNITIES)[number])
-                }
+                onChange={(e) => setCommunity(e.target.value as (typeof COMMUNITIES)[number])}
                 className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               >
                 {COMMUNITIES.map((c) => (
@@ -236,7 +314,7 @@ export default function AddResourcePage() {
               </select>
             </Field>
 
-            {/* ✅ Resource Types (multi-select dropdown) */}
+            {/* Types */}
             <Field label="Resource Types (multi-select)">
               <div ref={typesRef} className="relative">
                 <button
@@ -249,9 +327,7 @@ export default function AddResourcePage() {
                       {types.length === 0 ? (
                         <span className="text-white/50">Select types…</span>
                       ) : (
-                        <span className="text-white">
-                          {types.join(", ")}
-                        </span>
+                        <span className="text-white">{types.join(", ")}</span>
                       )}
                     </div>
                     <span className="text-white/60">{typesOpen ? "▲" : "▼"}</span>
@@ -262,18 +338,8 @@ export default function AddResourcePage() {
                   {typesOpen && (
                     <motion.div
                       initial={{ opacity: 0, y: 6, filter: "blur(6px)" }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                        filter: "blur(0px)",
-                        transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
-                      }}
-                      exit={{
-                        opacity: 0,
-                        y: 6,
-                        filter: "blur(6px)",
-                        transition: { duration: 0.16, ease: [0.16, 1, 0.3, 1] },
-                      }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
+                      exit={{ opacity: 0, y: 6, filter: "blur(6px)", transition: { duration: 0.16, ease: [0.16, 1, 0.3, 1] } }}
                       className="absolute z-20 mt-2 w-full rounded-2xl border border-white/10 bg-[#070A12]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.65)] p-2"
                     >
                       <div className="max-h-56 overflow-auto">
@@ -370,6 +436,9 @@ export default function AddResourcePage() {
                   className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </Field>
+              <div className="mt-2 text-xs text-white/55">
+                Note: we geocode the address to create map markers.
+              </div>
             </div>
 
             {/* Contact */}
@@ -386,8 +455,7 @@ export default function AddResourcePage() {
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
               <div className="text-xs text-white/55">
-                Saves directly to Firestore collection:{" "}
-                <span className="font-semibold">resources</span>
+                Saves directly to Firestore collection: <span className="font-semibold">resources</span>
               </div>
 
               <motion.button
