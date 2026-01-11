@@ -513,7 +513,7 @@ export default function EventsPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 mt-5">
+                    <div className="grid grid-cols-1 gap-2 mt-5">
                       <Link
                         href={`/events/register?id=${ev.id}`}
                         className="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
