@@ -57,32 +57,29 @@ const ACTIVITIES = [
 export type EventDoc = {
   community: (typeof COMMUNITIES)[number];
 
+  // multi select
   types: (typeof EVENT_TYPES)[number][];
   activities: (typeof ACTIVITIES)[number][];
 
   title: string;
 
+  // strings for UI
   date: string; // yyyy-mm-dd
   startTime: string; // HH:MM
   endTime: string; // HH:MM
 
+  // timestamps for sorting/querying
   startAt: Timestamp;
   endAt: Timestamp;
 
   venue: string;
-
-  // ✅ store the formatted full address here
   address: string;
-
-  // ✅ extra fields (optional but very useful)
-  addressPlaceId?: string;
-  addressLat?: number;
-  addressLng?: number;
 
   indoorOutdoor: "Indoor" | "Outdoor" | "Both";
   contact: string;
   description: string;
 
+  // ✅ registration capacity + current attendees
   spots: number;
   attendees: number;
 
@@ -93,153 +90,9 @@ export type EventDoc = {
    Helpers
 ===================== */
 function toTimestamp(date: string, time: string) {
+  // date = "2026-01-09", time = "18:30"
   const d = new Date(`${date}T${time}:00`);
   return Timestamp.fromDate(d);
-}
-
-/* =====================
-   Google Places Loader (no libraries)
-===================== */
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
-
-function loadGooglePlaces(apiKey: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") return reject(new Error("No window"));
-    if (window.google?.maps?.places) return resolve();
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[data-google-places="true"]',
-    );
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () =>
-        reject(new Error("Google Places script failed")),
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(
-      apiKey,
-    )}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.googlePlaces = "true";
-
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Google Places script failed"));
-
-    document.head.appendChild(script);
-  });
-}
-
-type AddressPick = {
-  formattedAddress: string;
-  placeId?: string;
-  lat?: number;
-  lng?: number;
-};
-
-function AddressAutocomplete({
-  value,
-  onChange,
-  onPick,
-  inputClassName,
-  placeholder,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  onPick: (pick: AddressPick) => void;
-  inputClassName: string;
-  placeholder?: string;
-}) {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [ready, setReady] = React.useState(false);
-  const [loadError, setLoadError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!key) {
-      setLoadError("Missing NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in .env.local");
-      return;
-    }
-
-    loadGooglePlaces(key)
-      .then(() => setReady(true))
-      .catch((e) => setLoadError(e?.message || "Failed to load Places API"));
-  }, []);
-
-  React.useEffect(() => {
-    if (!ready) return;
-    if (!inputRef.current) return;
-    if (!window.google?.maps?.places?.Autocomplete) return;
-
-    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ["address"],
-      // Optional: keep it US-only
-      componentRestrictions: { country: "us" },
-      fields: ["formatted_address", "place_id", "geometry"],
-    });
-
-    ac.addListener("place_changed", () => {
-      const place = ac.getPlace?.();
-      const formattedAddress = place?.formatted_address || "";
-      const placeId = place?.place_id;
-
-      const lat = place?.geometry?.location?.lat?.();
-      const lng = place?.geometry?.location?.lng?.();
-
-      if (formattedAddress) {
-        onChange(formattedAddress);
-        onPick({
-          formattedAddress,
-          placeId,
-          lat: typeof lat === "number" ? lat : undefined,
-          lng: typeof lng === "number" ? lng : undefined,
-        });
-      }
-    });
-
-    return () => {
-      // Autocomplete doesn't have a clean destroy API; removing listeners is enough
-      // If you ever need: window.google.maps.event.clearInstanceListeners(ac)
-      try {
-        window.google?.maps?.event?.clearInstanceListeners?.(ac);
-      } catch {}
-    };
-  }, [ready, onChange, onPick]);
-
-  return (
-    <div className="space-y-2">
-      <input
-        ref={inputRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder || "Start typing an address…"}
-        className={inputClassName}
-        autoComplete="off"
-      />
-
-      {!loadError ? null : (
-        <div className="text-xs text-rose-200/90">
-          ❌ {loadError}
-          <div className="text-white/55 mt-1">
-            Fix: add <span className="font-semibold">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</span>{" "}
-            to <span className="font-semibold">.env.local</span> and enable{" "}
-            <span className="font-semibold">Places API</span>.
-          </div>
-        </div>
-      )}
-
-      {ready ? null : !loadError ? (
-        <div className="text-xs text-white/55">Loading address suggestions…</div>
-      ) : null}
-    </div>
-  );
 }
 
 /* =====================
@@ -256,6 +109,7 @@ export default function AddEventPage() {
     "Cross Creek Ranch",
   );
 
+  // Multi selects
   const [types, setTypes] = React.useState<(typeof EVENT_TYPES)[number][]>([
     "Community",
   ]);
@@ -275,16 +129,7 @@ export default function AddEventPage() {
   const [endTime, setEndTime] = React.useState("");
 
   const [venue, setVenue] = React.useState("");
-
-  // ✅ now holds the formatted address (or whatever user typed)
   const [address, setAddress] = React.useState("");
-
-  // ✅ extra saved fields from autocomplete
-  const [addressPlaceId, setAddressPlaceId] = React.useState<string | undefined>(
-    undefined,
-  );
-  const [addressLat, setAddressLat] = React.useState<number | undefined>(undefined);
-  const [addressLng, setAddressLng] = React.useState<number | undefined>(undefined);
 
   const [indoorOutdoor, setIndoorOutdoor] = React.useState<
     "Indoor" | "Outdoor" | "Both"
@@ -293,6 +138,7 @@ export default function AddEventPage() {
   const [contact, setContact] = React.useState("");
   const [description, setDescription] = React.useState("");
 
+  // ✅ NEW: capacity / spots
   const [spots, setSpots] = React.useState<number>(30);
 
   // close dropdowns when clicking outside
@@ -319,6 +165,7 @@ export default function AddEventPage() {
     e.preventDefault();
     setError(null);
 
+    // validation
     if (!title.trim()) return setError("Please enter an Event Title.");
     if (!date) return setError("Please select an Event Date.");
     if (!startTime || !endTime) return setError("Please select Start + End time.");
@@ -329,6 +176,7 @@ export default function AddEventPage() {
     if (!Number.isFinite(spots) || spots <= 0)
       return setError("Please enter a valid capacity (spots) greater than 0.");
 
+    // build timestamps (so Events page can sort/query)
     let startAt: Timestamp;
     let endAt: Timestamp;
 
@@ -362,15 +210,11 @@ export default function AddEventPage() {
         venue: venue.trim(),
         address: address.trim(),
 
-        // ✅ save autocomplete extras (optional)
-        addressPlaceId,
-        addressLat,
-        addressLng,
-
         indoorOutdoor,
         contact: contact.trim(),
         description: description.trim(),
 
+        // ✅ NEW saved fields
         spots,
         attendees: 0,
 
@@ -389,11 +233,6 @@ export default function AddEventPage() {
       setEndTime("");
       setVenue("");
       setAddress("");
-
-      setAddressPlaceId(undefined);
-      setAddressLat(undefined);
-      setAddressLng(undefined);
-
       setIndoorOutdoor("Both");
       setContact("");
       setDescription("");
@@ -429,7 +268,7 @@ export default function AddEventPage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Community → Event (types + activities, title, date/time, venue/address w/ suggestions,
+              Community → Event (types + activities, title, date/time, venue/address,
               indoor/outdoor, contact, description, capacity)
             </div>
           </div>
@@ -438,7 +277,6 @@ export default function AddEventPage() {
             onSubmit={onSubmit}
             className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            {/* Alerts */}
             <div className="md:col-span-2">
               <AnimatePresence>
                 {sent && (
@@ -483,7 +321,6 @@ export default function AddEventPage() {
               </AnimatePresence>
             </div>
 
-            {/* Community */}
             <Field label="Community Name">
               <select
                 value={community}
@@ -500,7 +337,6 @@ export default function AddEventPage() {
               </select>
             </Field>
 
-            {/* Event Types */}
             <Field label="Event Types (multi-select)">
               <MultiSelect
                 refEl={typesRef}
@@ -514,7 +350,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Activities */}
             <Field label="Activities (multi-select)">
               <MultiSelect
                 refEl={actsRef}
@@ -528,7 +363,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Indoor/Outdoor */}
             <Field label="Indoor / Outdoor">
               <div className="grid grid-cols-3 gap-2">
                 {(["Indoor", "Outdoor", "Both"] as const).map((opt) => {
@@ -553,7 +387,6 @@ export default function AddEventPage() {
               </div>
             </Field>
 
-            {/* Title */}
             <div className="md:col-span-2">
               <Field label="Event Title">
                 <input
@@ -566,7 +399,6 @@ export default function AddEventPage() {
               </Field>
             </div>
 
-            {/* Date */}
             <Field label="Date">
               <input
                 type="date"
@@ -577,7 +409,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Time */}
             <Field label="Start / End Time">
               <div className="grid grid-cols-2 gap-2">
                 <input
@@ -597,7 +428,7 @@ export default function AddEventPage() {
               </div>
             </Field>
 
-            {/* Capacity */}
+            {/* ✅ NEW: capacity */}
             <Field label="Registration Capacity (spots)">
               <input
                 type="number"
@@ -611,7 +442,6 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* Venue */}
             <Field label="Venue Name">
               <input
                 value={venue}
@@ -622,35 +452,16 @@ export default function AddEventPage() {
               />
             </Field>
 
-            {/* ✅ Address with Suggestions */}
-            <Field label="Address (with suggestions)">
-              <AddressAutocomplete
+            <Field label="Address">
+              <input
                 value={address}
-                onChange={(v) => {
-                  setAddress(v);
-                  // If they type manually after selecting, you can keep place fields or clear them
-                  // Here we clear when they type a lot manually
-                  setAddressPlaceId(undefined);
-                  setAddressLat(undefined);
-                  setAddressLng(undefined);
-                }}
-                onPick={(pick) => {
-                  setAddress(pick.formattedAddress);
-                  setAddressPlaceId(pick.placeId);
-                  setAddressLat(pick.lat);
-                  setAddressLng(pick.lng);
-                }}
-                placeholder="Start typing a real address…"
-                inputClassName="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                onChange={(e) => setAddress(e.target.value)}
+                required
+                placeholder="Full street address (recommended)"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
               />
-
-              {/* Tiny helper text */}
-              <div className="text-xs text-white/55">
-                Tip: click a suggestion so the address is validated.
-              </div>
             </Field>
 
-            {/* Contact */}
             <div className="md:col-span-2">
               <Field label="Contact (optional)">
                 <input
@@ -662,7 +473,6 @@ export default function AddEventPage() {
               </Field>
             </div>
 
-            {/* Description */}
             <div className="md:col-span-2">
               <Field label="Description (optional)">
                 <textarea
@@ -674,7 +484,6 @@ export default function AddEventPage() {
               </Field>
             </div>
 
-            {/* Submit */}
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
               <div className="text-xs text-white/55">
                 Saves to Firestore: <span className="font-semibold">events</span>
