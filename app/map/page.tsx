@@ -172,7 +172,7 @@ const SEED_PLACES: Array<{
 /** ---------- Page ---------- */
 export default function Page() {
   // ✅ Use env (don’t hard-code keys in code)
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
   // Cross Creek Ranch-ish default center (map stays the same)
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
@@ -311,7 +311,7 @@ export default function Page() {
   };
 
   return (
-    <APIProvider apiKey={apiKey} libraries={["places"]}>
+    <APIProvider apiKey={AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM} libraries={["places"]}>
       {/* LIGHT THEME */}
       <div className="min-h-screen bg-white text-slate-900">
         <motion.div
