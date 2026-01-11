@@ -269,7 +269,7 @@ export default function AddResourcePage() {
           <div className="p-6 border-b border-white/10">
             <div className="text-white/80 font-semibold">Subsections</div>
             <div className="mt-2 text-sm text-white/60">
-              Before saving your resource please ensure all the feilds are complete
+              Ensure all the fields are complete
             </div>
           </div>
 
@@ -291,7 +291,7 @@ export default function AddResourcePage() {
                     }}
                     className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
                   >
-                    Resource saved 
+                    Resource saved
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -611,6 +611,11 @@ export default function AddResourcePage() {
                 </button>
               </Field>
             </div>
+
+            <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
+              <div className="text-xs text-white/55">
+                 <span className="font-semibold">resources</span>
+              </div>
 
               <motion.button
                 whileHover={{ y: -1 }}
