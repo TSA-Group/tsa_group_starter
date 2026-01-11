@@ -77,3 +77,14 @@ pre {
 .planet {
     transition: box-shadow 0.35s ease;
 }
+
+/* Google Places dropdown */
+.pac-container {
+  z-index: 999999 !important;
+}
+
+/* Optional: make it match dark UI a bit */
+.pac-container, .pac-item {
+  font-family: inherit;
+}
+
