@@ -10,6 +10,18 @@ import {
 } from "@vis.gl/react-google-maps";
 import Image from "next/image";
 
+// ✅ Firestore
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  setDoc,
+  writeBatch,
+  type Timestamp,
+} from "firebase/firestore";
+
 /** ---------- Types ---------- */
 interface LatLng {
   lat: number;
@@ -36,17 +48,18 @@ type ActivityType =
   | "Volunteering"
   | "Shopping";
 
-type LocationItem = {
+type ResourceDoc = {
   id: string;
   title: string;
   address: string;
   position: LatLng;
   eventType: EventType;
   activities: ActivityType[];
-  when: string;
   host?: string;
   description?: string;
   featured?: boolean;
+  seedKey?: string; // used to avoid duplicates for the "seed" button
+  createdAt?: Timestamp;
 };
 
 /** ---------- Motion ---------- */
@@ -70,113 +83,6 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-/** ---------- Cross Creek Area Resources (sample dataset) ----------
- * NOTE: Coordinates are approximate for Cross Creek Ranch / Fulshear area.
- * Swap for exact places later if needed.
- */
-const ALL_LOCATIONS: LocationItem[] = [
-  {
-    id: "ful-1",
-    title: "Cross Creek Ranch Fitness Center",
-    address: "Cross Creek Ranch, Fulshear, TX (Fitness Center)",
-    position: { lat: 29.7008, lng: -95.9082 },
-    eventType: "Fitness",
-    activities: ["Health", "Family"],
-    when: "Daily • 5:00 AM – 10:00 PM",
-    host: "Cross Creek Ranch",
-  },
-  {
-    id: "ful-2",
-    title: "Flewellen Creek Park & Trails",
-    address: "Flewellen Creek Park, Fulshear, TX",
-    position: { lat: 29.6972, lng: -95.8968 },
-    eventType: "Park & Trails",
-    activities: ["Outdoors", "Family"],
-    when: "Daily • Sunrise – Sunset",
-    host: "Community Parks",
-  },
-  {
-    id: "ful-3",
-    title: "Cross Creek Ranch Welcome Center",
-    address: "Cross Creek Ranch Welcome Center, Fulshear, TX",
-    position: { lat: 29.6988, lng: -95.9056 },
-    eventType: "Support Services",
-    activities: ["Support", "Family"],
-    when: "Mon–Fri • 9:00 AM – 5:00 PM",
-    host: "Community Staff",
-  },
-  {
-    id: "ful-4",
-    title: "Cross Creek Ranch Community Pool",
-    address: "Cross Creek Ranch Pool, Fulshear, TX",
-    position: { lat: 29.7034, lng: -95.8994 },
-    eventType: "Community Event",
-    activities: ["Family", "Health"],
-    when: "Seasonal • Check community schedule",
-    host: "Cross Creek Ranch",
-  },
-  {
-    id: "ful-5",
-    title: "HEB (Nearby Grocery)",
-    address: "Fulshear, TX area grocery (HEB)",
-    position: { lat: 29.6912, lng: -95.9185 },
-    eventType: "Grocery",
-    activities: ["Shopping", "Food", "Family"],
-    when: "Daily • 6:00 AM – 11:00 PM",
-    host: "HEB",
-  },
-  {
-    id: "ful-6",
-    title: "Fulshear Branch Library (Nearby)",
-    address: "Fulshear, TX (Public Library)",
-    position: { lat: 29.6883, lng: -95.9004 },
-    eventType: "Library",
-    activities: ["Education", "Family"],
-    when: "Mon–Sat • Hours vary",
-    host: "Public Library",
-  },
-  {
-    id: "ful-7",
-    title: "Community Food Pantry Support (Nearby)",
-    address: "Fulshear/Katy area food pantry support",
-    position: { lat: 29.6796, lng: -95.9222 },
-    eventType: "Food Pantry",
-    activities: ["Food", "Support", "Family"],
-    when: "Weekly • Appointment or walk-in hours",
-    host: "Community Partner",
-  },
-  {
-    id: "ful-8",
-    title: "Volunteer Cleanup — Trails & Park Day",
-    address: "Cross Creek Trails (meet near main trailhead)",
-    position: { lat: 29.7051, lng: -95.9041 },
-    eventType: "Volunteer Opportunity",
-    activities: ["Volunteering", "Outdoors", "Family"],
-    when: "Sat • 9:00 AM (Monthly)",
-    host: "Resident Volunteers",
-  },
-  {
-    id: "ful-9",
-    title: "Neighborhood Meetup — Community Pavilion",
-    address: "Cross Creek Ranch Pavilion / Gathering Spot",
-    position: { lat: 29.6999, lng: -95.8989 },
-    eventType: "Community Event",
-    activities: ["Family", "Support"],
-    when: "Sun • 4:00 PM (Weekly)",
-    host: "Neighborhood Group",
-  },
-  {
-    id: "ful-10",
-    title: "After-School Study & Tutoring Meetup",
-    address: "Nearby library study room / community study space",
-    position: { lat: 29.6891, lng: -95.901 },
-    eventType: "Support Services",
-    activities: ["Education", "Family", "Support"],
-    when: "Tue/Thu • 5:30 PM",
-    host: "Volunteer Tutors",
-  },
-];
-
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
   "Park & Trails",
@@ -199,11 +105,76 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
   "Shopping",
 ];
 
+/** ---------- Seed (NOT hard-coded addresses)
+ * We only hard-code place QUERIES. Google Places returns the real formatted address + lat/lng.
+ * Clicking the button writes them into Firestore collection: "resources"
+ */
+const SEED_PLACES: Array<{
+  seedKey: string;
+  query: string;
+  title: string;
+  eventType: EventType;
+  activities: ActivityType[];
+  host?: string;
+  description?: string;
+  featured?: boolean;
+}> = [
+  {
+    seedKey: "fulshear_library",
+    query: "Fulshear Branch Library, Fulshear TX",
+    title: "Fulshear Branch Library",
+    eventType: "Library",
+    activities: ["Education", "Family"],
+    host: "Public Library",
+    featured: true,
+    description: "Books, study space, and community programs for residents.",
+  },
+  {
+    seedKey: "fulshear_heb",
+    query: "H-E-B near Fulshear TX",
+    title: "H-E-B (Grocery)",
+    eventType: "Grocery",
+    activities: ["Shopping", "Food", "Family"],
+    host: "HEB",
+    featured: true,
+    description: "Nearby grocery for essentials, pantry staples, and meals.",
+  },
+  {
+    seedKey: "cross_creek_ranch",
+    query: "Cross Creek Ranch, Fulshear TX",
+    title: "Cross Creek Ranch (Community Area)",
+    eventType: "Community Event",
+    activities: ["Family", "Support"],
+    host: "Cross Creek Ranch",
+    featured: true,
+    description: "Community area with events, meetups, and resident resources.",
+  },
+  {
+    seedKey: "fulshear_park",
+    query: "park near Cross Creek Ranch Fulshear TX",
+    title: "Nearby Park & Trails",
+    eventType: "Park & Trails",
+    activities: ["Outdoors", "Family"],
+    host: "Community Parks",
+    description: "Outdoor trails and green space for walking and family time.",
+  },
+  {
+    seedKey: "food_pantry_katy_fulshear",
+    query: "food pantry near Fulshear TX",
+    title: "Food Pantry Support (Nearby)",
+    eventType: "Food Pantry",
+    activities: ["Food", "Support", "Family"],
+    host: "Community Partner",
+    description: "Local food assistance options for residents who need help.",
+  },
+];
+
 /** ---------- Page ---------- */
 export default function Page() {
-  const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
+  // ✅ Use env (don’t hard-code keys in code)
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
-  // Cross Creek Ranch-ish default center
+  // Cross Creek Ranch-ish default center (map stays the same)
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
 
@@ -214,7 +185,7 @@ export default function Page() {
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
-  // Directory search (resource hub search)
+  // Directory search
   const [directoryQuery, setDirectoryQuery] = useState("");
 
   // Active marker
@@ -225,33 +196,91 @@ export default function Page() {
   const [activityFilters, setActivityFilters] = useState<ActivityType[]>([]);
   const [radiusMode, setRadiusMode] = useState<"All" | "Near Center">("All");
 
+  /** ---------- Firestore Resources ---------- */
+  const [resources, setResources] = useState<ResourceDoc[]>([]);
+  const [loadingResources, setLoadingResources] = useState(true);
+
+  // Seed button states
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    const colRef = collection(db, "resources");
+    const unsub = onSnapshot(
+      colRef,
+      (snap) => {
+        const next: ResourceDoc[] = snap.docs
+          .map((d) => {
+            const data = d.data() as Omit<ResourceDoc, "id">;
+            return {
+              id: d.id,
+              title: data.title,
+              address: data.address,
+              position: data.position,
+              eventType: data.eventType,
+              activities: data.activities ?? [],
+              host: data.host,
+              description: data.description,
+              featured: data.featured ?? false,
+              seedKey: data.seedKey,
+              createdAt: data.createdAt,
+            };
+          })
+          .filter(
+            (r) =>
+              !!r.title &&
+              !!r.address &&
+              !!r.position &&
+              typeof r.position.lat === "number" &&
+              typeof r.position.lng === "number",
+          );
+
+        // small sort: featured first, then title
+        next.sort((a, b) => {
+          const fa = a.featured ? 1 : 0;
+          const fb = b.featured ? 1 : 0;
+          if (fa !== fb) return fb - fa;
+          return a.title.localeCompare(b.title);
+        });
+
+        setResources(next);
+        setLoadingResources(false);
+      },
+      (err) => {
+        console.error("Firestore resources read error:", err);
+        setResources([]);
+        setLoadingResources(false);
+      },
+    );
+    return () => unsub();
+  }, []);
+
   const filteredLocations = useMemo(() => {
     const q = directoryQuery.trim().toLowerCase();
 
-    const passQuery = (loc: LocationItem) => {
+    const passQuery = (loc: ResourceDoc) => {
       if (!q) return true;
       const haystack = [
         loc.title,
         loc.address,
         loc.eventType,
-        loc.when,
         loc.host ?? "",
         loc.description ?? "",
-        ...loc.activities,
+        ...(loc.activities ?? []),
       ]
         .join(" ")
         .toLowerCase();
       return haystack.includes(q);
     };
 
-    const passEvent = (loc: LocationItem) =>
+    const passEvent = (loc: ResourceDoc) =>
       eventFilters.length === 0 || eventFilters.includes(loc.eventType);
 
-    const passActivity = (loc: LocationItem) =>
+    const passActivity = (loc: ResourceDoc) =>
       activityFilters.length === 0 ||
-      activityFilters.every((a) => loc.activities.includes(a));
+      activityFilters.every((a) => (loc.activities ?? []).includes(a));
 
-    const passRadius = (loc: LocationItem) => {
+    const passRadius = (loc: ResourceDoc) => {
       if (radiusMode === "All") return true;
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
@@ -259,25 +288,14 @@ export default function Page() {
       return dist < 0.09; // "nearby"
     };
 
-    return ALL_LOCATIONS.filter(
-      (loc) =>
-        passQuery(loc) &&
-        passEvent(loc) &&
-        passActivity(loc) &&
-        passRadius(loc),
+    return resources.filter(
+      (loc) => passQuery(loc) && passEvent(loc) && passActivity(loc) && passRadius(loc),
     );
-  }, [
-    directoryQuery,
-    eventFilters,
-    activityFilters,
-    radiusMode,
-    center.lat,
-    center.lng,
-  ]);
+  }, [resources, directoryQuery, eventFilters, activityFilters, radiusMode, center.lat, center.lng]);
 
   const featured = useMemo(
-    () => ALL_LOCATIONS.filter((l) => l.featured).slice(0, 3),
-    [],
+    () => resources.filter((l) => l.featured).slice(0, 3),
+    [resources],
   );
 
   const activeCount =
@@ -286,19 +304,15 @@ export default function Page() {
     (radiusMode === "Near Center" ? 1 : 0) +
     (directoryQuery.trim() ? 1 : 0);
 
-  const handleCenter = (loc: LocationItem) => {
-    (loc.id);
+  const handleCenter = (loc: ResourceDoc) => {
     setCenter(loc.position);
     setZoom(15);
     setSelectedPlace(loc.position);
   };
 
   return (
-    <APIProvider
-      apiKey="AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM"
-      libraries={["places"]}
-    >
-      {/* LIGHT THEME to match screenshot */}
+    <APIProvider apiKey={apiKey} libraries={["places"]}>
+      {/* LIGHT THEME */}
       <div className="min-h-screen bg-white text-slate-900">
         <motion.div
           variants={container}
@@ -314,28 +328,50 @@ export default function Page() {
                   Cross Creek Community Resource Hub
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600">
-                  Explore community resources, events, and support — all in one
-                  place.
+                  Explore community resources, events, and support — all in one place.
                 </p>
               </div>
 
-              <AnimatePresence>
-                {activeCount > 0 && (
-                  <motion.div
-                    variants={pop}
-                    initial="hidden"
-                    animate="show"
-                    exit={{ opacity: 0, y: -6 }}
-                    className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
-                  >
-                    {activeCount} filter{activeCount === 1 ? "" : "s"} active
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div className="flex items-center gap-3 flex-wrap">
+                <AnimatePresence>
+                  {activeCount > 0 && (
+                    <motion.div
+                      variants={pop}
+                      initial="hidden"
+                      animate="show"
+                      exit={{ opacity: 0, y: -6 }}
+                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
+                    >
+                      {activeCount} filter{activeCount === 1 ? "" : "s"} active
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* ✅ One-click seed button */}
+                <SeedResourcesButton
+                  seeding={seeding}
+                  setSeeding={setSeeding}
+                  seedMsg={seedMsg}
+                  setSeedMsg={setSeedMsg}
+                />
+              </div>
             </div>
+
+            <AnimatePresence>
+              {seedMsg && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 text-blue-900 px-4 py-3 text-sm"
+                >
+                  {seedMsg}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
-          {/* Featured / Highlights (TSA requirement) */}
+          {/* Featured / Highlights */}
           <motion.section
             variants={fadeUp}
             className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
@@ -346,108 +382,51 @@ export default function Page() {
                   Spotlight Resources
                 </h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  A quick look at key resources + upcoming events in the Cross
-                  Creek community.
+                  A quick look at key resources in the community.
                 </p>
               </div>
             </div>
 
-            {/* ✅ Featured Resources (your existing 3 cards) */}
             <div className="mt-4">
               <div className="text-sm font-semibold text-slate-700 mb-2">
                 Featured resources
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {featured.map((loc) => (
-                  <motion.button
-                    key={loc.id}
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => handleCenter(loc)}
-                    className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="text-xs font-semibold text-blue-900">
-                      {loc.eventType}
-                    </div>
-                    <div className="mt-1 text-base font-bold text-slate-900">
-                      {loc.title}
-                    </div>
-                    <div className="mt-2 text-sm text-slate-600">
-                      {loc.description ?? loc.address}
-                    </div>
-                    <div className="mt-3 inline-flex text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
-                      {loc.when}
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-
-            {/* ✅ Spotlight Events (NEW: 2 motion cards) */}
-            <div className="mt-6">
-              <div className="text-sm font-semibold text-slate-700 mb-2">
-                Spotlight events
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <motion.div
-                  variants={fadeUp}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ duration: 0.2 }}
-                  className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
-                    Community Event
-                  </div>
-
-                  <h3 className="mt-2 text-lg font-bold text-slate-900">
-                    Cross Creek Neighborhood Meetup
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-600">
-                    Meet neighbors, share updates, and learn about new community
-                    resources.
-                  </p>
-
-                  <div className="mt-3 text-sm text-slate-700">
-                    <span className="font-semibold">When:</span> Saturday • 4:00
-                    PM
-                    <br />
-                    <span className="font-semibold">Where:</span> Community
-                    Pavilion (Cross Creek)
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  variants={fadeUp}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ duration: 0.2 }}
-                  className="rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-200 inline-flex px-2 py-1 rounded-full">
-                    Volunteer Opportunity
-                  </div>
-
-                  <h3 className="mt-2 text-lg font-bold text-slate-900">
-                    Trails & Park Cleanup Day
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-600">
-                    Help keep Cross Creek beautiful — gloves and bags provided.
-                  </p>
-
-                  <div className="mt-3 text-sm text-slate-700">
-                    <span className="font-semibold">When:</span> Sunday • 9:00
-                    AM
-                    <br />
-                    <span className="font-semibold">Where:</span> Main Trailhead
-                    (Cross Creek)
-                  </div>
-                </motion.div>
-              </div>
+              {loadingResources ? (
+                <div className="rounded-2xl border border-blue-200 bg-white p-4 text-sm text-slate-600">
+                  Loading resources…
+                </div>
+              ) : featured.length === 0 ? (
+                <div className="rounded-2xl border border-blue-200 bg-white p-4 text-sm text-slate-600">
+                  No featured resources yet. Use the “Save starter resources” button to add some.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {featured.map((loc) => (
+                    <motion.button
+                      key={loc.id}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => handleCenter(loc)}
+                      className="text-left rounded-2xl border border-blue-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="text-xs font-semibold text-blue-900">
+                        {loc.eventType}
+                      </div>
+                      <div className="mt-1 text-base font-bold text-slate-900">
+                        {loc.title}
+                      </div>
+                      <div className="mt-2 text-sm text-slate-600">
+                        {loc.description ?? loc.address}
+                      </div>
+                      <div className="mt-3 text-xs text-slate-600">
+                        <span className="font-semibold text-slate-700">Address:</span>{" "}
+                        {loc.address}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.section>
 
@@ -473,7 +452,7 @@ export default function Page() {
 
             {/* Map + Search + List */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Map Card — IMPORTANT: overflow-visible so dropdown isn't clipped */}
+              {/* Map Card — DO NOT CHANGE MAP */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
@@ -532,12 +511,12 @@ export default function Page() {
                     </Map>
                   </div>
 
-                  {/* Search — dropdown is now VERY visible (z-50, not clipped) */}
+                  {/* Search */}
                   <div className="mt-4 relative z-50">
                     <SearchBox
                       directoryQuery={directoryQuery}
                       setDirectoryQuery={setDirectoryQuery}
-                      directoryResults={ALL_LOCATIONS}
+                      directoryResults={resources}
                       onDirectoryPick={(loc) => handleCenter(loc)}
                       input={input}
                       setInput={setInput}
@@ -553,7 +532,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Results List */}
+              {/* Results List (tiles like before) */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
@@ -569,21 +548,26 @@ export default function Page() {
 
                 <div className="p-4 sm:p-5">
                   <AnimatePresence mode="popLayout">
-                    {filteredLocations.length === 0 ? (
+                    {loadingResources ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="rounded-2xl border border-blue-200 bg-white p-5 text-slate-700"
+                      >
+                        Loading resources…
+                      </motion.div>
+                    ) : filteredLocations.length === 0 ? (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
                       >
-                        No matches. Try removing a filter or changing your
-                        search.
+                        No matches. Try removing a filter or changing your search.
                       </motion.div>
                     ) : (
-                      <motion.div
-                        layout
-                        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                      >
+                      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {filteredLocations.map((loc) => (
                           <motion.button
                             key={loc.id}
@@ -606,14 +590,14 @@ export default function Page() {
                                 </div>
                               </div>
 
-                              <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
-                                {loc.when}
-                              </span>
+                              {loc.featured ? (
+                                <span className="shrink-0 text-xs px-2 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-900">
+                                  Featured
+                                </span>
+                              ) : null}
                             </div>
 
-                            <div className="mt-2 text-sm text-slate-600">
-                              {loc.address}
-                            </div>
+                            <div className="mt-2 text-sm text-slate-600">{loc.address}</div>
 
                             {loc.description && (
                               <div className="mt-2 text-sm text-slate-600">
@@ -621,8 +605,15 @@ export default function Page() {
                               </div>
                             )}
 
+                            {loc.host ? (
+                              <div className="mt-3 text-xs text-slate-600">
+                                <span className="font-semibold text-slate-700">Host:</span>{" "}
+                                {loc.host}
+                              </div>
+                            ) : null}
+
                             <div className="mt-3 flex flex-wrap gap-2">
-                              {loc.activities.slice(0, 6).map((a) => (
+                              {(loc.activities ?? []).slice(0, 6).map((a) => (
                                 <span
                                   key={a}
                                   className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50"
@@ -638,45 +629,132 @@ export default function Page() {
                   </AnimatePresence>
                 </div>
               </motion.section>
-
-              {/* Extra content (TSA requirement: additional content) */}
-              <motion.section
-                variants={fadeUp}
-                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
-              >
-                <div className="p-4 sm:p-5 border-b border-blue-200/60">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-                    Helpful Info
-                  </h3>
-                  <p className="text-sm text-slate-600">
-                    Tips for using the hub + quick guidance for residents.
-                  </p>
-                </div>
-                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoCard
-                    title="How to use this hub"
-                    lines={[
-                      "Use Filters to narrow by category and activities.",
-                      "Use Search directory to find resources by keyword.",
-                      "Use Search map to jump to any place by typing an address/place name.",
-                      "Tap any resource card to center it on the map.",
-                    ]}
-                  />
-                  <InfoCard
-                    title="Emergency & urgent needs"
-                    lines={[
-                      "If this is an emergency, call local emergency services.",
-                      "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
-                      "For after-hours info, use the community Welcome Center during business hours for guidance.",
-                    ]}
-                  />
-                </div>
-              </motion.section>
             </div>
           </div>
         </motion.div>
       </div>
     </APIProvider>
+  );
+}
+
+/** ---------- One-click Seed Button ----------
+ * Writes docs into Firestore "resources" using Places textSearch result:
+ * - formatted_address (real address)
+ * - geometry.location (real lat/lng)
+ * Uses seedKey as doc id so you can’t duplicate by clicking twice.
+ */
+function SeedResourcesButton({
+  seeding,
+  setSeeding,
+  seedMsg,
+  setSeedMsg,
+}: {
+  seeding: boolean;
+  setSeeding: (v: boolean) => void;
+  seedMsg: string | null;
+  setSeedMsg: (v: string | null) => void;
+}) {
+  const placesLib = useMapsLibrary("places");
+
+  const runSeed = async () => {
+    if (!placesLib) {
+      setSeedMsg("Places library is not ready yet. Try again in a second.");
+      return;
+    }
+
+    setSeeding(true);
+    setSeedMsg(null);
+
+    try {
+      // Use PlacesService textSearch to get real formatted addresses + lat/lng
+      const svc = new placesLib.PlacesService(document.createElement("div"));
+
+      const resolvePlace = (q: string) =>
+        new Promise<google.maps.places.PlaceResult | null>((resolve) => {
+          svc.textSearch({ query: q }, (results, status) => {
+            if (
+              status === google.maps.places.PlacesServiceStatus.OK &&
+              results &&
+              results.length > 0
+            ) {
+              resolve(results[0]);
+            } else {
+              resolve(null);
+            }
+          });
+        });
+
+      const batch = writeBatch(db);
+      const failures: string[] = [];
+
+      for (const item of SEED_PLACES) {
+        const place = await resolvePlace(item.query);
+
+        if (!place?.geometry?.location || !place.formatted_address) {
+          failures.push(item.title);
+          continue;
+        }
+
+        const position = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        };
+
+        const ref = doc(db, "resources", item.seedKey); // ✅ prevents duplicates
+        batch.set(
+          ref,
+          {
+            seedKey: item.seedKey,
+            title: item.title,
+            address: place.formatted_address, // ✅ real address from Google
+            position,
+            eventType: item.eventType,
+            activities: item.activities,
+            host: item.host ?? "",
+            description: item.description ?? "",
+            featured: !!item.featured,
+            createdAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+      }
+
+      await batch.commit();
+
+      if (failures.length > 0) {
+        setSeedMsg(
+          `Saved starter resources ✅ (Some could not be resolved: ${failures.join(
+            ", ",
+          )})`,
+        );
+      } else {
+        setSeedMsg("Saved starter resources ✅");
+      }
+    } catch (e) {
+      console.error(e);
+      setSeedMsg("Could not save starter resources. Check console for details.");
+    } finally {
+      setSeeding(false);
+      // auto-clear message after a bit
+      window.setTimeout(() => setSeedMsg(null), 3500);
+    }
+  };
+
+  return (
+    <motion.button
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={runSeed}
+      disabled={seeding}
+      className={`px-4 py-2 rounded-xl border text-sm transition ${
+        seeding
+          ? "border-slate-200 bg-white text-slate-400 cursor-not-allowed"
+          : "border-blue-200 bg-white text-blue-900 hover:bg-blue-50"
+      }`}
+      title="Adds a starter set of resources to Firestore (resources collection) using Places results."
+    >
+      {seeding ? "Saving…" : "Save starter resources"}
+    </motion.button>
   );
 }
 
@@ -711,12 +789,8 @@ function FilterBox({
       <div className="p-4 sm:p-5 border-b border-blue-200/60">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-              Filter
-            </h2>
-            <p className="text-sm text-slate-600">
-              Choose what you want to see.
-            </p>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">Filter</h2>
+            <p className="text-sm text-slate-600">Choose what you want to see.</p>
           </div>
 
           <motion.button
@@ -821,10 +895,7 @@ function FilterBox({
 }
 
 /** ---------- SearchBox (Directory + Places) ----------
- * FIX: dropdown visibility
- * - parent has relative z-50
- * - dropdown has z-[9999]
- * - map card uses overflow-visible
+ * (kept the same UX, but now searches Firestore-loaded resources)
  */
 function SearchBox({
   directoryQuery,
@@ -840,8 +911,8 @@ function SearchBox({
 }: {
   directoryQuery: string;
   setDirectoryQuery: (val: string) => void;
-  directoryResults: LocationItem[];
-  onDirectoryPick: (loc: LocationItem) => void;
+  directoryResults: ResourceDoc[];
+  onDirectoryPick: (loc: ResourceDoc) => void;
 
   input: string;
   setInput: (val: string) => void;
@@ -851,9 +922,7 @@ function SearchBox({
   setSelectedPlace: (loc: LatLng | null) => void;
 }) {
   const placesLib = useMapsLibrary("places");
-  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(
-    null,
-  );
+  const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -905,10 +974,9 @@ function SearchBox({
           loc.title,
           loc.address,
           loc.eventType,
-          loc.when,
           loc.host ?? "",
           loc.description ?? "",
-          ...loc.activities,
+          ...(loc.activities ?? []),
         ]
           .join(" ")
           .toLowerCase();
@@ -919,9 +987,7 @@ function SearchBox({
 
   const handleSelectPlace = (placeId: string) => {
     if (!placesLib) return;
-    const detailsService = new placesLib.PlacesService(
-      document.createElement("div"),
-    );
+    const detailsService = new placesLib.PlacesService(document.createElement("div"));
 
     detailsService.getDetails({ placeId }, (place) => {
       if (place?.geometry?.location) {
@@ -1015,7 +1081,7 @@ function SearchBox({
         )}
       </div>
 
-      {/* Dropdown (VERY visible) */}
+      {/* Dropdown */}
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
@@ -1040,7 +1106,7 @@ function SearchBox({
               >
                 <div className="font-semibold text-slate-900">{loc.title}</div>
                 <div className="text-xs text-slate-600">
-                  {loc.eventType} • {loc.when} • {loc.address}
+                  {loc.eventType} • {loc.address}
                 </div>
               </li>
             ))}
@@ -1075,17 +1141,19 @@ function SearchBox({
   );
 }
 
-/** ---------- Enhanced Marker with Image Morph ---------- */
+/** ---------- Marker ----------
+ * ✅ Removed the time section everywhere (no "when" field at all now)
+ */
 function HoverMarker({
   location,
   activeId,
   setActiveId,
   onCenter,
 }: {
-  location: LocationItem;
+  location: ResourceDoc;
   activeId: string | null;
   setActiveId: (id: string | null) => void;
-  onCenter: (loc: LocationItem) => void;
+  onCenter: (loc: ResourceDoc) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const isActive = activeId === location.id;
@@ -1093,35 +1161,24 @@ function HoverMarker({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isActive) {
-      // If already active, close it
-      setActiveId(null);
-    } else {
-      // Otherwise, activate and center
-      onCenter(location);
-    }
+    if (isActive) setActiveId(null);
+    else onCenter(location);
   };
 
   return (
     <div
-      onMouseEnter={() => {
-        setHovered(true);
-      }}
-      onMouseLeave={() => {
-        setHovered(false);
-      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
       style={{
         transform: "translate(-50%, -100%)",
         cursor: "pointer",
-        // Dynamic z-index: active/hovered markers appear above others
         zIndex: isExpanded ? 9999 : 1,
-        position: 'relative',
+        position: "relative",
       }}
     >
       <AnimatePresence mode="wait">
         {!isExpanded ? (
-          // Compact marker pin with your original icon
           <motion.div
             key="pin"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -1131,131 +1188,57 @@ function HoverMarker({
             className="relative"
           >
             <motion.div
-              animate={{
-                y: [0, -4, 0],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               className="w-8 h-8"
             >
-              <Image
-                src="/marker.png"
-                alt={location.title}
-                width={32}
-                height={32}
-                priority
-              />
+              <Image src="/marker.png" alt={location.title} width={32} height={32} priority />
             </motion.div>
-            
-            {/* Pulsing ring */}
+
             <motion.div
-              animate={{
-                scale: [1, 1.4, 1],
-                opacity: [0.5, 0, 0.5],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeOut",
-              }}
+              animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
               className="absolute inset-0 rounded-full bg-blue-400"
               style={{ zIndex: -1 }}
             />
           </motion.div>
         ) : (
-          // Expanded card (morphs from pin) - SMALLER SIZE
           <motion.div
             key="card"
             layoutId={`marker-${location.id}`}
             initial={{ opacity: 0, scale: 0.9, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 25,
-            }}
-            className="absolute left-1/2 bottom-full mb-3 -translate-x-1/2
-                       w-56 pointer-events-auto"
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute left-1/2 bottom-full mb-3 -translate-x-1/2 w-56 pointer-events-auto"
             style={{ zIndex: 10000 }}
           >
             <div className="relative">
-              {/* Card content */}
               <div className="rounded-xl bg-white shadow-2xl border border-blue-100 overflow-hidden">
-                {/* Header with gradient */}
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 text-white">
-                  <motion.div
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <div className="text-[10px] font-semibold uppercase tracking-wider opacity-90 mb-0.5">
-                      {location.eventType}
-                    </div>
-                    <div className="text-sm font-bold leading-tight">
-                      {location.title}
-                    </div>
-                  </motion.div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider opacity-90 mb-0.5">
+                    {location.eventType}
+                  </div>
+                  <div className="text-sm font-bold leading-tight">{location.title}</div>
                 </div>
 
-                {/* Body */}
-                <motion.div
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.15 }}
-                  className="p-3 space-y-2"
-                >
-                  {/* Time badge */}
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="w-3.5 h-3.5 text-blue-600 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-xs text-slate-700 font-medium">
-                      {location.when}
-                    </span>
+                <div className="p-3 space-y-2">
+                  <div className="text-xs text-slate-700">
+                    <span className="font-semibold">Address:</span> {location.address}
                   </div>
 
-                  {/* Host */}
-                  {location.host && (
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="w-3.5 h-3.5 text-blue-600 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                      </svg>
-                      <span className="text-xs text-slate-600">
-                        {location.host}
-                      </span>
+                  {location.host ? (
+                    <div className="text-xs text-slate-600">
+                      <span className="font-semibold text-slate-700">Host:</span>{" "}
+                      {location.host}
                     </div>
-                  )}
+                  ) : null}
 
-                  {/* Activities */}
                   <div className="flex flex-wrap gap-1">
-                    {location.activities.slice(0, 3).map((activity) => (
+                    {(location.activities ?? []).slice(0, 3).map((activity) => (
                       <span
                         key={activity}
-                        className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50
                                    text-blue-700 border border-blue-200 font-medium"
                       >
                         {activity}
@@ -1263,174 +1246,20 @@ function HoverMarker({
                     ))}
                   </div>
 
-                  {/* Click hint */}
                   <div className="pt-1.5 border-t border-slate-100">
-                    <div className="text-[10px] text-slate-500 flex items-center gap-1">
-                      <svg
-                        className="w-2.5 h-2.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                        />
-                      </svg>
-                      Click again to close
-                    </div>
+                    <div className="text-[10px] text-slate-500">Click again to close</div>
                   </div>
-                </motion.div>
+                </div>
               </div>
 
-              {/* Arrow pointer */}
               <div
-                className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-3 h-3 
+                className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-3 h-3
                            bg-white border-r border-b border-blue-100 rotate-45"
               />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  );
-}
-/** ---------- Suggest Resource Form ---------- */
-function SuggestResourceForm() {
-  const [name, setName] = useState("");
-  const [addr, setAddr] = useState("");
-  const [category, setCategory] = useState<EventType>("Support Services");
-  const [desc, setDesc] = useState("");
-  const [contact, setContact] = useState("");
-  const [sent, setSent] = useState(false);
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // This is a demo submit (client-side). Later you can POST to your DB.
-    setSent(true);
-    setTimeout(() => setSent(false), 2500);
-
-    setName("");
-    setAddr("");
-    setCategory("Support Services");
-    setDesc("");
-    setContact("");
-  };
-
-  return (
-    <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="md:col-span-2">
-        <AnimatePresence>
-          {sent && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              className="rounded-2xl border border-blue-200 bg-white p-3 text-sm text-blue-900"
-            >
-              ✅ Thanks! Your suggestion was submitted.
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <Field label="Resource name">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          placeholder="Example: Community Tutoring Program"
-        />
-      </Field>
-
-      <Field label="Address / location">
-        <input
-          value={addr}
-          onChange={(e) => setAddr(e.target.value)}
-          required
-          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          placeholder="Example: Cross Creek Ranch, Fulshear TX"
-        />
-      </Field>
-
-      <Field label="Category">
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value as EventType)}
-          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
-        >
-          {EVENT_OPTIONS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="Contact (optional)">
-        <input
-          value={contact}
-          onChange={(e) => setContact(e.target.value)}
-          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
-          placeholder="Email / phone / website"
-        />
-      </Field>
-
-      <div className="md:col-span-2">
-        <Field label="Description">
-          <textarea
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            className="w-full min-h-[120px] rounded-2xl border border-blue-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            placeholder="What is this resource and how does it help residents?"
-          />
-        </Field>
-      </div>
-
-      <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap">
-        <div className="text-xs text-slate-600">
-          Submissions are reviewed before being added to the directory.
-        </div>
-        <motion.button
-          whileHover={{ y: -1 }}
-          whileTap={{ scale: 0.99 }}
-          type="submit"
-          className="px-4 py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition"
-        >
-          Submit resource
-        </motion.button>
-      </div>
-    </form>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="text-sm font-semibold text-slate-900">{label}</div>
-      {children}
-    </div>
-  );
-}
-
-function InfoCard({ title, lines }: { title: string; lines: string[] }) {
-  return (
-    <div className="rounded-2xl border border-blue-200 bg-white p-4">
-      <div className="text-base font-bold text-[#1E3A8A]">{title}</div>
-      <ul className="mt-2 space-y-1 text-sm text-slate-600 list-disc pl-5">
-        {lines.map((l) => (
-          <li key={l}>{l}</li>
-        ))}
-      </ul>
     </div>
   );
 }
