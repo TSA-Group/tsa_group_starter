@@ -2,180 +2,20 @@
 "use client";
 
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion, Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-type Event = {
-  id: number;
-  title: string;
-  category: string;
-  activities: string[];
-  date: string;
-  time: string;
-  location: string;
-  attendees: number;
-  spots: number;
-  description: string;
-};
+// ✅ use YOUR real path:
+import { db } from "@/lib/firebase";
 
-/* ✅ Locations + vibe updated to match your light-blue theme */
-const EVENTS: Event[] = [
-  {
-    id: 1,
-    title: "Community Dinner Night",
-    category: "community",
-    activities: ["food", "family"],
-    date: "Dec 28, 2025",
-    time: "6:00 PM – 8:00 PM",
-    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
-    attendees: 42,
-    spots: 60,
-    description:
-      "A welcoming dinner bringing neighbors together for conversation and connection.",
-  },
-  {
-    id: 2,
-    title: "Literacy Tutoring Session",
-    category: "tutoring",
-    activities: ["education"],
-    date: "Dec 25, 2025",
-    time: "4:00 PM – 6:00 PM",
-    location: "Fulshear Branch Library (Nearby) (Fulshear, TX)",
-    attendees: 14,
-    spots: 20,
-    description:
-      "Volunteer to help young students improve reading and writing skills.",
-  },
-  {
-    id: 3,
-    title: "Food Pantry Distribution",
-    category: "pantry",
-    activities: ["food", "donations"],
-    date: "Dec 26, 2025",
-    time: "9:00 AM – 1:00 PM",
-    location: "Community Food Pantry Support (Nearby) (Fulshear/Katy area)",
-    attendees: 88,
-    spots: 110,
-    description: "Help organize and distribute food to families in need.",
-  },
-  {
-    id: 4,
-    title: "River Cleanup Day",
-    category: "cleanup",
-    activities: ["outdoors", "volunteering"],
-    date: "Dec 29, 2025",
-    time: "8:00 AM – 12:00 PM",
-    location: "Cross Creek Trails (meet near main trailhead)",
-    attendees: 31,
-    spots: 50,
-    description:
-      "Protect local wildlife by helping clean up trails and public spaces.",
-  },
-  {
-    id: 5,
-    title: "Holiday Clothing Drive",
-    category: "clothing",
-    activities: ["donations", "family"],
-    date: "Dec 27, 2025",
-    time: "10:00 AM – 4:00 PM",
-    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
-    attendees: 27,
-    spots: 40,
-    description:
-      "Sort and organize donated winter clothing for families in need.",
-  },
-  {
-    id: 6,
-    title: "Park Tree Planting",
-    category: "cleanup",
-    activities: ["outdoors", "volunteering"],
-    date: "Jan 04, 2026",
-    time: "9:00 AM – 12:00 PM",
-    location: "Flewellen Creek Park & Trails (Fulshear, TX)",
-    attendees: 22,
-    spots: 40,
-    description: "Plant native trees and learn about local ecology.",
-  },
-  {
-    id: 7,
-    title: "Neighborhood Mural Project",
-    category: "meetup",
-    activities: ["volunteering", "family"],
-    date: "Jan 12, 2026",
-    time: "9:00 AM – 5:00 PM",
-    location: "Cross Creek Ranch Community Pool (Fulshear, TX)",
-    attendees: 16,
-    spots: 30,
-    description:
-      "Assist local artists in painting a community mural; no experience required.",
-  },
-  {
-    id: 8,
-    title: "Senior Meal Delivery",
-    category: "community",
-    activities: ["food", "volunteering"],
-    date: "Jan 08, 2026",
-    time: "10:00 AM – 1:00 PM",
-    location: "HEB (Nearby Grocery) (Fulshear, TX area)",
-    attendees: 12,
-    spots: 20,
-    description: "Deliver warm meals and check in with homebound seniors.",
-  },
-  {
-    id: 9,
-    title: "Community Garden Workshop",
-    category: "meetup",
-    activities: ["outdoors", "education"],
-    date: "Jan 15, 2026",
-    time: "9:00 AM – 11:30 AM",
-    location: "Flewellen Creek Park & Trails (Fulshear, TX)",
-    attendees: 18,
-    spots: 30,
-    description: "Hands-on workshop about seasonal planting and composting.",
-  },
-  {
-    id: 10,
-    title: "Clothing Repair Pop-up",
-    category: "clothing",
-    activities: ["donations", "education"],
-    date: "Jan 18, 2026",
-    time: "11:00 AM – 3:00 PM",
-    location: "Cross Creek Ranch Welcome Center (Fulshear, TX)",
-    attendees: 9,
-    spots: 20,
-    description:
-      "Learn basic mending skills and repair donated garments for reuse.",
-  },
-  {
-    id: 11,
-    title: "After-school STEM Club",
-    category: "tutoring",
-    activities: ["education", "family"],
-    date: "Jan 20, 2026",
-    time: "3:30 PM – 5:30 PM",
-    location:
-      "After-School Study & Tutoring Meetup (Nearby study room / community study space)",
-    attendees: 26,
-    spots: 30,
-    description:
-      "Volunteer mentors lead hands-on STEM projects for middle schoolers.",
-  },
-  {
-    id: 12,
-    title: "Neighborhood Watch Meeting",
-    category: "meetup",
-    activities: ["volunteering", "family"],
-    date: "Jan 22, 2026",
-    time: "7:00 PM – 8:30 PM",
-    location:
-      "Neighborhood Meetup — Community Pavilion (Cross Creek Ranch Pavilion / Gathering Spot)",
-    attendees: 34,
-    spots: 60,
-    description:
-      "Community safety meeting with local officers and block captains.",
-  },
-];
+import {
+  collection,
+  doc,
+  onSnapshot,
+  runTransaction,
+  serverTimestamp,
+} from "firebase/firestore";
 
 /* ===== Motion (TS-safe easing) ===== */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -195,24 +35,171 @@ const cardUp: Variants = {
   },
 };
 
+type EventFromDB = {
+  title?: string;
+  date?: string; // "2026-01-17" (from admin)
+  startTime?: string; // "10:13"
+  endTime?: string; // "22:14"
+  venue?: string;
+  address?: string;
+
+  description?: string;
+
+  // capacity + registered count
+  spots?: number; // capacity
+  attendees?: number; // registered count
+
+  // optional extras
+  indoorOutdoor?: "Indoor" | "Outdoor" | "Both";
+  contact?: string;
+};
+
 export default function RegisterClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const idParam = searchParams.get("id");
-  const eventId = Number(idParam);
+  const eventId = searchParams.get("id"); // Firestore doc id string
 
-  const event = useMemo(() => {
-    if (!idParam || Number.isNaN(eventId)) return null;
-    return EVENTS.find((e) => e.id === eventId) ?? null;
-  }, [idParam, eventId]);
+  const [loading, setLoading] = useState(true);
+  const [event, setEvent] = useState<(EventFromDB & { id: string }) | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
+  // form
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [agree, setAgree] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // ✅ live event read
+  useEffect(() => {
+    setLoadError(null);
+    setSubmitted(false);
+    setSubmitError(null);
+
+    if (!eventId) {
+      setLoading(false);
+      setEvent(null);
+      setLoadError("Missing event id.");
+      return;
+    }
+
+    const ref = doc(db, "events", eventId);
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        if (!snap.exists()) {
+          setEvent(null);
+          setLoading(false);
+          setLoadError("Event not found.");
+          return;
+        }
+        const data = snap.data() as EventFromDB;
+
+        setEvent({
+          id: snap.id,
+          ...data,
+          // normalize numbers (Firestore can store as undefined)
+          spots: typeof data.spots === "number" ? data.spots : 0,
+          attendees: typeof data.attendees === "number" ? data.attendees : 0,
+        });
+
+        setLoading(false);
+      },
+      (err) => {
+        setLoading(false);
+        setEvent(null);
+        setLoadError(err?.message || "Failed to load event.");
+      },
+    );
+
+    return () => unsub();
+  }, [eventId]);
+
+  const prettyTime = useMemo(() => {
+    if (!event) return "";
+    const s = event.startTime?.trim();
+    const e = event.endTime?.trim();
+    if (!s && !e) return "";
+    if (s && e) return `${s} – ${e}`;
+    return s || e || "";
+  }, [event]);
+
+  const spots = event?.spots ?? 0;
+  const attendees = event?.attendees ?? 0;
+  const spotsLeft = Math.max(0, spots - attendees);
+  const percent = spots > 0 ? Math.round((attendees / spots) * 100) : 0;
+  const isFull = spots > 0 && attendees >= spots;
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+
+    if (!eventId) return setSubmitError("Missing event id.");
+    if (!agree) return setSubmitError("Please agree to the code of conduct.");
+    if (!email.trim()) return setSubmitError("Please enter an email.");
+
+    try {
+      setSubmitting(true);
+
+      const eventRef = doc(db, "events", eventId);
+
+      await runTransaction(db, async (tx) => {
+        const snap = await tx.get(eventRef);
+        if (!snap.exists()) throw new Error("Event not found.");
+
+        const data = snap.data() as EventFromDB;
+
+        const cap = typeof data.spots === "number" ? data.spots : 0;
+        const cur = typeof data.attendees === "number" ? data.attendees : 0;
+
+        if (cap > 0 && cur >= cap) {
+          throw new Error("Sorry — this event is full.");
+        }
+
+        // Create registration under the same event id:
+        const regRef = doc(collection(db, "events", eventId, "registrations"));
+        tx.set(regRef, {
+          first: first.trim(),
+          last: last.trim(),
+          email: email.trim().toLowerCase(),
+          notes: notes.trim(),
+          createdAt: serverTimestamp(),
+        });
+
+        // Increment attendees (registered count)
+        tx.update(eventRef, { attendees: cur + 1 });
+      });
+
+      setSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err?.message || "Registration failed.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <motion.div
+        variants={pageFade}
+        initial="hidden"
+        animate="show"
+        className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 flex items-center justify-center px-6"
+      >
+        <motion.div
+          variants={cardUp}
+          className="max-w-xl w-full bg-white border border-blue-200 rounded-2xl p-6 shadow-sm"
+        >
+          <p className="text-slate-600">Loading registration…</p>
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   if (!event) {
     return (
@@ -226,12 +213,8 @@ export default function RegisterClient() {
           variants={cardUp}
           className="max-w-xl w-full bg-white border border-blue-200 rounded-2xl p-6 shadow-sm"
         >
-          <h1 className="text-2xl font-semibold text-[#143B8C]">
-            Event not found
-          </h1>
-          <p className="text-slate-600 mt-2">
-            That registration link is missing a valid event id.
-          </p>
+          <h1 className="text-2xl font-semibold text-[#143B8C]">Event not found</h1>
+          <p className="text-slate-600 mt-2">{loadError || "Invalid link."}</p>
           <button
             onClick={() => router.push("/events")}
             className="mt-5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition active:scale-[0.99]"
@@ -242,15 +225,6 @@ export default function RegisterClient() {
       </motion.div>
     );
   }
-
-  const percent = Math.round((event.attendees / event.spots) * 100);
-  const spotsLeft = event.spots - event.attendees;
-
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!agree) return;
-    setSubmitted(true);
-  };
 
   return (
     <motion.div
@@ -264,11 +238,16 @@ export default function RegisterClient() {
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
               <h1 className="text-3xl font-semibold text-[#143B8C]">
-                Register for {event.title}
+                Register for {event.title || "Event"}
               </h1>
               <p className="mt-2 text-slate-600">
-                {event.date} • {event.time} • {event.location}
+                {(event.date || "").trim()}
+                {prettyTime ? ` • ${prettyTime}` : ""}
+                {event.venue ? ` • ${event.venue}` : ""}
               </p>
+              {event.address ? (
+                <p className="mt-1 text-slate-600">{event.address}</p>
+              ) : null}
             </div>
 
             <Link
@@ -288,16 +267,14 @@ export default function RegisterClient() {
             animate="show"
             className="lg:col-span-5 bg-white border border-blue-200 rounded-2xl p-6 shadow-sm"
           >
-            <h2 className="text-lg font-semibold mb-2 text-[#143B8C]">
-              Event details
-            </h2>
-            <p className="text-slate-700 text-sm">{event.description}</p>
+            <h2 className="text-lg font-semibold mb-2 text-[#143B8C]">Event details</h2>
+            <p className="text-slate-700 text-sm">{event.description || "—"}</p>
 
             <div className="mt-5">
               <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${percent}%` }}
+                  animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
                   transition={{ duration: 0.6, ease: EASE_OUT }}
                   className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
                 />
@@ -308,12 +285,11 @@ export default function RegisterClient() {
               </div>
             </div>
 
-            <div className="mt-4 text-xs text-slate-600">
-              <p>
-                <span className="font-medium text-slate-700">Location:</span>{" "}
-                {event.location}
-              </p>
-            </div>
+            {isFull ? (
+              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                This event is currently full.
+              </div>
+            ) : null}
           </motion.section>
 
           {/* Right form */}
@@ -325,15 +301,18 @@ export default function RegisterClient() {
           >
             {!submitted ? (
               <>
-                <h2 className="text-lg font-semibold mb-2 text-[#143B8C]">
-                  Your info
-                </h2>
+                <h2 className="text-lg font-semibold mb-2 text-[#143B8C]">Your info</h2>
+
+                {submitError ? (
+                  <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {submitError}
+                  </div>
+                ) : null}
+
                 <form onSubmit={onSubmit} className="grid gap-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs text-slate-700">
-                        First name
-                      </label>
+                      <label className="text-xs text-slate-700">First name</label>
                       <input
                         required
                         value={first}
@@ -367,9 +346,7 @@ export default function RegisterClient() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-slate-700">
-                      Notes (optional)
-                    </label>
+                    <label className="text-xs text-slate-700">Notes (optional)</label>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
@@ -391,9 +368,10 @@ export default function RegisterClient() {
 
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
+                    disabled={submitting || isFull}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:hover:bg-blue-600 text-white py-2 rounded-xl transition active:scale-[0.99]"
                   >
-                    Confirm Registration
+                    {isFull ? "Event Full" : submitting ? "Registering..." : "Confirm Registration"}
                   </button>
 
                   <p className="text-xs text-slate-600">
@@ -403,24 +381,20 @@ export default function RegisterClient() {
               </>
             ) : (
               <div className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
-                <h2 className="text-xl font-semibold text-[#143B8C]">
-                  You’re registered ✅
-                </h2>
-                <p className="text-slate-700 mt-2">
-                  Thanks, {first}! Your spot is saved.
-                </p>
+                <h2 className="text-xl font-semibold text-[#143B8C]">You’re registered ✅</h2>
+                <p className="text-slate-700 mt-2">Thanks, {first}! Your spot is saved.</p>
 
                 <div className="mt-4 text-sm text-slate-700 space-y-1">
                   <p>
                     <span className="text-slate-500">Event:</span> {event.title}
                   </p>
                   <p>
-                    <span className="text-slate-500">When:</span> {event.date} •{" "}
-                    {event.time}
+                    <span className="text-slate-500">When:</span> {event.date}
+                    {prettyTime ? ` • ${prettyTime}` : ""}
                   </p>
                   <p>
-                    <span className="text-slate-500">Where:</span>{" "}
-                    {event.location}
+                    <span className="text-slate-500">Where:</span> {event.venue}
+                    {event.address ? ` • ${event.address}` : ""}
                   </p>
                   <p>
                     <span className="text-slate-500">Email:</span> {email}
