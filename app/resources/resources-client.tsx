@@ -29,18 +29,29 @@ type ResourceUI = {
   createdAtMs: number;
 };
 
-const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const container: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.45, ease: "easeOut" } },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.45, ease: "easeOut" },
+  },
 };
 
 function safeStr(v: unknown, fallback = "") {
   return typeof v === "string" ? v : fallback;
 }
+
 function safeArr(v: unknown): string[] {
   return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
 }
+
 function toMs(createdAt: any) {
   return (
     createdAt?.toMillis?.() ??
@@ -53,6 +64,7 @@ export default function ResourcesClient() {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
+  // search + filter UI
   const [q, setQ] = useState("");
   const [activeType, setActiveType] = useState<string>("All");
 
@@ -82,7 +94,7 @@ export default function ResourcesClient() {
           };
         });
 
-        // sort newest first (without depending on Firestore orderBy)
+        // newest first (doesn't depend on Firestore orderBy)
         next.sort((a, b) => b.createdAtMs - a.createdAtMs);
 
         setRows(next);
@@ -136,6 +148,7 @@ export default function ResourcesClient() {
         animate="show"
         className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 py-8 sm:py-10"
       >
+        {/* Header */}
         <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
@@ -154,7 +167,8 @@ export default function ResourcesClient() {
                   animate={{ opacity: 1, y: 0 }}
                   className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-blue-50 text-blue-900"
                 >
-                  Showing {filtered.length} resource{filtered.length === 1 ? "" : "s"}
+                  Showing {filtered.length} resource
+                  {filtered.length === 1 ? "" : "s"}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -164,12 +178,15 @@ export default function ResourcesClient() {
             <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
               ❌ {errMsg}
               <div className="mt-1 text-xs text-rose-800">
-                This usually means Firestore rules blocked read access OR the app is pointing to a different Firebase project.
+                This usually means Firestore rules blocked read access OR your
+                app is pointing to a different Firebase project than the Admin
+                page.
               </div>
             </div>
           )}
         </motion.div>
 
+        {/* Controls */}
         <motion.section
           variants={fadeUp}
           className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5 mb-6"
@@ -204,6 +221,7 @@ export default function ResourcesClient() {
           </div>
         </motion.section>
 
+        {/* Tiles */}
         <motion.section
           variants={fadeUp}
           className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5"
@@ -250,6 +268,7 @@ export default function ResourcesClient() {
                         {t}
                       </span>
                     ))}
+
                     {r.indoorOutdoor ? (
                       <span className="text-xs px-2 py-1 rounded-full border border-blue-200 text-blue-900 bg-blue-50">
                         {r.indoorOutdoor}
