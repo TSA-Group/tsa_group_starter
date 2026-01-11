@@ -520,15 +520,6 @@ export default function EventsPage() {
                       >
                         Register
                       </Link>
-
-                      <a
-                        href={mapsHref(ev)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-center bg-white border border-blue-200 text-slate-800 py-2 rounded-xl hover:bg-blue-50 transition active:scale-[0.99]"
-                      >
-                        Open in Maps
-                      </a>
                     </div>
                   </motion.article>
                 );
