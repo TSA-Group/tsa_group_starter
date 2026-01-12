@@ -78,6 +78,66 @@ const ORBS = [
   { size: 200, color: "rgba(59,130,246,0.14)", top: 62, left: 52, speed: 0.25 },
 ];
 
+/* ---------------- Feature Data ---------------- */
+const FEATURES = [
+  {
+    title: "Resources",
+    shortDesc: "Find trusted local services and support in seconds.",
+    longDesc:
+      "Browse a curated directory of community resources — food support, fitness, libraries, and more. Search quickly and find what matters without the noise.",
+    imageLabel: "Resource Directory Preview",
+  },
+  {
+    title: "Events",
+    shortDesc: "See what’s happening in Cross Creek this week.",
+    longDesc:
+      "Discover meetups, drives, and neighborhood gatherings. Save dates, share with friends, and stay connected to what’s going on near you.",
+    imageLabel: "Events & Calendar Preview",
+  },
+  {
+    title: "Volunteer",
+    shortDesc: "Make a difference with easy ways to help.",
+    longDesc:
+      "Find volunteer opportunities and community initiatives. Whether you have 30 minutes or a weekend, there’s a way to pitch in.",
+    imageLabel: "Volunteer Opportunities Preview",
+  },
+  {
+    title: "Guides",
+    shortDesc: "Simple guides to get settled and explore.",
+    longDesc:
+      "From amenities to local tips, our guides help you navigate the community quickly — with clear, friendly info made for residents.",
+    imageLabel: "Neighborhood Guide Preview",
+  },
+  {
+    title: "Safety",
+    shortDesc: "Stay informed with practical safety info.",
+    longDesc:
+      "Find quick links to emergency contacts, preparedness tips, and community updates. Designed to be clear and calm when it matters.",
+    imageLabel: "Safety & Alerts Preview",
+  },
+  {
+    title: "Parks & Trails",
+    shortDesc: "Explore outdoor spots and favorite routes.",
+    longDesc:
+      "Find parks, trails, and outdoor recreation in and around Cross Creek. Great for families, walkers, and anyone wanting fresh air.",
+    imageLabel: "Parks & Trails Preview",
+  },
+  {
+    title: "Food & Dining",
+    shortDesc: "Find nearby food options and local favorites.",
+    longDesc:
+      "Discover casual eats, local spots, and family-friendly dining. A quick way to explore what’s around your neighborhood.",
+    imageLabel: "Food & Dining Preview",
+  },
+  {
+    title: "Community",
+    shortDesc: "Connect with neighbors and local groups.",
+    longDesc:
+      "Join community groups, discover neighborhood initiatives, and connect with people who share your interests — all in one place.",
+    imageLabel: "Community Groups Preview",
+  },
+];
+
 /* ---------------- MAIN PAGE ---------------- */
 export default function Home() {
   const reduce = useReducedMotion();
@@ -118,17 +178,17 @@ export default function Home() {
   const bg = useTransform(
     scrollProgSmooth,
     [0, 0.35, 0.7, 1],
-    ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"],
+    ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"]
   );
   const softGrey = useTransform(
     scrollProgSmooth,
     [0.25, 0.55],
-    ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"],
+    ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"]
   );
   const navyWash = useTransform(
     scrollProgSmooth,
     [0.62, 1],
-    ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"],
+    ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"]
   );
 
   /* ---- Cursor spotlight ---- */
@@ -205,7 +265,7 @@ export default function Home() {
       "November",
       "December",
     ],
-    [],
+    []
   );
 
   const events = useMemo(
@@ -229,7 +289,7 @@ export default function Home() {
         details: "Donate clothes for those in need and volunteer.",
       },
     ],
-    [],
+    []
   );
 
   const calendarDays = useMemo(() => {
@@ -475,7 +535,7 @@ export default function Home() {
 
               <div className="text-center">
                 <div className="text-[11px] text-blue-700 font-semibold tracking-[0.18em]">
-                  Cross Creek Calender
+                  Cross Creek Calendar
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                   {monthNames[calMonth]} {calYear}
@@ -530,14 +590,12 @@ export default function Home() {
                       isSelected
                         ? "bg-blue-400 text-white"
                         : isToday
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-50 hover:bg-blue-100 text-blue-900",
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-50 hover:bg-blue-100 text-blue-900",
                       "outline-none",
                     ].join(" ")}
                     onClick={() =>
-                      setSelectedDate((prev) =>
-                        prev && prev.getTime() === date.getTime() ? null : date,
-                      )
+                      setSelectedDate((prev) => (prev && prev.getTime() === date.getTime() ? null : date))
                     }
                   >
                     <span className="block">{date.getDate()}</span>
@@ -621,7 +679,7 @@ export default function Home() {
       </motion.section>
 
       {/* Content sections + curved dividers */}
-      {[...Array(8)].map((_, i) => (
+      {FEATURES.map((f, i) => (
         <React.Fragment key={i}>
           <motion.section initial="hidden" variants={container} className="max-w-7xl mx-auto px-6 my-20">
             <motion.div
@@ -631,7 +689,12 @@ export default function Home() {
               viewport={{ once: true, margin: "-120px" }}
               className="flex justify-center"
             >
-              <FlipFeatureRow index={i} />
+              <FlipFeatureRow
+                title={f.title}
+                shortDesc={f.shortDesc}
+                longDesc={f.longDesc}
+                imageLabel={f.imageLabel}
+              />
             </motion.div>
           </motion.section>
 
@@ -675,10 +738,11 @@ export default function Home() {
             <span className="font-bold text-blue-700">2024 – A little to know about us:</span>{" "}
             Our community is massive and sits on 3,200 acres and is home to around 20,000 residents! We pride ourselves in always giving our residents the best.
           </p>
-          <p className="mb-6 relative">
+          <p className="mb-0 relative">
             <span className="font-bold text-blue-700">2025 – Present Day:</span>{" "}
             Now in 2026, our staff is proud to announce our new website, Gatherly, with its main focus being to help you! We have specially made it to guide you around the area and to help participate in our community.
           </p>
+        </motion.div>
 
         <footer className="mt-14 text-center text-sm text-blue-800/70">
           © {year} Gatherly • Built for community
@@ -687,11 +751,6 @@ export default function Home() {
     </motion.div>
   );
 }
-
-/* ---------------- Helpers ---------------- */
-
-const clamp = (v: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, v));
 
 /* ---------------- Subcomponents ---------------- */
 
@@ -765,9 +824,7 @@ function MagneticButton({
       <motion.span
         aria-hidden
         animate={reduce ? undefined : { x: [0, 3, 0] }}
-        transition={
-          reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
-        }
+        transition={reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
       >
         →
       </motion.span>
@@ -820,106 +877,3 @@ function FlipFeatureRow({
   imageLabel: string;
 }) {
   const reduce = useReducedMotion();
-  const [flipped, setFlipped] = useState(false);
-
-  return (
-    <div className="w-full max-w-6xl">
-      <motion.div
-        initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-120px" }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="grid grid-cols-1 lg:grid-cols-[minmax(320px,520px)_1fr] gap-6 lg:gap-8"
-      >
-        <FlipInfoCard
-          title={title}
-          shortDesc={shortDesc}
-          longDesc={longDesc}
-          flipped={flipped}
-          setFlipped={setFlipped}
-        />
-
-        <motion.div
-          whileHover={reduce ? undefined : { y: -3 }}
-          transition={{ type: "spring", stiffness: 220, damping: 20 }}
-          className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
-        >
-          <div className="h-[280px] bg-[#8e8e8e] flex items-center justify-center">
-            <span className="text-xl font-semibold text-black/70">
-              {imageLabel}
-            </span>
-          </div>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
-
-/* ---------------- Flip Card ---------------- */
-
-function FlipInfoCard({
-  title,
-  shortDesc,
-  longDesc,
-  flipped,
-  setFlipped,
-}: {
-  title: string;
-  shortDesc: string;
-  longDesc: string;
-  flipped: boolean;
-  setFlipped: (v: boolean | ((v: boolean) => boolean)) => void;
-}) {
-  const reduce = useReducedMotion();
-
-  return (
-    <button
-      type="button"
-      onClick={() => setFlipped((v) => !v)}
-      className="text-left w-full"
-      aria-pressed={flipped}
-    >
-      <motion.div
-        className="relative w-full"
-        style={{ perspective: 1200 }}
-      >
-        <motion.div
-          animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: reduce ? 0 : 0.75, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full"
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          {/* FRONT */}
-          <div
-            className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-lg overflow-hidden"
-            style={{ backfaceVisibility: "hidden" }}
-          >
-            <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 p-6">
-              <div className="text-3xl font-medium text-black/80">{title}</div>
-            </div>
-
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-blue-900">{title}</h3>
-              <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
-              <div className="mt-4 text-sm font-semibold text-blue-600">
-                Learn more →
-              </div>
-            </div>
-          </div>
-
-          {/* BACK */}
-          <div
-            className="absolute inset-0 rounded-3xl border border-blue-200 bg-blue-50 p-6"
-            style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
-          >
-            <h3 className="text-xl font-extrabold text-blue-900">{title}</h3>
-            <p className="mt-3 text-sm text-blue-800">{longDesc}</p>
-            <div className="mt-6 text-sm font-semibold text-blue-700">
-              Click to flip back ↺
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </button>
-  );
-}
