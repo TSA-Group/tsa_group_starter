@@ -56,16 +56,13 @@ function clamp(n: number, a: number, b: number) {
 
 /**
  * Smooth scrolling fallback (NO external libraries needed).
- * This just enables native smooth scrolling.
  */
 function useSmoothScrollFallback(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
-
     const html = document.documentElement;
     const prev = html.style.scrollBehavior;
     html.style.scrollBehavior = "smooth";
-
     return () => {
       html.style.scrollBehavior = prev || "";
     };
@@ -75,13 +72,7 @@ function useSmoothScrollFallback(enabled: boolean) {
 /* ---------------- Orbs ---------------- */
 const ORBS = [
   { size: 220, color: "rgba(59,130,246,0.18)", top: 12, left: 8, speed: 0.22 },
-  {
-    size: 320,
-    color: "rgba(147,197,253,0.16)",
-    top: 45,
-    left: 75,
-    speed: 0.35,
-  },
+  { size: 320, color: "rgba(147,197,253,0.16)", top: 45, left: 75, speed: 0.35 },
   { size: 180, color: "rgba(15,23,42,0.12)", top: 70, left: 18, speed: 0.15 },
   { size: 260, color: "rgba(147,197,253,0.10)", top: 18, left: 82, speed: 0.3 },
   { size: 200, color: "rgba(59,130,246,0.14)", top: 62, left: 52, speed: 0.25 },
@@ -103,10 +94,10 @@ export default function Home() {
     damping: 30,
   });
 
-  // velocity reactive micro-tilt
+  // velocity reactive micro-tilt (subtle)
   const vel = useVelocity(scrollY);
   const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
-  const tilt = useTransform(velSmooth, [-1800, 0, 1800], [-1.8, 0, 1.8]);
+  const tilt = useTransform(velSmooth, [-1800, 0, 1800], [-1.2, 0, 1.2]);
 
   /* ---- Cursor ---- */
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
@@ -192,9 +183,7 @@ export default function Home() {
   }, []);
 
   const now = new Date();
-  const texasToday = new Date(
-    now.toLocaleString("en-US", { timeZone: "America/Chicago" }),
-  );
+  const texasToday = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
   texasToday.setHours(0, 0, 0, 0);
 
   const calYear = calendarDate.getFullYear();
@@ -541,8 +530,8 @@ export default function Home() {
                       isSelected
                         ? "bg-blue-400 text-white"
                         : isToday
-                        ? "bg-blue-600 text-white"
-                        : "bg-blue-50 hover:bg-blue-100 text-blue-900",
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-50 hover:bg-blue-100 text-blue-900",
                       "outline-none",
                     ].join(" ")}
                     onClick={() =>
@@ -624,58 +613,35 @@ export default function Home() {
           className="rounded-[34px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6 sm:p-10"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <FeatureStat
-              title="Curated resources"
-              value="Local-first"
-              desc="Support services, food, fitness, and more."
-            />
-            <FeatureStat
-              title="Community events"
-              value="Real-time"
-              desc="Find what’s happening near you."
-            />
-            <FeatureStat
-              title="Trust & clarity"
-              value="No noise"
-              desc="Just what helps your neighborhood thrive."
-            />
+            <FeatureStat title="Curated resources" value="Local-first" desc="Support services, food, fitness, and more." />
+            <FeatureStat title="Community events" value="Real-time" desc="Find what’s happening near you." />
+            <FeatureStat title="Trust & clarity" value="No noise" desc="Just what helps your neighborhood thrive." />
           </div>
         </motion.div>
       </motion.section>
 
-      {/* Content sections */}
-      {[...Array(8)].map((_, i) => {
-        const alignRight = i % 2 === 1;
-        return (
-          <React.Fragment key={i}>
-            <motion.section
-              className="max-w-7xl mx-auto px-6 my-20"
+      {/* Content sections + curved dividers */}
+      {[...Array(8)].map((_, i) => (
+        <React.Fragment key={i}>
+          <motion.section initial="hidden" variants={container} className="max-w-7xl mx-auto px-6 my-20">
+            <motion.div
+              variants={fadeUp}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: "-120px" }}
-              variants={container}
+              className="flex justify-center"
             >
-              <motion.div
-                variants={fadeUp}
-                className={`flex ${alignRight ? "justify-end" : "justify-start"}`}
-              >
-                <Link href="#" className="block w-full md:w-[50%]">
-                  <ParallaxCard index={i} alignRight={alignRight} />
-                </Link>
-              </motion.div>
-            </motion.section>
+              <FlipFeatureRow index={i} />
+            </motion.div>
+          </motion.section>
 
-            <div className="-mt-14">
-              <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-20">
-                <path
-                  d="M0,0 C480,120 960,0 1440,120 L1440,0 L0,0 Z"
-                  fill="rgba(229,233,239,0.28)"
-                />
-              </svg>
-            </div>
-          </React.Fragment>
-        );
-      })}
+          <div className="-mt-14">
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-20">
+              <path d="M0,0 C480,120 960,0 1440,120 L1440,0 L0,0 Z" fill="rgba(229,233,239,0.28)" />
+            </svg>
+          </div>
+        </React.Fragment>
+      ))}
 
       {/* Our story */}
       <motion.section
@@ -729,6 +695,12 @@ export default function Home() {
 
 /* ---------------- Subcomponents ---------------- */
 
+/**
+ * Smoother (less “shaky”) magnetic button:
+ * - only reacts while hovered
+ * - smaller clamp + smaller multipliers
+ * - uses springs to smooth motion
+ */
 function MagneticButton({
   href,
   label,
@@ -740,8 +712,13 @@ function MagneticButton({
 }) {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLAnchorElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const x = useSpring(rawX, { stiffness: 220, damping: 28, mass: 0.7 });
+  const y = useSpring(rawY, { stiffness: 220, damping: 28, mass: 0.7 });
+
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     if (reduce) return;
@@ -749,33 +726,38 @@ function MagneticButton({
     if (!el) return;
 
     const onMove = (e: MouseEvent) => {
+      if (!hovered) return;
       const r = el.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2);
       const dy = e.clientY - (r.top + r.height / 2);
-      x.set(clamp(dx * 0.15, -18, 18));
-      y.set(clamp(dy * 0.18, -14, 14));
+
+      rawX.set(clamp(dx * 0.06, -8, 8));
+      rawY.set(clamp(dy * 0.08, -6, 6));
     };
 
     const onLeave = () => {
-      x.set(0);
-      y.set(0);
+      rawX.set(0);
+      rawY.set(0);
     };
 
-    el.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     el.addEventListener("mouseleave", onLeave);
+
     return () => {
-      el.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousemove", onMove);
       el.removeEventListener("mouseleave", onLeave);
     };
-  }, [reduce, x, y]);
+  }, [reduce, hovered, rawX, rawY]);
 
   return (
     <motion.a
       ref={ref}
       href={href}
       style={{ x, y }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       whileHover={reduce ? undefined : { scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.985 }}
       className={[
         "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold border transition-colors shadow-sm",
         primary
@@ -786,7 +768,7 @@ function MagneticButton({
       <span>{label}</span>
       <motion.span
         aria-hidden
-        animate={reduce ? undefined : { x: [0, 4, 0] }}
+        animate={reduce ? undefined : { x: [0, 3, 0] }}
         transition={reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
       >
         →
@@ -823,46 +805,150 @@ function FeatureStat({
   );
 }
 
-function ParallaxCard({ index, alignRight }: { index: number; alignRight: boolean }) {
-  const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const offset = index * 0.12;
+/* ---------------- Box Row (LEFT flip card + RIGHT image) ---------------- */
 
-  const y = useTransform(scrollY, [0, 1600], [0 + offset * 16, -24 + offset * 16]);
-  const rotate = useTransform(scrollY, [0, 1600], [alignRight ? 0.35 : -0.35, 0]);
+function FlipFeatureRow({ index }: { index: number }) {
+  const reduce = useReducedMotion();
+  const [flipped, setFlipped] = useState(false);
+
+  const title = `Box ${index + 1}`;
+  const shortDesc =
+    "Quick preview of this section. Click to flip for details.";
+  const longDesc =
+    "More details appear here after the flip: what this section offers, how it helps the community, and what the user can do next. Keep it clear, friendly, and local-first — like a quick, helpful explainer.";
 
   return (
-    <motion.div
-      style={reduce ? undefined : { y, rotate }}
-      whileHover={reduce ? undefined : { y: -8, scale: 1.015 }}
-      transition={{ type: "spring", stiffness: 260, damping: 18 }}
-      className="bg-white/70 backdrop-blur-xl rounded-3xl border border-blue-200 shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden cursor-pointer"
-    >
-      <div className="h-56 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-semibold relative">
-        <motion.div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(600px circle at 30% 30%, rgba(59,130,246,0.18), rgba(255,255,255,0) 55%)",
-          }}
-          animate={reduce ? undefined : { opacity: [0.55, 0.9, 0.55] }}
-          transition={reduce ? undefined : { duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+    <div className="w-full max-w-6xl">
+      <motion.div
+        initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-120px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="grid grid-cols-1 lg:grid-cols-[minmax(320px,520px)_1fr] gap-6 lg:gap-8 items-stretch"
+      >
+        {/* LEFT: FLIP CARD */}
+        <FlipInfoCard
+          title={title}
+          shortDesc={shortDesc}
+          longDesc={longDesc}
+          flipped={flipped}
+          setFlipped={setFlipped}
         />
-        <span className="relative">Image {index + 1}</span>
-      </div>
 
-      <div className="p-6 space-y-2">
-        <h3 className="text-lg font-semibold text-blue-900">Section Title {index + 1}</h3>
-        <p className="text-sm text-blue-700">
-          A clean, story-like layout with smooth scroll reveals and responsive motion that reacts to you.
-        </p>
-        <motion.span
-          className="inline-flex items-center gap-2 mt-2 text-sm font-semibold text-blue-600"
-          whileHover={reduce ? undefined : { x: 4 }}
+        {/* RIGHT: IMAGE PANEL */}
+        <motion.div
+          whileHover={reduce ? undefined : { y: -3 }}
+          transition={{ type: "spring", stiffness: 220, damping: 20 }}
+          className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
-          Learn more <span aria-hidden>→</span>
-        </motion.span>
-      </div>
-    </motion.div>
+          <div className="h-[280px] lg:h-full min-h-[280px] bg-[#8e8e8e] flex items-center justify-center">
+            <span className="text-xl md:text-2xl font-semibold text-black/70">
+              Put the image here
+            </span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+function FlipInfoCard({
+  title,
+  shortDesc,
+  longDesc,
+  flipped,
+  setFlipped,
+}: {
+  title: string;
+  shortDesc: string;
+  longDesc: string;
+  flipped: boolean;
+  setFlipped: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const reduce = useReducedMotion();
+  const dur = reduce ? 0 : 0.75;
+
+  return (
+    <button
+      type="button"
+      onClick={() => setFlipped((v) => !v)}
+      className="text-left"
+      aria-pressed={flipped}
+    >
+      <motion.div
+        whileHover={reduce ? undefined : { y: -3 }}
+        transition={{ type: "spring", stiffness: 220, damping: 20 }}
+        className="relative w-full"
+        style={{ perspective: 1200 }}
+      >
+        <motion.div
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ duration: dur, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          {/* FRONT */}
+          <div
+            className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
+            style={{ backfaceVisibility: "hidden" }}
+          >
+            {/* “image-ish” top area like your old card */}
+            <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 relative">
+              <div className="absolute inset-0 opacity-60 blur-2xl bg-[radial-gradient(circle_at_30%_30%,rgba(59,130,246,0.35),rgba(255,255,255,0)_60%)]" />
+              <div className="relative p-6">
+                <div className="text-3xl font-medium text-black/80">{title.toLowerCase()}</div>
+                <div className="mt-10 text-blue-700 font-semibold text-center">Image {title.split(" ")[1]}</div>
+              </div>
+            </div>
+
+            {/* bottom text area */}
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-blue-900">{`Section Title ${title.split(" ")[1]}`}</h3>
+              <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
+
+              <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
+                Learn more <span aria-hidden>→</span>
+              </div>
+
+              <div className="mt-2 text-xs text-blue-700/70">
+                (Click anywhere on this card to flip)
+              </div>
+            </div>
+          </div>
+
+          {/* BACK */}
+          <div
+            className="absolute inset-0 rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-7"
+            style={{
+              transform: "rotateY(180deg)",
+              backfaceVisibility: "hidden",
+            }}
+          >
+            <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
+              DETAILS
+            </div>
+            <h3 className="mt-2 text-2xl font-extrabold text-blue-900">{`Section Title ${title.split(" ")[1]}`}</h3>
+
+            <p className="mt-3 text-sm text-blue-800 leading-relaxed">{longDesc}</p>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 border border-blue-200 text-blue-800">
+                Community-friendly
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 border border-blue-200 text-blue-800">
+                Local-first
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 border border-blue-200 text-blue-800">
+                Clear info
+              </span>
+            </div>
+
+            <div className="mt-6 text-sm font-semibold text-blue-700 inline-flex items-center gap-2">
+              Click to flip back <span aria-hidden>↺</span>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </button>
   );
 }
