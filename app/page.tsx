@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { QuickActions } from "./QuickActions";
 import {
   motion,
@@ -54,9 +53,7 @@ function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));
 }
 
-/**
- * Smooth scrolling fallback (NO external libraries needed).
- */
+/** Smooth scrolling fallback (NO external libraries needed). */
 function useSmoothScrollFallback(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
@@ -175,21 +172,9 @@ export default function Home() {
   }, [mx, my]);
 
   /* ---- Background palette transitions ---- */
-  const bg = useTransform(
-    scrollProgSmooth,
-    [0, 0.35, 0.7, 1],
-    ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"]
-  );
-  const softGrey = useTransform(
-    scrollProgSmooth,
-    [0.25, 0.55],
-    ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"]
-  );
-  const navyWash = useTransform(
-    scrollProgSmooth,
-    [0.62, 1],
-    ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"]
-  );
+  const bg = useTransform(scrollProgSmooth, [0, 0.35, 0.7, 1], ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"]);
+  const softGrey = useTransform(scrollProgSmooth, [0.25, 0.55], ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"]);
+  const navyWash = useTransform(scrollProgSmooth, [0.62, 1], ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"]);
 
   /* ---- Cursor spotlight ---- */
   const glowX = useTransform(mx, (v) => `${v}px`);
@@ -251,20 +236,7 @@ export default function Home() {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = useMemo(
-    () => [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
+    () => ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     []
   );
 
@@ -411,6 +383,7 @@ export default function Home() {
               >
                 COMMUNITY • RESOURCES • EVENTS
               </motion.div>
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -419,6 +392,7 @@ export default function Home() {
               >
                 GATHERLY
               </motion.div>
+
               <div className="mt-4 flex items-center justify-center gap-2">
                 <motion.span
                   className="h-2 w-2 rounded-full bg-blue-700"
@@ -534,9 +508,7 @@ export default function Home() {
               </motion.button>
 
               <div className="text-center">
-                <div className="text-[11px] text-blue-700 font-semibold tracking-[0.18em]">
-                  Cross Creek Calendar
-                </div>
+                <div className="text-[11px] text-blue-700 font-semibold tracking-[0.18em]">Cross Creek Calendar</div>
                 <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                   {monthNames[calMonth]} {calYear}
                 </h3>
@@ -587,16 +559,10 @@ export default function Home() {
                     whileTap={{ scale: 0.98 }}
                     className={[
                       "relative flex flex-col items-center justify-start h-12 w-full rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-colors",
-                      isSelected
-                        ? "bg-blue-400 text-white"
-                        : isToday
-                        ? "bg-blue-600 text-white"
-                        : "bg-blue-50 hover:bg-blue-100 text-blue-900",
+                      isSelected ? "bg-blue-400 text-white" : isToday ? "bg-blue-600 text-white" : "bg-blue-50 hover:bg-blue-100 text-blue-900",
                       "outline-none",
                     ].join(" ")}
-                    onClick={() =>
-                      setSelectedDate((prev) => (prev && prev.getTime() === date.getTime() ? null : date))
-                    }
+                    onClick={() => setSelectedDate((prev) => (prev && prev.getTime() === date.getTime() ? null : date))}
                   >
                     <span className="block">{date.getDate()}</span>
 
@@ -623,9 +589,7 @@ export default function Home() {
                   className="mt-4 bg-white/80 backdrop-blur-xl border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-semibold text-blue-900">
-                      Events on {selectedDate.toLocaleDateString()}
-                    </h3>
+                    <h3 className="font-semibold text-blue-900">Events on {selectedDate.toLocaleDateString()}</h3>
                     <motion.button
                       whileHover={{ scale: 1.06 }}
                       whileTap={{ scale: 0.98 }}
@@ -640,7 +604,7 @@ export default function Home() {
                     <ul className="mt-3 space-y-3">
                       {selectedEvents.map((event, i) => (
                         <motion.li
-                          key={i}
+                          key={`${event.title}-${i}`}
                           whileHover={reduce ? undefined : { scale: 1.02, x: 2 }}
                           transition={{ type: "spring", stiffness: 260, damping: 18 }}
                           className="border-l-4 border-blue-500 pl-3 cursor-pointer"
@@ -680,7 +644,7 @@ export default function Home() {
 
       {/* Content sections + curved dividers */}
       {FEATURES.map((f, i) => (
-        <React.Fragment key={i}>
+        <React.Fragment key={`${f.title}-${i}`}>
           <motion.section initial="hidden" variants={container} className="max-w-7xl mx-auto px-6 my-20">
             <motion.div
               variants={fadeUp}
@@ -689,12 +653,7 @@ export default function Home() {
               viewport={{ once: true, margin: "-120px" }}
               className="flex justify-center"
             >
-              <FlipFeatureRow
-                title={f.title}
-                shortDesc={f.shortDesc}
-                longDesc={f.longDesc}
-                imageLabel={f.imageLabel}
-              />
+              <FlipFeatureRow title={f.title} shortDesc={f.shortDesc} longDesc={f.longDesc} imageLabel={f.imageLabel} />
             </motion.div>
           </motion.section>
 
@@ -744,9 +703,7 @@ export default function Home() {
           </p>
         </motion.div>
 
-        <footer className="mt-14 text-center text-sm text-blue-800/70">
-          © {year} Gatherly • Built for community
-        </footer>
+        <footer className="mt-14 text-center text-sm text-blue-800/70">© {year} Gatherly • Built for community</footer>
       </motion.section>
     </motion.div>
   );
@@ -754,9 +711,6 @@ export default function Home() {
 
 /* ---------------- Subcomponents ---------------- */
 
-/**
- * Smoother magnetic button
- */
 function MagneticButton({
   href,
   label,
@@ -815,9 +769,7 @@ function MagneticButton({
       whileTap={{ scale: 0.985 }}
       className={[
         "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold border transition-colors shadow-sm",
-        primary
-          ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800"
-          : "bg-white/70 text-blue-900 border-blue-200 hover:bg-white",
+        primary ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800" : "bg-white/70 text-blue-900 border-blue-200 hover:bg-white",
       ].join(" ")}
     >
       <span>{label}</span>
@@ -831,8 +783,6 @@ function MagneticButton({
     </motion.a>
   );
 }
-
-/* ---------------- Feature Stat ---------------- */
 
 function FeatureStat({
   title,
@@ -854,16 +804,12 @@ function FeatureStat({
       whileHover={reduce ? undefined : { y: -3 }}
       className="rounded-3xl border border-blue-200 bg-white/60 backdrop-blur-xl p-6"
     >
-      <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
-        {title.toUpperCase()}
-      </div>
+      <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">{title.toUpperCase()}</div>
       <div className="mt-2 text-2xl font-extrabold text-blue-900">{value}</div>
       <div className="mt-2 text-sm text-blue-700">{desc}</div>
     </motion.div>
   );
 }
-
-/* ---------------- Flip Feature Row ---------------- */
 
 function FlipFeatureRow({
   title,
@@ -877,3 +823,90 @@ function FlipFeatureRow({
   imageLabel: string;
 }) {
   const reduce = useReducedMotion();
+  const [flipped, setFlipped] = useState(false);
+
+  return (
+    <div className="w-full max-w-6xl">
+      <motion.div
+        initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-120px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="grid grid-cols-1 lg:grid-cols-[minmax(320px,520px)_1fr] gap-6 lg:gap-8"
+      >
+        <FlipInfoCard
+          title={title}
+          shortDesc={shortDesc}
+          longDesc={longDesc}
+          flipped={flipped}
+          setFlipped={setFlipped}
+        />
+
+        <motion.div
+          whileHover={reduce ? undefined : { y: -3 }}
+          transition={{ type: "spring", stiffness: 220, damping: 20 }}
+          className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
+        >
+          <div className="h-[280px] bg-[#8e8e8e] flex items-center justify-center">
+            <span className="text-xl font-semibold text-black/70">{imageLabel}</span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
+function FlipInfoCard({
+  title,
+  shortDesc,
+  longDesc,
+  flipped,
+  setFlipped,
+}: {
+  title: string;
+  shortDesc: string;
+  longDesc: string;
+  flipped: boolean;
+  setFlipped: (v: boolean | ((v: boolean) => boolean)) => void;
+}) {
+  const reduce = useReducedMotion();
+
+  return (
+    <button type="button" onClick={() => setFlipped((v) => !v)} className="text-left w-full" aria-pressed={flipped}>
+      <motion.div className="relative w-full" style={{ perspective: 1200 }}>
+        <motion.div
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ duration: reduce ? 0 : 0.75, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          {/* FRONT */}
+          <div
+            className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-lg overflow-hidden"
+            style={{ backfaceVisibility: "hidden" }}
+          >
+            <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 p-6">
+              <div className="text-3xl font-medium text-black/80">{title}</div>
+            </div>
+
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-blue-900">{title}</h3>
+              <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
+              <div className="mt-4 text-sm font-semibold text-blue-600">Learn more →</div>
+            </div>
+          </div>
+
+          {/* BACK */}
+          <div
+            className="absolute inset-0 rounded-3xl border border-blue-200 bg-blue-50 p-6"
+            style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
+          >
+            <h3 className="text-xl font-extrabold text-blue-900">{title}</h3>
+            <p className="mt-3 text-sm text-blue-800">{longDesc}</p>
+            <div className="mt-6 text-sm font-semibold text-blue-700">Click to flip back ↺</div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </button>
+  );
+}
