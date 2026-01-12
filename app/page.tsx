@@ -688,13 +688,15 @@ export default function Home() {
   );
 }
 
+/* ---------------- Helpers ---------------- */
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
+
 /* ---------------- Subcomponents ---------------- */
 
 /**
- * Smoother (less “shaky”) magnetic button:
- * - only reacts while hovered
- * - smaller clamp + smaller multipliers
- * - uses springs to smooth motion
+ * Smoother magnetic button
  */
 function MagneticButton({
   href,
@@ -716,12 +718,11 @@ function MagneticButton({
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce || !hovered) return;
     const el = ref.current;
     if (!el) return;
 
     const onMove = (e: MouseEvent) => {
-      if (!hovered) return;
       const r = el.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2);
       const dy = e.clientY - (r.top + r.height / 2);
@@ -730,17 +731,17 @@ function MagneticButton({
       rawY.set(clamp(dy * 0.08, -6, 6));
     };
 
-    const onLeave = () => {
+    const reset = () => {
       rawX.set(0);
       rawY.set(0);
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
-    el.addEventListener("mouseleave", onLeave);
+    el.addEventListener("mouseleave", reset);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
-      el.removeEventListener("mouseleave", onLeave);
+      el.removeEventListener("mouseleave", reset);
     };
   }, [reduce, hovered, rawX, rawY]);
 
@@ -764,13 +765,17 @@ function MagneticButton({
       <motion.span
         aria-hidden
         animate={reduce ? undefined : { x: [0, 3, 0] }}
-        transition={reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        transition={
+          reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+        }
       >
         →
       </motion.span>
     </motion.a>
   );
 }
+
+/* ---------------- Feature Stat ---------------- */
 
 function FeatureStat({
   title,
@@ -782,6 +787,7 @@ function FeatureStat({
   desc: string;
 }) {
   const reduce = useReducedMotion();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12, filter: "blur(10px)" }}
@@ -800,19 +806,21 @@ function FeatureStat({
   );
 }
 
-    
+/* ---------------- Flip Feature Row ---------------- */
 
-/* ---------------- Box Row (LEFT flip card + RIGHT image) ---------------- */
-
-function FlipFeatureRow({ index }: { index: number }) {
+function FlipFeatureRow({
+  title,
+  shortDesc,
+  longDesc,
+  imageLabel,
+}: {
+  title: string;
+  shortDesc: string;
+  longDesc: string;
+  imageLabel: string;
+}) {
   const reduce = useReducedMotion();
   const [flipped, setFlipped] = useState(false);
-
-  const title = `Box ${index + 1}`;
-  const shortDesc =
-    "Quick preview of this section. Click to flip for details.";
-  const longDesc =
-    "More details appear here after the flip: what this section offers, how it helps the community, and what the user can do next. Keep it clear, friendly, and local-first — like a quick, helpful explainer.";
 
   return (
     <div className="w-full max-w-6xl">
@@ -821,9 +829,8 @@ function FlipFeatureRow({ index }: { index: number }) {
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         viewport={{ once: true, margin: "-120px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="grid grid-cols-1 lg:grid-cols-[minmax(320px,520px)_1fr] gap-6 lg:gap-8 items-stretch"
+        className="grid grid-cols-1 lg:grid-cols-[minmax(320px,520px)_1fr] gap-6 lg:gap-8"
       >
-        {/* LEFT: FLIP CARD */}
         <FlipInfoCard
           title={title}
           shortDesc={shortDesc}
@@ -832,15 +839,14 @@ function FlipFeatureRow({ index }: { index: number }) {
           setFlipped={setFlipped}
         />
 
-        {/* RIGHT: IMAGE PANEL */}
         <motion.div
           whileHover={reduce ? undefined : { y: -3 }}
           transition={{ type: "spring", stiffness: 220, damping: 20 }}
           className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
-          <div className="h-[280px] lg:h-full min-h-[280px] bg-[#8e8e8e] flex items-center justify-center">
-            <span className="text-xl md:text-2xl font-semibold text-black/70">
-              Put the image here
+          <div className="h-[280px] bg-[#8e8e8e] flex items-center justify-center">
+            <span className="text-xl font-semibold text-black/70">
+              {imageLabel}
             </span>
           </div>
         </motion.div>
@@ -848,6 +854,8 @@ function FlipFeatureRow({ index }: { index: number }) {
     </div>
   );
 }
+
+/* ---------------- Flip Card ---------------- */
 
 function FlipInfoCard({
   title,
@@ -860,88 +868,54 @@ function FlipInfoCard({
   shortDesc: string;
   longDesc: string;
   flipped: boolean;
-  setFlipped: React.Dispatch<React.SetStateAction<boolean>>;
+  setFlipped: (v: boolean | ((v: boolean) => boolean)) => void;
 }) {
   const reduce = useReducedMotion();
-  const dur = reduce ? 0 : 0.75;
 
   return (
     <button
       type="button"
       onClick={() => setFlipped((v) => !v)}
-      className="text-left"
+      className="text-left w-full"
       aria-pressed={flipped}
     >
       <motion.div
-        whileHover={reduce ? undefined : { y: -3 }}
-        transition={{ type: "spring", stiffness: 220, damping: 20 }}
         className="relative w-full"
         style={{ perspective: 1200 }}
       >
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: dur, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduce ? 0 : 0.75, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full"
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* FRONT */}
           <div
-            className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
+            className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-lg overflow-hidden"
             style={{ backfaceVisibility: "hidden" }}
           >
-            {/* “image-ish” top area like your old card */}
-            <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 relative">
-              <div className="absolute inset-0 opacity-60 blur-2xl bg-[radial-gradient(circle_at_30%_30%,rgba(59,130,246,0.35),rgba(255,255,255,0)_60%)]" />
-              <div className="relative p-6">
-                <div className="text-3xl font-medium text-black/80">{title.toLowerCase()}</div>
-                <div className="mt-10 text-blue-700 font-semibold text-center">Image {title.split(" ")[1]}</div>
-              </div>
+            <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 p-6">
+              <div className="text-3xl font-medium text-black/80">{title}</div>
             </div>
 
-            {/* bottom text area */}
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-blue-900">{`Section Title ${title.split(" ")[1]}`}</h3>
+              <h3 className="text-lg font-semibold text-blue-900">{title}</h3>
               <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
-
-              <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
-                Learn more <span aria-hidden>→</span>
-              </div>
-
-              <div className="mt-2 text-xs text-blue-700/70">
-                (Click anywhere on this card to flip)
+              <div className="mt-4 text-sm font-semibold text-blue-600">
+                Learn more →
               </div>
             </div>
           </div>
 
           {/* BACK */}
           <div
-            className="absolute inset-0 rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-7"
-            style={{
-              transform: "rotateY(180deg)",
-              backfaceVisibility: "hidden",
-            }}
+            className="absolute inset-0 rounded-3xl border border-blue-200 bg-blue-50 p-6"
+            style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
           >
-            <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
-              DETAILS
-            </div>
-            <h3 className="mt-2 text-2xl font-extrabold text-blue-900">{`Section Title ${title.split(" ")[1]}`}</h3>
-
-            <p className="mt-3 text-sm text-blue-800 leading-relaxed">{longDesc}</p>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 border border-blue-200 text-blue-800">
-                Community-friendly
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 border border-blue-200 text-blue-800">
-                Local-first
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/70 border border-blue-200 text-blue-800">
-                Clear info
-              </span>
-            </div>
-
-            <div className="mt-6 text-sm font-semibold text-blue-700 inline-flex items-center gap-2">
-              Click to flip back <span aria-hidden>↺</span>
+            <h3 className="text-xl font-extrabold text-blue-900">{title}</h3>
+            <p className="mt-3 text-sm text-blue-800">{longDesc}</p>
+            <div className="mt-6 text-sm font-semibold text-blue-700">
+              Click to flip back ↺
             </div>
           </div>
         </motion.div>
