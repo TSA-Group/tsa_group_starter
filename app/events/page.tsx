@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion, type Variants } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  type Variants,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from "framer-motion";
 
 // ✅ FIXED: your firebase file is here
 import { db } from "@/lib/firebase";
-
-import {
-  collection,
-  onSnapshot,
-  orderBy,
-  query,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
 
 /* =====================
    Types
@@ -57,9 +61,7 @@ const Chip = ({ children }: { children: React.ReactNode }) => (
 
 function mapsHref(ev: EventDoc) {
   const q = `${ev.venue ?? ""}, ${ev.address ?? ""}`.trim();
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    q,
-  )}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
 
 function formatDateLabel(ev: EventDoc) {
@@ -119,30 +121,29 @@ function formatTimeRange(ev: EventDoc) {
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const pageWrap: Variants = {
-  hidden: { opacity: 1 },
+  hidden: {},
   show: {
-    opacity: 1,
     transition: { staggerChildren: 0.06, delayChildren: 0.04 },
   },
 };
 
 const headerUp: Variants = {
-  hidden: { opacity: 0, y: 12, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 14, filter: "blur(12px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.6, ease: EASE_OUT },
+    transition: { duration: 0.7, ease: EASE_OUT },
   },
 };
 
 const panelUp: Variants = {
-  hidden: { opacity: 0, y: 14, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 16, filter: "blur(12px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.55, ease: EASE_OUT },
+    transition: { duration: 0.65, ease: EASE_OUT },
   },
 };
 
@@ -152,18 +153,30 @@ const gridWrap: Variants = {
 };
 
 const cardPop: Variants = {
-  hidden: { opacity: 0, y: 14, scale: 0.985, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 16, scale: 0.985, filter: "blur(12px)" },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.5, ease: EASE_OUT },
+    transition: { duration: 0.55, ease: EASE_OUT },
   },
   exit: { opacity: 0, y: 10, scale: 0.985, transition: { duration: 0.18 } },
 };
 
+const shimmerIn: Variants = {
+  hidden: { opacity: 0, y: 10, filter: "blur(10px)" },
+  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.7, ease: EASE_OUT } },
+};
+
+function clamp(n: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, n));
+}
+
 export default function EventsPage() {
+  const reduce = useReducedMotion();
+
+  /* ======== Keep ALL functionality (state, db, filters) as-is ======== */
   const [events, setEvents] = useState<EventDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -197,8 +210,6 @@ export default function EventsPage() {
 
   // ✅ live read from Firestore
   useEffect(() => {
-    // orderBy startAt if it exists on docs, otherwise Firestore will error.
-    // Your screenshot shows startAt exists, so this is correct.
     const qy = query(collection(db, "events"), orderBy("startAt", "asc"));
 
     const unsub = onSnapshot(
@@ -223,36 +234,28 @@ export default function EventsPage() {
   const filtered = useMemo(() => {
     const q = queryText.trim().toLowerCase();
 
-    // ✅ category filter now uses Firestore `types` (array)
     let list =
       selectedCategory === "all"
         ? events
         : events.filter((e) => (e.types || []).includes(selectedCategory));
 
-    // ✅ activities filter matches Firestore `activities` (array)
     if (selectedActivities.length > 0) {
       list = list.filter((e) =>
         selectedActivities.every((a) => (e.activities || []).includes(a)),
       );
     }
 
-    // ✅ search uses the fields you actually store
     if (q) {
       list = list.filter((e) =>
-        `${e.title ?? ""} ${e.description ?? ""} ${e.venue ?? ""} ${
-          e.address ?? ""
-        }`
+        `${e.title ?? ""} ${e.description ?? ""} ${e.venue ?? ""} ${e.address ?? ""}`
           .toLowerCase()
           .includes(q),
       );
     }
 
     if (sortBy === "popular") {
-      list = [...list].sort(
-        (a, b) => (b.attendees ?? 0) - (a.attendees ?? 0),
-      );
+      list = [...list].sort((a, b) => (b.attendees ?? 0) - (a.attendees ?? 0));
     } else {
-      // upcoming: prefer startAt timestamp, fallback to date string
       list = [...list].sort((a, b) => {
         const ta = a.startAt?.toMillis?.() ?? new Date(a.date || "").getTime();
         const tb = b.startAt?.toMillis?.() ?? new Date(b.date || "").getTime();
@@ -275,76 +278,220 @@ export default function EventsPage() {
     setSortBy("upcoming");
   };
 
+  /* =====================
+     Visual Motion (NEW)
+  ===================== */
+  const { scrollY, scrollYProgress } = useScroll();
+  const scrollProgSmooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+
+  const vel = useVelocity(scrollY);
+  const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
+  const tilt = useTransform(velSmooth, [-1600, 0, 1600], [-1.0, 0, 1.0]);
+
+  // Cursor spotlight like homepage
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mx.set(e.clientX);
+      my.set(e.clientY);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [mx, my]);
+
+  const glowX = useTransform(mx, (v) => `${v}px`);
+  const glowY = useTransform(my, (v) => `${v}px`);
+
+  // Background transitions (keep your palette)
+  const bg = useTransform(
+    scrollProgSmooth,
+    [0, 0.35, 0.7, 1],
+    ["#F6FAFF", "#F2F7FF", "#EEF5FF", "#EAF0FF"],
+  );
+
+  const softGrey = useTransform(scrollProgSmooth, [0.25, 0.55], ["rgba(226,232,240,0)", "rgba(203,213,225,0.55)"]);
+  const navyWash = useTransform(scrollProgSmooth, [0.62, 1], ["rgba(15,23,42,0)", "rgba(15,23,42,0.12)"]);
+
+  // progress bar
+  const progScaleX = useTransform(scrollProgSmooth, [0, 1], [0.06, 1]);
+
+  // subtle grain drift
+  const grainX = useTransform(scrollY, [0, 1200], [0, -110]);
+  const grainY = useTransform(scrollY, [0, 1200], [0, -80]);
+
+  // floating orbs (like homepage)
+  const ORBS = useMemo(
+    () => [
+      { size: 360, color: "rgba(59,130,246,0.16)", top: 12, left: 6, speed: 0.22 },
+      { size: 520, color: "rgba(147,197,253,0.14)", top: 48, left: 76, speed: 0.33 },
+      { size: 260, color: "rgba(15,23,42,0.10)", top: 72, left: 18, speed: 0.15 },
+      { size: 420, color: "rgba(147,197,253,0.10)", top: 20, left: 86, speed: 0.26 },
+      { size: 320, color: "rgba(59,130,246,0.12)", top: 62, left: 52, speed: 0.21 },
+    ],
+    [],
+  );
+
+  const orbX: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
+  const orbY: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
+
+  // track mouse position for orbs (very soft)
+  const mouseRef = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const h = window.innerHeight || 1;
+    const w = window.innerWidth || 1;
+    const scrollRange = document.body.scrollHeight - h || 1;
+
+    const m = mouseRef.current;
+
+    ORBS.forEach((orb, i) => {
+      const mouseFx = (m.x / w - 0.5) * 180 * orb.speed; // softer than home
+      const mouseFy = (m.y / h - 0.5) * 180 * orb.speed;
+      const scrollFy = -240 * orb.speed * (y / scrollRange);
+
+      orbX[i].set(mouseFx);
+      orbY[i].set(scrollFy + mouseFy);
+    });
+  });
+
   return (
     <motion.div
       variants={pageWrap}
       initial="hidden"
       animate="show"
-      className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900 antialiased"
+      style={{ background: bg }}
+      className="relative min-h-screen overflow-hidden text-slate-900 antialiased"
     >
-      {/* background */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
+      {/* Scroll progress bar */}
+      <motion.div
+        style={{ scaleX: progScaleX }}
+        className="fixed left-0 top-0 h-1 w-full origin-left bg-gradient-to-r from-blue-900 via-blue-600 to-blue-300 z-[60]"
+      />
 
-        <motion.div
-          aria-hidden
-          className="absolute -top-40 -left-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-45"
+      {/* Cursor spotlight */}
+      <motion.div
+        aria-hidden
+        style={{
+          background: useTransform([glowX, glowY], ([x, y]) => {
+            return `radial-gradient(420px circle at ${x} ${y}, rgba(59,130,246,0.18), rgba(59,130,246,0.06) 35%, rgba(255,255,255,0) 70%)`;
+          }),
+        }}
+        className="fixed inset-0 pointer-events-none -z-30"
+      />
+
+      {/* Grain */}
+      <motion.div
+        aria-hidden
+        style={{ x: grainX, y: grainY, opacity: reduce ? 0.05 : 0.085 }}
+        className="fixed inset-0 pointer-events-none -z-30"
+      >
+        <div
+          className="w-[140%] h-[140%]"
           style={{
-            background:
-              "radial-gradient(circle at 30% 30%, rgba(37,99,235,0.35), rgba(37,99,235,0) 60%)",
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E\")",
           }}
-          animate={{ x: [0, 28, 0], y: [0, 18, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: EASE_OUT }}
         />
+      </motion.div>
+
+      {/* Floating Orbs */}
+      {ORBS.map((orb, i) => (
         <motion.div
-          aria-hidden
-          className="absolute -bottom-48 -right-48 h-[620px] w-[620px] rounded-full blur-3xl opacity-40"
+          key={i}
           style={{
-            background:
-              "radial-gradient(circle at 40% 40%, rgba(14,165,233,0.30), rgba(14,165,233,0) 62%)",
+            x: reduce ? 0 : orbX[i],
+            y: reduce ? 0 : orbY[i],
+            width: orb.size,
+            height: orb.size,
+            top: `${orb.top}%`,
+            left: `${orb.left}%`,
+            backgroundColor: orb.color,
           }}
-          animate={{ x: [0, -24, 0], y: [0, -16, 0] }}
-          transition={{ duration: 11.5, repeat: Infinity, ease: EASE_OUT }}
+          className="absolute rounded-full pointer-events-none -z-20 blur-3xl"
         />
-        <motion.div
-          aria-hidden
-          className="absolute top-[30%] left-[55%] h-[420px] w-[420px] rounded-full blur-3xl opacity-35"
-          style={{
-            background:
-              "radial-gradient(circle at 30% 30%, rgba(99,102,241,0.25), rgba(99,102,241,0) 60%)",
-          }}
-          animate={{ x: [0, 18, 0], y: [0, -22, 0] }}
-          transition={{ duration: 12.2, repeat: Infinity, ease: EASE_OUT }}
-        />
+      ))}
+
+      {/* Soft overlays */}
+      <motion.div style={{ backgroundColor: softGrey }} className="fixed inset-0 pointer-events-none -z-20" />
+      <motion.div style={{ backgroundColor: navyWash }} className="fixed inset-0 pointer-events-none -z-20" />
+
+      {/* Background grid (your original vibe, just nicer) */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 opacity-[0.20] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
       </div>
 
+      {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        <motion.header variants={headerUp} className="mb-8">
-          <h1 className="text-4xl font-semibold text-[#143B8C]">
-            Gatherly — Community Events
-          </h1>
-          <p className="mt-2 text-slate-600 max-w-2xl">
-            Discover local volunteering opportunities and community events in
-            Cross Creek.
-          </p>
+        {/* Header (immersive card) */}
+        <motion.header
+          variants={headerUp}
+          style={{ rotate: reduce ? 0 : tilt }}
+          className="mb-8"
+        >
+          <motion.div
+            variants={shimmerIn}
+            className="rounded-[28px] border border-blue-200 bg-white/65 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] px-6 sm:px-10 py-8 relative overflow-hidden"
+          >
+            <div className="absolute -top-20 -left-16 w-[420px] h-[420px] rounded-full bg-blue-300/20 blur-3xl" />
+            <div className="absolute -bottom-24 -right-16 w-[460px] h-[460px] rounded-full bg-blue-500/10 blur-3xl" />
+
+            <div className="text-xs sm:text-sm font-semibold text-blue-700 tracking-[0.22em]">
+              DISCOVER • VOLUNTEER • CONNECT
+            </div>
+            <h1 className="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600">
+              Gatherly — Community Events
+            </h1>
+            <p className="mt-2 text-slate-600 max-w-2xl">
+              Discover local volunteering opportunities and community events in Cross Creek.
+            </p>
+
+            <motion.div
+              className="mt-5 text-blue-700/80 text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25, duration: 0.7 }}
+            >
+              <motion.span
+                className="inline-flex items-center gap-2"
+                animate={reduce ? undefined : { y: [0, 4, 0] }}
+                transition={reduce ? undefined : { duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="font-semibold">Scroll</span>
+                <span className="opacity-80">to explore</span>
+                <span aria-hidden>↓</span>
+              </motion.span>
+            </motion.div>
+          </motion.div>
         </motion.header>
 
+        {/* Filter panel */}
         <motion.div
           variants={panelUp}
-          className="bg-white/80 backdrop-blur border border-blue-200 rounded-2xl p-5 mb-10 shadow-sm"
+          className="bg-white/70 backdrop-blur-xl border border-blue-200 rounded-3xl p-5 mb-10 shadow-[0_18px_60px_rgba(15,23,42,0.08)] relative overflow-hidden"
         >
+          <div className="absolute -top-16 -right-20 w-[360px] h-[360px] rounded-full bg-blue-300/15 blur-3xl" />
+          <div className="absolute -bottom-16 -left-24 w-[420px] h-[420px] rounded-full bg-sky-300/10 blur-3xl" />
+
           <div className="flex items-center justify-between gap-4 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
-              <p className="text-sm text-slate-600">
-                Choose what you want to see.
-              </p>
+              <p className="text-sm text-slate-600">Choose what you want to see.</p>
             </div>
 
             <motion.button
               onClick={clearFilters}
+              whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white hover:bg-blue-50 transition"
+              className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white/80 hover:bg-blue-50 transition shadow-sm"
             >
               Clear
             </motion.button>
@@ -356,11 +503,12 @@ export default function EventsPage() {
               <motion.button
                 key={c.id}
                 onClick={() => setSelectedCategory(c.id)}
+                whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
                   selectedCategory === c.id
                     ? "bg-blue-600 text-white border border-blue-600"
-                    : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
+                    : "bg-white/80 text-slate-700 border border-blue-200 hover:bg-blue-50"
                 }`}
               >
                 {c.name}
@@ -374,11 +522,12 @@ export default function EventsPage() {
               <motion.button
                 key={a.id}
                 onClick={() => toggleActivity(a.id)}
+                whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
                   selectedActivities.includes(a.id)
                     ? "bg-blue-600 text-white border border-blue-600"
-                    : "bg-white text-slate-700 border border-blue-200 hover:bg-blue-50"
+                    : "bg-white/80 text-slate-700 border border-blue-200 hover:bg-blue-50"
                 }`}
               >
                 {a.name}
@@ -388,22 +537,25 @@ export default function EventsPage() {
 
           {/* Search + Sort */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <input
-              value={queryText}
-              onChange={(e) => setQueryText(e.target.value)}
-              placeholder="Search events..."
-              className="flex-1 bg-white placeholder:text-slate-400 text-slate-800 px-4 py-2 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div className="relative flex-1">
+              <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-blue-700/60">
+                🔎
+              </div>
+              <input
+                value={queryText}
+                onChange={(e) => setQueryText(e.target.value)}
+                placeholder="Search events..."
+                className="w-full bg-white/85 placeholder:text-slate-400 text-slate-800 pl-10 pr-4 py-2.5 rounded-2xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm"
+              />
+            </div>
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-slate-600">Sort:</span>
-              <div className="inline-flex rounded-full bg-white border border-blue-200 p-1">
+              <div className="inline-flex rounded-full bg-white/85 border border-blue-200 p-1 shadow-sm">
                 {["upcoming", "popular"].map((option) => (
                   <button
                     key={option}
-                    onClick={() =>
-                      setSortBy(option as "upcoming" | "popular")
-                    }
+                    onClick={() => setSortBy(option as "upcoming" | "popular")}
                     className={`px-4 py-1 text-sm rounded-full transition ${
                       sortBy === option
                         ? "bg-blue-600 text-white"
@@ -419,24 +571,23 @@ export default function EventsPage() {
         </motion.div>
 
         {/* Cards */}
-        <motion.div
-          variants={gridWrap}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
+        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence mode="popLayout">
             {loading ? (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full rounded-2xl border border-blue-200 bg-white/90 p-6 text-slate-700"
+                layout
+                initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                className="col-span-full rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl p-6 text-slate-700 shadow-[0_18px_60px_rgba(15,23,42,0.08)]"
               >
                 Loading events...
               </motion.div>
             ) : filtered.length === 0 ? (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full rounded-2xl border border-blue-200 bg-white/90 p-6 text-slate-700"
+                layout
+                initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                className="col-span-full rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl p-6 text-slate-700 shadow-[0_18px_60px_rgba(15,23,42,0.08)]"
               >
                 No events found.
               </motion.div>
@@ -460,68 +611,75 @@ export default function EventsPage() {
                     exit="exit"
                     whileHover={{ y: -6, scale: 1.01 }}
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                    className="bg-white/90 backdrop-blur border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-300"
+                    className="bg-white/75 backdrop-blur-xl border border-blue-200 rounded-3xl p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] hover:shadow-[0_24px_80px_rgba(15,23,42,0.12)] hover:border-blue-300 relative overflow-hidden"
                   >
-                    <h3 className="text-xl font-semibold mb-1 text-slate-900">
-                      {ev.title ?? "Untitled Event"}
-                    </h3>
+                    {/* glow corners */}
+                    <div className="pointer-events-none absolute -top-16 -left-16 w-[240px] h-[240px] rounded-full bg-blue-300/15 blur-3xl" />
+                    <div className="pointer-events-none absolute -bottom-20 -right-16 w-[280px] h-[280px] rounded-full bg-sky-300/10 blur-3xl" />
 
-                    <p className="text-slate-700 text-sm font-medium">
-                      {ev.venue ?? ""}
-                    </p>
+                    <div className="relative">
+                      <h3 className="text-xl font-semibold mb-1 text-slate-900">
+                        {ev.title ?? "Untitled Event"}
+                      </h3>
 
-                    {ev.address ? (
-                      <p className="text-slate-600 text-sm">{ev.address}</p>
-                    ) : null}
+                      <p className="text-slate-700 text-sm font-medium">{ev.venue ?? ""}</p>
 
-                    {(dateLabel || timeLabel) && (
-                      <p className="text-slate-700 text-sm mt-1">
-                        {dateLabel}
-                        {timeLabel ? ` • ${timeLabel}` : ""}
-                      </p>
-                    )}
+                      {ev.address ? <p className="text-slate-600 text-sm">{ev.address}</p> : null}
 
-                    {ev.description ? (
-                      <p className="text-slate-700 text-sm mt-3">
-                        {ev.description}
-                      </p>
-                    ) : null}
+                      {(dateLabel || timeLabel) && (
+                        <p className="text-slate-700 text-sm mt-1">
+                          {dateLabel}
+                          {timeLabel ? ` • ${timeLabel}` : ""}
+                        </p>
+                      )}
 
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {(ev.activities || []).map((a) => (
-                        <Chip key={a}>{a}</Chip>
-                      ))}
-                    </div>
+                      {ev.description ? (
+                        <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
+                      ) : null}
 
-                    <div className="mt-4">
-                      <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${Math.min(
-                              100,
-                              Math.max(0, percent),
-                            )}%`,
-                          }}
-                          transition={{ duration: 0.7, ease: EASE_OUT }}
-                          className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
-                        />
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {(ev.activities || []).map((a) => (
+                          <Chip key={a}>{a}</Chip>
+                        ))}
                       </div>
-                      <div className="flex justify-between text-xs text-slate-600 mt-1">
-                        <span>{percent}% filled</span>
-                        <span>{spotsLeft} spots left</span>
+
+                      <div className="mt-4">
+                        <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+                            transition={{ duration: 0.7, ease: EASE_OUT }}
+                            className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-slate-600 mt-1">
+                          <span>{percent}% filled</span>
+                          <span>{spotsLeft} spots left</span>
+                        </div>
                       </div>
+
+                      {/* IMPORTANT: do not change functionality */}
+                      <div className="grid grid-cols-2 gap-2 mt-5">
+                        <Link
+                          href={`/events/register?id=${ev.id}`}
+                          className="col-span-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99] shadow-sm"
+                        >
+                          Register
+                        </Link>
+                      </div>
+
+                      {/* Optional extra link (doesn't change any existing functionality) */}
+                      {(ev.venue || ev.address) && (
+                        <a
+                          href={mapsHref(ev)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 transition"
+                        >
+                          View on Maps <span aria-hidden>↗</span>
+                        </a>
+                      )}
                     </div>
-
-                  <div className="grid grid-cols-2 gap-2 mt-5">
-  <Link
-    href={`/events/register?id=${ev.id}`}
-    className="col-span-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99]"
-  >
-    Register
-  </Link>
-                  </div>
-
                   </motion.article>
                 );
               })
