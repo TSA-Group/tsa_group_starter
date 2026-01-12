@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
+  type MotionValue,
   type Variants,
   useMotionValue,
   useMotionValueEvent,
@@ -168,10 +169,6 @@ const shimmerIn: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(10px)" },
   show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.7, ease: EASE_OUT } },
 };
-
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
 
 export default function EventsPage() {
   const reduce = useReducedMotion();
@@ -424,19 +421,14 @@ export default function EventsPage() {
       <motion.div style={{ backgroundColor: softGrey }} className="fixed inset-0 pointer-events-none -z-20" />
       <motion.div style={{ backgroundColor: navyWash }} className="fixed inset-0 pointer-events-none -z-20" />
 
-      {/* Background grid (your original vibe, just nicer) */}
+      {/* Background grid */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 opacity-[0.20] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        {/* Header (immersive card) */}
-        <motion.header
-          variants={headerUp}
-          style={{ rotate: reduce ? 0 : tilt }}
-          className="mb-8"
-        >
+        {/* Header */}
+        <motion.header variants={headerUp} style={{ rotate: reduce ? 0 : tilt }} className="mb-8">
           <motion.div
             variants={shimmerIn}
             className="rounded-[28px] border border-blue-200 bg-white/65 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] px-6 sm:px-10 py-8 relative overflow-hidden"
@@ -454,12 +446,7 @@ export default function EventsPage() {
               Discover local volunteering opportunities and community events in Cross Creek.
             </p>
 
-            <motion.div
-              className="mt-5 text-blue-700/80 text-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.25, duration: 0.7 }}
-            >
+            <motion.div className="mt-5 text-blue-700/80 text-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25, duration: 0.7 }}>
               <motion.span
                 className="inline-flex items-center gap-2"
                 animate={reduce ? undefined : { y: [0, 4, 0] }}
@@ -557,9 +544,7 @@ export default function EventsPage() {
                     key={option}
                     onClick={() => setSortBy(option as "upcoming" | "popular")}
                     className={`px-4 py-1 text-sm rounded-full transition ${
-                      sortBy === option
-                        ? "bg-blue-600 text-white"
-                        : "text-slate-700 hover:bg-blue-50"
+                      sortBy === option ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-blue-50"
                     }`}
                   >
                     {option === "upcoming" ? "Upcoming" : "Popular"}
@@ -613,7 +598,6 @@ export default function EventsPage() {
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
                     className="bg-white/75 backdrop-blur-xl border border-blue-200 rounded-3xl p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] hover:shadow-[0_24px_80px_rgba(15,23,42,0.12)] hover:border-blue-300 relative overflow-hidden"
                   >
-                    {/* glow corners */}
                     <div className="pointer-events-none absolute -top-16 -left-16 w-[240px] h-[240px] rounded-full bg-blue-300/15 blur-3xl" />
                     <div className="pointer-events-none absolute -bottom-20 -right-16 w-[280px] h-[280px] rounded-full bg-sky-300/10 blur-3xl" />
 
@@ -633,9 +617,7 @@ export default function EventsPage() {
                         </p>
                       )}
 
-                      {ev.description ? (
-                        <p className="text-slate-700 text-sm mt-3">{ev.description}</p>
-                      ) : null}
+                      {ev.description ? <p className="text-slate-700 text-sm mt-3">{ev.description}</p> : null}
 
                       <div className="flex flex-wrap gap-2 mt-3">
                         {(ev.activities || []).map((a) => (
@@ -668,7 +650,6 @@ export default function EventsPage() {
                         </Link>
                       </div>
 
-                      {/* Optional extra link (doesn't change any existing functionality) */}
                       {(ev.venue || ev.address) && (
                         <a
                           href={mapsHref(ev)}
