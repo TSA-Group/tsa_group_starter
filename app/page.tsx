@@ -16,7 +16,6 @@ import {
   useVelocity,
 } from "framer-motion";
 
-/* ---------------- Variants ---------------- */
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.12, delayChildren: 0.08 } },
