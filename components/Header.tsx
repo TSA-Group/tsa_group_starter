@@ -9,6 +9,7 @@ const navItems = [
   { label: "Events", href: "/events" },
   { label: "Contact", href: "/contact" },
   { label: "Login", href: "/admin" },
+  { label: "History", href: "/history" },
 ];
 
 export const Header: React.FC = () => {
