@@ -16,7 +16,7 @@ import {
   useVelocity,
 } from "framer-motion";
 
-// ✅ FIXED: your firebase file is here
+// ✅ your firebase file
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
 
@@ -89,7 +89,6 @@ function formatDateLabel(ev: EventDoc) {
 }
 
 function formatTimeRange(ev: EventDoc) {
-  // Prefer Firestore timestamps if present
   if (ev.startAt && ev.endAt) {
     const s = ev.startAt
       .toDate()
@@ -100,7 +99,6 @@ function formatTimeRange(ev: EventDoc) {
     return `${s} – ${e}`;
   }
 
-  // Fallback to time strings saved by form
   if (ev.startTime && ev.endTime) {
     const s = new Date(`1970-01-01T${ev.startTime}:00`).toLocaleTimeString([], {
       hour: "numeric",
@@ -123,9 +121,7 @@ const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const pageWrap: Variants = {
   hidden: {},
-  show: {
-    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
-  },
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
 };
 
 const headerUp: Variants = {
@@ -167,13 +163,18 @@ const cardPop: Variants = {
 
 const shimmerIn: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(10px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.7, ease: EASE_OUT } },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.7, ease: EASE_OUT },
+  },
 };
 
 export default function EventsPage() {
   const reduce = useReducedMotion();
 
-  /* ======== Keep ALL functionality (state, db, filters) as-is ======== */
+  /* ======== DO NOT CHANGE FUNCTIONALITY ======== */
   const [events, setEvents] = useState<EventDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -182,7 +183,6 @@ export default function EventsPage() {
   const [queryText, setQueryText] = useState("");
   const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
 
-  // These IDs MUST match what you store in Firestore `types`
   const categories: Category[] = [
     { id: "all", name: "All" },
     { id: "Community", name: "Community" },
@@ -195,7 +195,6 @@ export default function EventsPage() {
     { id: "Other", name: "Other" },
   ];
 
-  // These IDs MUST match what you store in Firestore `activities`
   const activities: Activity[] = [
     { id: "Food", name: "Food" },
     { id: "Volunteering", name: "Volunteering" },
@@ -205,7 +204,6 @@ export default function EventsPage() {
     { id: "Family", name: "Family" },
   ];
 
-  // ✅ live read from Firestore
   useEffect(() => {
     const qy = query(collection(db, "events"), orderBy("startAt", "asc"));
 
@@ -276,7 +274,7 @@ export default function EventsPage() {
   };
 
   /* =====================
-     Visual Motion (NEW)
+     Visual Motion (ONLY)
   ===================== */
   const { scrollY, scrollYProgress } = useScroll();
   const scrollProgSmooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
@@ -285,7 +283,6 @@ export default function EventsPage() {
   const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
   const tilt = useTransform(velSmooth, [-1600, 0, 1600], [-1.0, 0, 1.0]);
 
-  // Cursor spotlight like homepage
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
 
@@ -301,24 +298,29 @@ export default function EventsPage() {
   const glowX = useTransform(mx, (v) => `${v}px`);
   const glowY = useTransform(my, (v) => `${v}px`);
 
-  // Background transitions (keep your palette)
   const bg = useTransform(
     scrollProgSmooth,
     [0, 0.35, 0.7, 1],
     ["#F6FAFF", "#F2F7FF", "#EEF5FF", "#EAF0FF"],
   );
 
-  const softGrey = useTransform(scrollProgSmooth, [0.25, 0.55], ["rgba(226,232,240,0)", "rgba(203,213,225,0.55)"]);
-  const navyWash = useTransform(scrollProgSmooth, [0.62, 1], ["rgba(15,23,42,0)", "rgba(15,23,42,0.12)"]);
+  const softGrey = useTransform(
+    scrollProgSmooth,
+    [0.25, 0.55],
+    ["rgba(226,232,240,0)", "rgba(203,213,225,0.55)"],
+  );
 
-  // progress bar
+  const navyWash = useTransform(
+    scrollProgSmooth,
+    [0.62, 1],
+    ["rgba(15,23,42,0)", "rgba(15,23,42,0.12)"],
+  );
+
   const progScaleX = useTransform(scrollProgSmooth, [0, 1], [0.06, 1]);
 
-  // subtle grain drift
   const grainX = useTransform(scrollY, [0, 1200], [0, -110]);
   const grainY = useTransform(scrollY, [0, 1200], [0, -80]);
 
-  // floating orbs (like homepage)
   const ORBS = useMemo(
     () => [
       { size: 360, color: "rgba(59,130,246,0.16)", top: 12, left: 6, speed: 0.22 },
@@ -333,7 +335,6 @@ export default function EventsPage() {
   const orbX: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
   const orbY: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
 
-  // track mouse position for orbs (very soft)
   const mouseRef = useRef({ x: 0, y: 0 });
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -351,7 +352,7 @@ export default function EventsPage() {
     const m = mouseRef.current;
 
     ORBS.forEach((orb, i) => {
-      const mouseFx = (m.x / w - 0.5) * 180 * orb.speed; // softer than home
+      const mouseFx = (m.x / w - 0.5) * 180 * orb.speed;
       const mouseFy = (m.y / h - 0.5) * 180 * orb.speed;
       const scrollFy = -240 * orb.speed * (y / scrollRange);
 
@@ -418,8 +419,14 @@ export default function EventsPage() {
       ))}
 
       {/* Soft overlays */}
-      <motion.div style={{ backgroundColor: softGrey }} className="fixed inset-0 pointer-events-none -z-20" />
-      <motion.div style={{ backgroundColor: navyWash }} className="fixed inset-0 pointer-events-none -z-20" />
+      <motion.div
+        style={{ backgroundColor: softGrey }}
+        className="fixed inset-0 pointer-events-none -z-20"
+      />
+      <motion.div
+        style={{ backgroundColor: navyWash }}
+        className="fixed inset-0 pointer-events-none -z-20"
+      />
 
       {/* Background grid */}
       <div className="pointer-events-none fixed inset-0 -z-10">
@@ -433,8 +440,9 @@ export default function EventsPage() {
             variants={shimmerIn}
             className="rounded-[28px] border border-blue-200 bg-white/65 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] px-6 sm:px-10 py-8 relative overflow-hidden"
           >
-            <div className="absolute -top-20 -left-16 w-[420px] h-[420px] rounded-full bg-blue-300/20 blur-3xl" />
-            <div className="absolute -bottom-24 -right-16 w-[460px] h-[460px] rounded-full bg-blue-500/10 blur-3xl" />
+            {/* ✅ FIX: pointer-events-none so it NEVER blocks clicks */}
+            <div className="pointer-events-none absolute -top-20 -left-16 w-[420px] h-[420px] rounded-full bg-blue-300/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -right-16 w-[460px] h-[460px] rounded-full bg-blue-500/10 blur-3xl" />
 
             <div className="text-xs sm:text-sm font-semibold text-blue-700 tracking-[0.22em]">
               DISCOVER • VOLUNTEER • CONNECT
@@ -446,7 +454,12 @@ export default function EventsPage() {
               Discover local volunteering opportunities and community events in Cross Creek.
             </p>
 
-            <motion.div className="mt-5 text-blue-700/80 text-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25, duration: 0.7 }}>
+            <motion.div
+              className="mt-5 text-blue-700/80 text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25, duration: 0.7 }}
+            >
               <motion.span
                 className="inline-flex items-center gap-2"
                 animate={reduce ? undefined : { y: [0, 4, 0] }}
@@ -465,8 +478,9 @@ export default function EventsPage() {
           variants={panelUp}
           className="bg-white/70 backdrop-blur-xl border border-blue-200 rounded-3xl p-5 mb-10 shadow-[0_18px_60px_rgba(15,23,42,0.08)] relative overflow-hidden"
         >
-          <div className="absolute -top-16 -right-20 w-[360px] h-[360px] rounded-full bg-blue-300/15 blur-3xl" />
-          <div className="absolute -bottom-16 -left-24 w-[420px] h-[420px] rounded-full bg-sky-300/10 blur-3xl" />
+          {/* ✅ FIX: pointer-events-none so the blobs NEVER block filter clicks */}
+          <div className="pointer-events-none absolute -top-16 -right-20 w-[360px] h-[360px] rounded-full bg-blue-300/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-24 w-[420px] h-[420px] rounded-full bg-sky-300/10 blur-3xl" />
 
           <div className="flex items-center justify-between gap-4 mb-4">
             <div>
@@ -640,7 +654,6 @@ export default function EventsPage() {
                         </div>
                       </div>
 
-                      {/* IMPORTANT: do not change functionality */}
                       <div className="grid grid-cols-2 gap-2 mt-5">
                         <Link
                           href={`/events/register?id=${ev.id}`}
