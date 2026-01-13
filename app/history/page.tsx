@@ -1,20 +1,14 @@
-// app/history/page.tsx
 "use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-export const metadata = {
-  title: "History | Gatherly",
-  description: "Timeline of milestones that shaped Gatherly",
-};
 
 type Milestone = {
   year: number;
   title: string;
   description: string;
   details?: string[];
-  badge?: string; // optional text or emoji badge
+  badge?: string;
 };
 
 const historyData: Milestone[] = [
@@ -64,7 +58,10 @@ const historyData: Milestone[] = [
     year: 2021,
     title: "Mobile App Launch",
     description: "iOS and Android apps released.",
-    details: ["Smooth cross-platform experience", "Push notifications implemented"],
+    details: [
+      "Smooth cross-platform experience",
+      "Push notifications implemented",
+    ],
   },
   {
     year: 2022,
@@ -76,29 +73,42 @@ const historyData: Milestone[] = [
     year: 2023,
     title: "Major Redesign",
     description: "Website and app redesigned for modern UX.",
-    details: ["New branding", "Performance optimization", "Accessibility improvements"],
+    details: [
+      "New branding",
+      "Performance optimization",
+      "Accessibility improvements",
+    ],
   },
   {
     year: 2024,
     title: "Community Events",
     description: "First live events held.",
-    details: ["Workshops and meetups organized", "User-generated content initiatives"],
+    details: [
+      "Workshops and meetups organized",
+      "User-generated content initiatives",
+    ],
   },
   {
     year: 2025,
     title: "AI Integration",
     description: "AI tools integrated for personalized experiences.",
-    details: ["Smart recommendations for events", "AI-powered moderation"],
+    details: [
+      "Smart recommendations for events",
+      "AI-powered moderation",
+    ],
   },
   {
     year: 2026,
     title: "Future Plans",
     description: "Preparing for next-gen features.",
-    details: ["VR/AR experiences in beta", "Global user base projected to double"],
+    details: [
+      "VR/AR experiences in beta",
+      "Global user base projected to double",
+    ],
   },
 ];
 
-export default function HistoryPage() {
+export default function HistoryClient() {
   const [openYear, setOpenYear] = useState<number | null>(null);
 
   return (
@@ -112,8 +122,7 @@ export default function HistoryPage() {
         </p>
 
         <div className="relative space-y-8">
-          {/* Gradient vertical timeline line */}
-          <div className="absolute top-0 left-5 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500"></div>
+          <div className="absolute top-0 left-5 w-1 h-full bg-gradient-to-b from-blue-500 to-purple-500" />
 
           {historyData.map((item, index) => (
             <motion.div
@@ -126,13 +135,18 @@ export default function HistoryPage() {
               className="relative pl-12"
             >
               <div
-                className="p-6 border-l-4 border-blue-500 bg-gray-50 rounded-xl shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300"
-                onClick={() => setOpenYear(openYear === item.year ? null : item.year)}
+                onClick={() =>
+                  setOpenYear(openYear === item.year ? null : item.year)
+                }
+                className="p-6 border-l-4 border-blue-500 bg-gray-50 rounded-xl shadow-md cursor-pointer hover:shadow-xl transition-shadow"
               >
-                <h2 className="text-2xl font-semibold text-gray-900 flex items-center space-x-2">
-                  {item.badge && <span className="text-xl">{item.badge}</span>}
-                  <span>{item.year} – {item.title}</span>
+                <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
+                  {item.badge && <span>{item.badge}</span>}
+                  <span>
+                    {item.year} – {item.title}
+                  </span>
                 </h2>
+
                 <p className="mt-2 text-gray-700">{item.description}</p>
 
                 <AnimatePresence>
@@ -141,19 +155,17 @@ export default function HistoryPage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="mt-4 list-disc list-inside text-gray-700 space-y-1"
+                      className="mt-4 list-disc list-inside space-y-1 text-gray-700"
                     >
-                      {item.details?.map((detail, idx) => (
-                        <li key={idx}>{detail}</li>
+                      {item.details?.map((detail, i) => (
+                        <li key={i}>{detail}</li>
                       ))}
                     </motion.ul>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Animated timeline dot */}
               <motion.div
-                layout
                 className="absolute left-1 top-6 w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-md"
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
