@@ -9,7 +9,7 @@ export const metadata = {
 // Sample history data
 const historyData = [
   {
-    year: 2023,
+    year: 2008,
     title: "Starting Out",
     description: "Cross Creek is founded in Fulshear, first residents arrived in 2008.",
   },
