@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -15,6 +16,10 @@ import {
   useTransform,
   useVelocity,
 } from "framer-motion";
+
+// ✅ Firestore (events from DB)
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, type DocumentData } from "firebase/firestore";
 
 const container: Variants = {
   hidden: {},
@@ -63,6 +68,84 @@ function useSmoothScrollFallback(enabled: boolean) {
       html.style.scrollBehavior = prev || "";
     };
   }, [enabled]);
+}
+
+/* ✅ Chicago date helpers (for calendar matching) */
+function getChicagoParts(d: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+
+  const yy = parts.find((p) => p.type === "year")?.value ?? "1970";
+  const mm = parts.find((p) => p.type === "month")?.value ?? "01";
+  const dd = parts.find((p) => p.type === "day")?.value ?? "01";
+  return { yy, mm, dd, key: `${yy}-${mm}-${dd}` };
+}
+
+function formatChicagoTime(d: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(d);
+}
+
+/** ✅ robustly try to pull a Date from Firestore event doc shapes */
+function parseEventDate(data: DocumentData): Date | null {
+  // 1) Timestamp-like fields (common)
+  const tsCandidates = [
+    data.when,
+    data.start,
+    data.startTime,
+    data.dateTime,
+    data.datetime,
+    data.eventTime,
+  ];
+
+  for (const v of tsCandidates) {
+    if (v?.toDate && typeof v.toDate === "function") {
+      const d = v.toDate();
+      if (d instanceof Date && !Number.isNaN(d.getTime())) return d;
+    }
+    if (typeof v?.seconds === "number") {
+      const d = new Date(v.seconds * 1000);
+      if (!Number.isNaN(d.getTime())) return d;
+    }
+  }
+
+  // 2) date + time strings (also common)
+  // Examples:
+  // - date: "2026-01-13", time: "6:30 PM"
+  // - date: "Jan 13, 2026", time: "18:30"
+  const dateStr = typeof data.date === "string" ? data.date : "";
+  const timeStr = typeof data.time === "string" ? data.time : "";
+
+  if (dateStr) {
+    const base = new Date(dateStr);
+    if (!Number.isNaN(base.getTime())) {
+      if (timeStr) {
+        const m = timeStr.match(/^\s*(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?\s*$/i);
+        if (m) {
+          let hh = parseInt(m[1], 10);
+          const mm = m[2] ? parseInt(m[2], 10) : 0;
+          const ap = (m[3] || "").toUpperCase();
+
+          if (ap === "PM" && hh < 12) hh += 12;
+          if (ap === "AM" && hh === 12) hh = 0;
+
+          base.setHours(hh, mm, 0, 0);
+        }
+      } else {
+        base.setHours(0, 0, 0, 0);
+      }
+      return base;
+    }
+  }
+
+  return null;
 }
 
 /* ---------------- Orbs ---------------- */
@@ -135,6 +218,14 @@ const FEATURES = [
 ];
 
 /* ---------------- MAIN PAGE ---------------- */
+type DbEvent = {
+  id: string;
+  title: string;
+  location: string;
+  details: string;
+  when: Date;
+};
+
 export default function Home() {
   const reduce = useReducedMotion();
 
@@ -239,29 +330,51 @@ export default function Home() {
     []
   );
 
-  const events = useMemo(
-    () => [
-      {
-        title: "Neighborhood Meetup",
-        dateString: "2025-12-21T14:00:00",
-        location: "Community Park",
-        details: "Meet local residents and join community discussions.",
+  /* ✅ EVENTS FROM FIRESTORE */
+  const [events, setEvents] = useState<DbEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setEventsLoading(true);
+    setEventsError(null);
+
+    // ✅ change "events" if your collection is named differently
+    const ref = collection(db, "events");
+
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        const next: DbEvent[] = [];
+        snap.forEach((doc) => {
+          const data = doc.data() as DocumentData;
+          const when = parseEventDate(data);
+          if (!when) return;
+
+          next.push({
+            id: doc.id,
+            title: String(data.title ?? "Untitled event"),
+            location: String(data.location ?? ""),
+            details: String(data.details ?? data.description ?? ""),
+            when,
+          });
+        });
+
+        next.sort((a, b) => a.when.getTime() - b.when.getTime());
+
+        setEvents(next);
+        setEventsLoading(false);
       },
-      {
-        title: "Community Dinner",
-        dateString: "2025-12-21T18:00:00",
-        location: "Downtown Church",
-        details: "Enjoy a free meal and fellowship with neighbors.",
-      },
-      {
-        title: "Clothing Drive",
-        dateString: "2025-12-22T10:00:00",
-        location: "Westside Center",
-        details: "Donate clothes for those in need and volunteer.",
-      },
-    ],
-    []
-  );
+      (err) => {
+        console.error("Failed to read events:", err);
+        setEventsError(err?.message || "Failed to read events.");
+        setEvents([]);
+        setEventsLoading(false);
+      }
+    );
+
+    return () => unsub();
+  }, []);
 
   const calendarDays = useMemo(() => {
     const firstDay = new Date(calYear, calMonth, 1).getDay();
@@ -278,14 +391,11 @@ export default function Home() {
 
   const selectedEvents = useMemo(() => {
     if (!selectedDate) return [];
-    return events.filter((event) => {
-      const e = new Date(event.dateString);
-      return (
-        e.getFullYear() === selectedDate.getFullYear() &&
-        e.getMonth() === selectedDate.getMonth() &&
-        e.getDate() === selectedDate.getDate()
-      );
-    });
+    const selKey = getChicagoParts(selectedDate).key;
+
+    return events
+      .filter((ev) => getChicagoParts(ev.when).key === selKey)
+      .sort((a, b) => a.when.getTime() - b.when.getTime());
   }, [events, selectedDate]);
 
   /* ---- Scroll progress bar ---- */
@@ -511,6 +621,11 @@ export default function Home() {
                 <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                   {monthNames[calMonth]} {calYear}
                 </h3>
+
+                {/* ✅ tiny status */}
+                <div className="mt-1 text-[11px] text-blue-700/80">
+                  {eventsLoading ? "Loading events…" : eventsError ? "Events error" : `${events.length} event${events.length === 1 ? "" : "s"}`}
+                </div>
               </div>
 
               <motion.button
@@ -522,6 +637,15 @@ export default function Home() {
                 ❯
               </motion.button>
             </div>
+
+            {eventsError ? (
+              <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+                ❌ {eventsError}
+                <div className="mt-1 text-xs text-rose-800">
+                  This usually means Firestore rules blocked reads OR your app is connected to a different Firebase project.
+                </div>
+              </div>
+            ) : null}
 
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map((d) => (
@@ -537,14 +661,9 @@ export default function Home() {
                 const isToday = date.getTime() === texasToday.getTime();
                 const isSelected = date.getTime() === selectedDate?.getTime();
 
-                const hasEvent = events.some((event) => {
-                  const eDate = new Date(event.dateString);
-                  return (
-                    eDate.getFullYear() === date.getFullYear() &&
-                    eDate.getMonth() === date.getMonth() &&
-                    eDate.getDate() === date.getDate()
-                  );
-                });
+                // ✅ DB-driven hasEvent (Chicago-safe)
+                const dayKey = getChicagoParts(date).key;
+                const hasEvent = events.some((ev) => getChicagoParts(ev.when).key === dayKey);
 
                 return (
                   <motion.button
@@ -599,18 +718,23 @@ export default function Home() {
                     </motion.button>
                   </div>
 
-                  {selectedEvents.length > 0 ? (
+                  {eventsLoading ? (
+                    <p className="mt-3 text-blue-700 text-sm">Loading events…</p>
+                  ) : selectedEvents.length > 0 ? (
                     <ul className="mt-3 space-y-3">
-                      {selectedEvents.map((event, i) => (
+                      {selectedEvents.map((event) => (
                         <motion.li
-                          key={`${event.title}-${i}`}
+                          key={event.id}
                           whileHover={reduce ? undefined : { scale: 1.02, x: 2 }}
                           transition={{ type: "spring", stiffness: 260, damping: 18 }}
                           className="border-l-4 border-blue-500 pl-3 cursor-pointer"
                         >
-                          <p className="font-semibold text-blue-800">{event.title}</p>
-                          <p className="text-xs text-blue-700">{event.location}</p>
-                          <p className="text-xs text-blue-700">{event.details}</p>
+                          {/* ✅ time + title */}
+                          <p className="font-semibold text-blue-800">
+                            {formatChicagoTime(event.when)} • {event.title}
+                          </p>
+                          {event.location ? <p className="text-xs text-blue-700">{event.location}</p> : null}
+                          {event.details ? <p className="text-xs text-blue-700">{event.details}</p> : null}
                         </motion.li>
                       ))}
                     </ul>
