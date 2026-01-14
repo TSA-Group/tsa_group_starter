@@ -382,7 +382,7 @@ export default function Home() {
   );
 
   /* ============================================================
-     ✅ FIRESTORE EVENTS (replaces hardcoded events array)
+      FIRESTORE EVENTS (replaces hardcoded events array)
      ============================================================ */
   const [dbEvents, setDbEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -601,7 +601,7 @@ export default function Home() {
               <motion.div
                 initial={{ letterSpacing: "0.2em", opacity: 0.7 }}
                 animate={{ letterSpacing: "0.08em", opacity: 1 }}
-                transition={{ duration: 1.2, ease: "easeOut" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
                 className="text-xs font-semibold text-blue-700 text-center"
               >
                 COMMUNITY • RESOURCES • EVENTS
