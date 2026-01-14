@@ -3,6 +3,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QuickActions } from "./QuickActions";
+import { useRouter } from "next/navigation";
 import {
   motion,
   AnimatePresence,
@@ -17,9 +18,14 @@ import {
   useVelocity,
 } from "framer-motion";
 
-// ✅ Firestore (events from DB)
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, type DocumentData } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query as fsQuery,
+  type Timestamp,
+} from "firebase/firestore";
 
 const container: Variants = {
   hidden: {},
@@ -70,82 +76,93 @@ function useSmoothScrollFallback(enabled: boolean) {
   }, [enabled]);
 }
 
-/* ✅ Chicago date helpers (for calendar matching) */
-function getChicagoParts(d: Date) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(d);
-
-  const yy = parts.find((p) => p.type === "year")?.value ?? "1970";
-  const mm = parts.find((p) => p.type === "month")?.value ?? "01";
-  const dd = parts.find((p) => p.type === "day")?.value ?? "01";
-  return { yy, mm, dd, key: `${yy}-${mm}-${dd}` };
+/** Safe Timestamp/FieldValue-ish to ms */
+function tsToMs(v: any): number {
+  if (!v) return 0;
+  if (typeof v?.toMillis === "function") return v.toMillis();
+  if (typeof v?.seconds === "number") return v.seconds * 1000;
+  return 0;
 }
 
-function formatChicagoTime(d: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(d);
+/** "YYYY-MM-DD" for America/Chicago (stable grouping) */
+function dayKeyFromMs(ms: number): string {
+  try {
+    return new Date(ms).toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+  } catch {
+    // fallback local
+    const d = new Date(ms);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${da}`;
+  }
 }
 
-/** ✅ robustly try to pull a Date from Firestore event doc shapes */
-function parseEventDate(data: DocumentData): Date | null {
-  // 1) Timestamp-like fields (common)
-  const tsCandidates = [
-    data.when,
-    data.start,
-    data.startTime,
-    data.dateTime,
-    data.datetime,
-    data.eventTime,
-  ];
-
-  for (const v of tsCandidates) {
-    if (v?.toDate && typeof v.toDate === "function") {
-      const d = v.toDate();
-      if (d instanceof Date && !Number.isNaN(d.getTime())) return d;
-    }
-    if (typeof v?.seconds === "number") {
-      const d = new Date(v.seconds * 1000);
-      if (!Number.isNaN(d.getTime())) return d;
-    }
+function formatTime(ms: number): string {
+  if (!ms) return "";
+  try {
+    return new Date(ms).toLocaleTimeString("en-US", {
+      timeZone: "America/Chicago",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } catch {
+    return new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   }
+}
 
-  // 2) date + time strings (also common)
-  // Examples:
-  // - date: "2026-01-13", time: "6:30 PM"
-  // - date: "Jan 13, 2026", time: "18:30"
-  const dateStr = typeof data.date === "string" ? data.date : "";
-  const timeStr = typeof data.time === "string" ? data.time : "";
+function safeStr(v: unknown, fb = "") {
+  return typeof v === "string" ? v : fb;
+}
+function safeArr(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+}
 
-  if (dateStr) {
-    const base = new Date(dateStr);
-    if (!Number.isNaN(base.getTime())) {
-      if (timeStr) {
-        const m = timeStr.match(/^\s*(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?\s*$/i);
-        if (m) {
-          let hh = parseInt(m[1], 10);
-          const mm = m[2] ? parseInt(m[2], 10) : 0;
-          const ap = (m[3] || "").toUpperCase();
+/** Parse "8:06 AM – 8:07 PM" or "8:06 AM-8:07 PM" */
+function splitTimeRange(s: string): { start?: string; end?: string } {
+  const raw = (s || "").replace(/\s+/g, " ").trim();
+  const parts = raw.split("–").map((x) => x.trim());
+  if (parts.length === 2) return { start: parts[0], end: parts[1] };
+  const parts2 = raw.split("-").map((x) => x.trim());
+  if (parts2.length === 2) return { start: parts2[0], end: parts2[1] };
+  return {};
+}
 
-          if (ap === "PM" && hh < 12) hh += 12;
-          if (ap === "AM" && hh === 12) hh = 0;
-
-          base.setHours(hh, mm, 0, 0);
-        }
-      } else {
-        base.setHours(0, 0, 0, 0);
-      }
-      return base;
-    }
+/** Parse "8:06 AM" into {h24, m} */
+function parse12hTime(t: string): { h: number; m: number } | null {
+  const s = (t || "").trim();
+  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (!m) return null;
+  let hh = parseInt(m[1], 10);
+  const mm = m[2] ? parseInt(m[2], 10) : 0;
+  const ap = m[3].toUpperCase();
+  if (ap === "AM") {
+    if (hh === 12) hh = 0;
+  } else {
+    if (hh !== 12) hh += 12;
   }
+  return { h: hh, m: mm };
+}
 
-  return null;
+/**
+ * Build ms from date string "YYYY-MM-DD" and a time like "8:06 AM"
+ * Uses local Date construction (good enough when your app/users are in the same TZ),
+ * then formats/grouping uses America/Chicago for consistent day dots.
+ */
+function msFromDateAndTime(dateStr: string, timeStr?: string): number {
+  if (!dateStr) return 0;
+  const base = dateStr.trim();
+  const parsed = timeStr ? parse12hTime(timeStr.trim()) : null;
+
+  // Default to midnight if no time
+  const hh = parsed?.h ?? 0;
+  const mm = parsed?.m ?? 0;
+
+  // Construct as local time
+  const d = new Date(`${base}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return 0;
+  d.setHours(hh, mm, 0, 0);
+  return d.getTime();
 }
 
 /* ---------------- Orbs ---------------- */
@@ -217,16 +234,50 @@ const FEATURES = [
   },
 ];
 
-/* ---------------- MAIN PAGE ---------------- */
-type DbEvent = {
+/* ---------------- Firestore Event Types ---------------- */
+type EventDoc = {
+  // common fields you likely have (supports multiple schemas safely)
+  title?: string;
+  name?: string;
+
+  date?: string; // "YYYY-MM-DD"
+  startTime?: string; // "8:06 AM"
+  endTime?: string; // "8:07 PM"
+  time?: string; // "8:06 AM – 8:07 PM"
+
+  startAt?: Timestamp | any;
+  endAt?: Timestamp | any;
+  start?: Timestamp | any;
+  end?: Timestamp | any;
+  createdAt?: Timestamp | any;
+
+  location?: string;
+  address?: string;
+  description?: string;
+
+  // optional extras (ignored here)
+  category?: string;
+  activities?: string[];
+  community?: string;
+};
+
+type CalendarEvent = {
   id: string;
   title: string;
   location: string;
-  details: string;
-  when: Date;
+  description: string;
+
+  startMs: number;
+  endMs: number;
+
+  dayKey: string;
+  startLabel: string;
+  endLabel: string;
 };
 
+/* ---------------- MAIN PAGE ---------------- */
 export default function Home() {
+  const router = useRouter();
   const reduce = useReducedMotion();
 
   // Smooth scroll fallback (no Lenis)
@@ -330,51 +381,113 @@ export default function Home() {
     []
   );
 
-  /* ✅ EVENTS FROM FIRESTORE */
-  const [events, setEvents] = useState<DbEvent[]>([]);
+  /* ============================================================
+     ✅ FIRESTORE EVENTS (replaces hardcoded events array)
+     ============================================================ */
+  const [dbEvents, setDbEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
-  const [eventsError, setEventsError] = useState<string | null>(null);
 
   useEffect(() => {
     setEventsLoading(true);
-    setEventsError(null);
 
-    // ✅ change "events" if your collection is named differently
     const ref = collection(db, "events");
+    const qy = fsQuery(ref, orderBy("createdAt", "desc"));
 
     const unsub = onSnapshot(
-      ref,
+      qy,
       (snap) => {
-        const next: DbEvent[] = [];
-        snap.forEach((doc) => {
-          const data = doc.data() as DocumentData;
-          const when = parseEventDate(data);
-          if (!when) return;
+        const next: CalendarEvent[] = snap.docs
+          .map((d) => {
+            const data = d.data() as EventDoc;
 
-          next.push({
-            id: doc.id,
-            title: String(data.title ?? "Untitled event"),
-            location: String(data.location ?? ""),
-            details: String(data.details ?? data.description ?? ""),
-            when,
-          });
-        });
+            const title = safeStr(data.title || data.name, "Untitled event");
+            const location = safeStr(data.location || data.address, "");
+            const description = safeStr(data.description, "");
 
-        next.sort((a, b) => a.when.getTime() - b.when.getTime());
+            // 1) Prefer timestamps if present
+            const startMs =
+              tsToMs((data as any).startAt) ||
+              tsToMs((data as any).start) ||
+              // 2) Else build from date + startTime or time range
+              (() => {
+                const dateStr = safeStr((data as any).date, "");
+                const range = splitTimeRange(safeStr((data as any).time, ""));
+                const startT = safeStr((data as any).startTime, "") || range.start || "";
+                return msFromDateAndTime(dateStr, startT);
+              })();
 
-        setEvents(next);
+            const endMs =
+              tsToMs((data as any).endAt) ||
+              tsToMs((data as any).end) ||
+              (() => {
+                const dateStr = safeStr((data as any).date, "");
+                const range = splitTimeRange(safeStr((data as any).time, ""));
+                const endT = safeStr((data as any).endTime, "") || range.end || "";
+                const ms = endT ? msFromDateAndTime(dateStr, endT) : 0;
+                return ms || startMs;
+              })();
+
+            const sLabel = formatTime(startMs);
+            const eLabel = endMs && endMs !== startMs ? formatTime(endMs) : "";
+
+            if (!startMs) return null;
+
+            return {
+              id: d.id,
+              title,
+              location,
+              description,
+              startMs,
+              endMs: endMs || startMs,
+              dayKey: dayKeyFromMs(startMs),
+              startLabel: sLabel,
+              endLabel: eLabel,
+            };
+          })
+          .filter(Boolean) as CalendarEvent[];
+
+        // sort by start time (better for daily list)
+        next.sort((a, b) => a.startMs - b.startMs);
+
+        setDbEvents(next);
         setEventsLoading(false);
       },
       (err) => {
         console.error("Failed to read events:", err);
-        setEventsError(err?.message || "Failed to read events.");
-        setEvents([]);
+        setDbEvents([]);
         setEventsLoading(false);
       }
     );
 
     return () => unsub();
   }, []);
+
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    for (const e of dbEvents) {
+      const list = map.get(e.dayKey) || [];
+      list.push(e);
+      map.set(e.dayKey, list);
+    }
+    // ensure each day list is sorted
+    for (const [k, list] of map.entries()) {
+      list.sort((a, b) => a.startMs - b.startMs);
+      map.set(k, list);
+    }
+    return map;
+  }, [dbEvents]);
+
+  const totalEventsThisMonth = useMemo(() => {
+    // count events in the current visible month
+    const monthStart = new Date(calYear, calMonth, 1);
+    const monthEnd = new Date(calYear, calMonth + 1, 1);
+    const startKey = dayKeyFromMs(monthStart.getTime());
+    const endKey = dayKeyFromMs(monthEnd.getTime());
+    // quick filter by ms (accurate)
+    const startMs = monthStart.getTime();
+    const endMs = monthEnd.getTime();
+    return dbEvents.filter((e) => e.startMs >= startMs && e.startMs < endMs).length;
+  }, [dbEvents, calYear, calMonth]);
 
   const calendarDays = useMemo(() => {
     const firstDay = new Date(calYear, calMonth, 1).getDay();
@@ -389,14 +502,15 @@ export default function Home() {
     return days;
   }, [calYear, calMonth]);
 
-  const selectedEvents = useMemo(() => {
-    if (!selectedDate) return [];
-    const selKey = getChicagoParts(selectedDate).key;
+  const selectedDayKey = useMemo(() => {
+    if (!selectedDate) return null;
+    return dayKeyFromMs(selectedDate.getTime());
+  }, [selectedDate]);
 
-    return events
-      .filter((ev) => getChicagoParts(ev.when).key === selKey)
-      .sort((a, b) => a.when.getTime() - b.when.getTime());
-  }, [events, selectedDate]);
+  const selectedEvents = useMemo(() => {
+    if (!selectedDayKey) return [];
+    return eventsByDay.get(selectedDayKey) || [];
+  }, [eventsByDay, selectedDayKey]);
 
   /* ---- Scroll progress bar ---- */
   const progScaleX = useTransform(scrollProgSmooth, [0, 1], [0.06, 1]);
@@ -622,9 +736,8 @@ export default function Home() {
                   {monthNames[calMonth]} {calYear}
                 </h3>
 
-                {/* ✅ tiny status */}
-                <div className="mt-1 text-[11px] text-blue-700/80">
-                  {eventsLoading ? "Loading events…" : eventsError ? "Events error" : `${events.length} event${events.length === 1 ? "" : "s"}`}
+                <div className="mt-1 text-xs text-blue-700/80">
+                  {eventsLoading ? "Loading events…" : `${totalEventsThisMonth} event${totalEventsThisMonth === 1 ? "" : "s"}`}
                 </div>
               </div>
 
@@ -637,15 +750,6 @@ export default function Home() {
                 ❯
               </motion.button>
             </div>
-
-            {eventsError ? (
-              <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
-                ❌ {eventsError}
-                <div className="mt-1 text-xs text-rose-800">
-                  This usually means Firestore rules blocked reads OR your app is connected to a different Firebase project.
-                </div>
-              </div>
-            ) : null}
 
             <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
               {daysOfWeek.map((d) => (
@@ -661,9 +765,8 @@ export default function Home() {
                 const isToday = date.getTime() === texasToday.getTime();
                 const isSelected = date.getTime() === selectedDate?.getTime();
 
-                // ✅ DB-driven hasEvent (Chicago-safe)
-                const dayKey = getChicagoParts(date).key;
-                const hasEvent = events.some((ev) => getChicagoParts(ev.when).key === dayKey);
+                const key = dayKeyFromMs(date.getTime());
+                const hasEvent = (eventsByDay.get(key)?.length || 0) > 0;
 
                 return (
                   <motion.button
@@ -686,7 +789,7 @@ export default function Home() {
 
                     {hasEvent && (
                       <motion.span
-                        layoutId={`dot-${idx}`}
+                        layoutId={`dot-${key}`}
                         className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"
                         animate={reduce ? undefined : { scale: [1, 1.35, 1] }}
                         transition={reduce ? undefined : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
@@ -707,7 +810,10 @@ export default function Home() {
                   className="mt-4 bg-white/80 backdrop-blur-xl border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="font-semibold text-blue-900">Events on {selectedDate.toLocaleDateString()}</h3>
+                    <h3 className="font-semibold text-blue-900">
+                      Events on{" "}
+                      {selectedDate.toLocaleDateString("en-US", { timeZone: "America/Chicago" })}
+                    </h3>
                     <motion.button
                       whileHover={{ scale: 1.06 }}
                       whileTap={{ scale: 0.98 }}
@@ -718,23 +824,26 @@ export default function Home() {
                     </motion.button>
                   </div>
 
-                  {eventsLoading ? (
-                    <p className="mt-3 text-blue-700 text-sm">Loading events…</p>
-                  ) : selectedEvents.length > 0 ? (
+                  {selectedEvents.length > 0 ? (
                     <ul className="mt-3 space-y-3">
-                      {selectedEvents.map((event) => (
+                      {selectedEvents.map((event, i) => (
                         <motion.li
-                          key={event.id}
+                          key={`${event.id}-${i}`}
                           whileHover={reduce ? undefined : { scale: 1.02, x: 2 }}
                           transition={{ type: "spring", stiffness: 260, damping: 18 }}
                           className="border-l-4 border-blue-500 pl-3 cursor-pointer"
+                          onClick={() => router.push(`/events?focus=${event.id}`)}
                         >
-                          {/* ✅ time + title */}
                           <p className="font-semibold text-blue-800">
-                            {formatChicagoTime(event.when)} • {event.title}
+                            {event.startLabel}
+                            {event.endLabel ? ` – ${event.endLabel}` : ""} • {event.title}
                           </p>
-                          {event.location ? <p className="text-xs text-blue-700">{event.location}</p> : null}
-                          {event.details ? <p className="text-xs text-blue-700">{event.details}</p> : null}
+                          {event.location ? (
+                            <p className="text-xs text-blue-700">{event.location}</p>
+                          ) : null}
+                          {event.description ? (
+                            <p className="text-xs text-blue-700">{event.description}</p>
+                          ) : null}
                         </motion.li>
                       ))}
                     </ul>
