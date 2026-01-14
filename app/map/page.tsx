@@ -165,7 +165,9 @@ export default function Page() {
               : [],
             host: typeof data?.host === "string" ? data.host : undefined,
             description:
-              typeof data?.description === "string" ? data.description : undefined,
+              typeof data?.description === "string"
+                ? data.description
+                : undefined,
             featured: Boolean(data?.featured),
           });
         });
@@ -258,9 +260,14 @@ export default function Page() {
     return (
       <div className="min-h-screen bg-white text-slate-900 flex items-center justify-center px-6">
         <div className="max-w-xl w-full rounded-2xl border border-rose-200 bg-rose-50 p-5">
-          <div className="text-lg font-bold text-rose-900">Missing Maps API key</div>
+          <div className="text-lg font-bold text-rose-900">
+            Missing Maps API key
+          </div>
           <div className="mt-2 text-sm text-rose-800">
-            Set <span className="font-semibold">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</span>{" "}
+            Set{" "}
+            <span className="font-semibold">
+              NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+            </span>{" "}
             in <span className="font-semibold">.env.local</span> (and in Vercel
             Environment Variables).
           </div>
@@ -287,7 +294,8 @@ export default function Page() {
                   Cross Creek Community Resource Hub
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600">
-                  Explore community resources, events, and support — all in one place.
+                  Explore community resources, events, and support — all in one
+                  place.
                 </p>
               </div>
 
@@ -347,7 +355,8 @@ export default function Page() {
                 </div>
               ) : featured.length === 0 ? (
                 <div className="rounded-2xl border border-blue-200 bg-white p-4 text-sm text-slate-600">
-                  No featured resources yet. (Set <span className="font-semibold">featured: true</span> on a
+                  No featured resources yet. (Set{" "}
+                  <span className="font-semibold">featured: true</span> on a
                   resource doc.)
                 </div>
               ) : (
@@ -435,7 +444,11 @@ export default function Page() {
                       center={center}
                       zoom={zoom}
                       gestureHandling="greedy"
-                      disableDefaultUI={false}
+                      disableDefaultUI={true}
+                      zoomControl={false}
+                      fullscreenControl={false}
+                      streetViewControl={false}
+                      mapTypeControl={false}
                       onClick={() => setActiveId(null)}
                       className="w-full h-full"
                     >
@@ -506,7 +519,8 @@ export default function Page() {
                           exit={{ opacity: 0 }}
                           className="rounded-2xl border border-blue-200 bg-white p-5 text-blue-900"
                         >
-                          No matches. Try removing a filter or changing your search.
+                          No matches. Try removing a filter or changing your
+                          search.
                         </motion.div>
                       ) : (
                         <motion.div
@@ -638,7 +652,9 @@ function FilterBox({
             <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
               Filter
             </h2>
-            <p className="text-sm text-slate-600">Choose what you want to see.</p>
+            <p className="text-sm text-slate-600">
+              Choose what you want to see.
+            </p>
           </div>
 
           <motion.button
@@ -1089,7 +1105,9 @@ function HoverMarker({
                   </div>
 
                   {location.host ? (
-                    <div className="text-xs text-slate-600">{location.host}</div>
+                    <div className="text-xs text-slate-600">
+                      {location.host}
+                    </div>
                   ) : null}
 
                   {location.activities.length > 0 ? (
