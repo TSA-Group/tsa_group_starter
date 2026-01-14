@@ -14,7 +14,8 @@ const crossCreekHistory: Milestone[] = [
   {
     year: 2008,
     title: "First Residents Arrive",
-    description: "Cross Creek welcomes its first residents, marking the beginning of a thriving community.",
+    description:
+      "Cross Creek welcomes its first residents, marking the beginning of a thriving community.",
     details: [
       "Initial homes completed in the southern section",
       "Community amenities like parks and walking trails begin development",
@@ -34,7 +35,8 @@ const crossCreekHistory: Milestone[] = [
   {
     year: 2013,
     title: "New Amenities",
-    description: "Community lifestyle enhanced with parks, pools, and recreational facilities.",
+    description:
+      "Community lifestyle enhanced with parks, pools, and recreational facilities.",
     details: [
       "Basketball courts and tennis courts built",
       "Community clubhouse opens",
@@ -94,7 +96,8 @@ const crossCreekHistory: Milestone[] = [
   {
     year: 2024,
     title: "Major Redesign & Events",
-    description: "Website and community engagement enhanced with a modern redesign.",
+    description:
+      "Website and community engagement enhanced with a modern redesign.",
     details: [
       "Mobile-first redesign for smoother UX",
       "Live community events integrated with platform",
@@ -104,7 +107,8 @@ const crossCreekHistory: Milestone[] = [
   {
     year: 2025,
     title: "Next-Gen Features",
-    description: "Preparing the community platform for future tech integration.",
+    description:
+      "Preparing the community platform for future tech integration.",
     details: [
       "AI-powered event recommendations in beta",
       "Focus on sustainability and accessibility",
@@ -123,7 +127,8 @@ export default function HistoryClient() {
           Cross Creek History
         </h1>
         <p className="text-sm text-neutral-600 mb-12">
-          Discover the milestones that shaped Cross Creek and the community platform Gatherly over the years.
+          Discover the milestones that shaped Cross Creek and the community
+          platform Gatherly over the years.
         </p>
 
         <div className="relative space-y-10">
@@ -141,7 +146,9 @@ export default function HistoryClient() {
               className="relative pl-12"
             >
               <div
-                onClick={() => setOpenYear(openYear === item.year ? null : item.year)}
+                onClick={() =>
+                  setOpenYear(openYear === item.year ? null : item.year)
+                }
                 className="p-6 border-l-4 border-blue-500 bg-gray-50 rounded-xl shadow-md cursor-pointer hover:shadow-2xl transition-shadow duration-300 hover:scale-[1.02]"
               >
                 <h2 className="text-2xl font-semibold text-gray-900">
@@ -167,7 +174,7 @@ export default function HistoryClient() {
 
               {/* Timeline dot */}
               <motion.div
-                className="absolute left-1 top-6 w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg"
+                className="absolute left-3 top-11 w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg"
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
