@@ -3,7 +3,11 @@
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/Header";
 
-export default function LayoutShell({ children }: { children: React.ReactNode }) {
+export default function LayoutShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
 
@@ -16,7 +20,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-24 bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF]">
+      <main className="min-h-screen pt-16 bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF]">
         {children}
       </main>
     </>
