@@ -754,10 +754,6 @@ export default function Home() {
             community events and explore new parts of our community.
           </motion.p>
 
-          <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <MagneticButton href="/map" label="Explore Resources" primary />
-            <MagneticButton href="/events" label="Browse Events" />
-          </div>
         </motion.div>
 
         <motion.div
