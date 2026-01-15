@@ -785,7 +785,7 @@ export default function Home() {
       <CrossCreekBanner
         reduce={reduce}
         scrollProgSmooth={scrollProgSmooth}
-        onExplore={() => router.push("/resources")}
+        onExplore={() => router.push("/map")}
         onEvents={() => router.push("/events")}
       />
 
