@@ -754,7 +754,7 @@ export default function Home() {
           </motion.p>
 
           <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <MagneticButton href="/resources" label="Explore Resources" primary />
+            <MagneticButton href="/map" label="Explore Resources" primary />
             <MagneticButton href="/events" label="Browse Events" />
           </div>
         </motion.div>
