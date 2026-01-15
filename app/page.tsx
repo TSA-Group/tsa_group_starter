@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import {
   motion,
   AnimatePresence,
-  MotionValue,
-  Variants,
+  type MotionValue,
+  type Variants,
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
@@ -87,9 +87,10 @@ function tsToMs(v: any): number {
 /** "YYYY-MM-DD" for America/Chicago (stable grouping) */
 function dayKeyFromMs(ms: number): string {
   try {
-    return new Date(ms).toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+    return new Date(ms).toLocaleDateString("en-CA", {
+      timeZone: "America/Chicago",
+    });
   } catch {
-    // fallback local
     const d = new Date(ms);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -107,15 +108,15 @@ function formatTime(ms: number): string {
       minute: "2-digit",
     });
   } catch {
-    return new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    return new Date(ms).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
   }
 }
 
 function safeStr(v: unknown, fb = "") {
   return typeof v === "string" ? v : fb;
-}
-function safeArr(v: unknown): string[] {
-  return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
 }
 
 /** Parse "8:06 AM – 8:07 PM" or "8:06 AM-8:07 PM" */
@@ -146,19 +147,16 @@ function parse12hTime(t: string): { h: number; m: number } | null {
 
 /**
  * Build ms from date string "YYYY-MM-DD" and a time like "8:06 AM"
- * Uses local Date construction (good enough when your app/users are in the same TZ),
- * then formats/grouping uses America/Chicago for consistent day dots.
+ * Uses local Date construction; grouping uses America/Chicago for consistent dots.
  */
 function msFromDateAndTime(dateStr: string, timeStr?: string): number {
   if (!dateStr) return 0;
   const base = dateStr.trim();
   const parsed = timeStr ? parse12hTime(timeStr.trim()) : null;
 
-  // Default to midnight if no time
   const hh = parsed?.h ?? 0;
   const mm = parsed?.m ?? 0;
 
-  // Construct as local time
   const d = new Date(`${base}T00:00:00`);
   if (Number.isNaN(d.getTime())) return 0;
   d.setHours(hh, mm, 0, 0);
@@ -167,11 +165,41 @@ function msFromDateAndTime(dateStr: string, timeStr?: string): number {
 
 /* ---------------- Orbs ---------------- */
 const ORBS = [
-  { size: 220, color: "rgba(59,130,246,0.18)", top: 12, left: 8, speed: 0.22 },
-  { size: 320, color: "rgba(147,197,253,0.16)", top: 45, left: 75, speed: 0.35 },
-  { size: 180, color: "rgba(15,23,42,0.12)", top: 70, left: 18, speed: 0.15 },
-  { size: 260, color: "rgba(147,197,253,0.10)", top: 18, left: 82, speed: 0.3 },
-  { size: 200, color: "rgba(59,130,246,0.14)", top: 62, left: 52, speed: 0.25 },
+  {
+    size: 220,
+    color: "rgba(59,130,246,0.18)",
+    top: 12,
+    left: 8,
+    speed: 0.22,
+  },
+  {
+    size: 320,
+    color: "rgba(147,197,253,0.16)",
+    top: 45,
+    left: 75,
+    speed: 0.35,
+  },
+  {
+    size: 180,
+    color: "rgba(15,23,42,0.12)",
+    top: 70,
+    left: 18,
+    speed: 0.15,
+  },
+  {
+    size: 260,
+    color: "rgba(147,197,253,0.10)",
+    top: 18,
+    left: 82,
+    speed: 0.3,
+  },
+  {
+    size: 200,
+    color: "rgba(59,130,246,0.14)",
+    top: 62,
+    left: 52,
+    speed: 0.25,
+  },
 ];
 
 /* ---------------- Feature Data ---------------- */
@@ -236,7 +264,6 @@ const FEATURES = [
 
 /* ---------------- Firestore Event Types ---------------- */
 type EventDoc = {
-  // common fields you likely have (supports multiple schemas safely)
   title?: string;
   name?: string;
 
@@ -255,7 +282,6 @@ type EventDoc = {
   address?: string;
   description?: string;
 
-  // optional extras (ignored here)
   category?: string;
   activities?: string[];
   community?: string;
@@ -313,9 +339,21 @@ export default function Home() {
   }, [mx, my]);
 
   /* ---- Background palette transitions ---- */
-  const bg = useTransform(scrollProgSmooth, [0, 0.35, 0.7, 1], ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"]);
-  const softGrey = useTransform(scrollProgSmooth, [0.25, 0.55], ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"]);
-  const navyWash = useTransform(scrollProgSmooth, [0.62, 1], ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"]);
+  const bg = useTransform(
+    scrollProgSmooth,
+    [0, 0.35, 0.7, 1],
+    ["#ffffff", "#F3F7FF", "#EEF4FA", "#E5E9EF"],
+  );
+  const softGrey = useTransform(
+    scrollProgSmooth,
+    [0.25, 0.55],
+    ["rgba(226,232,240,0)", "rgba(203,213,225,0.60)"],
+  );
+  const navyWash = useTransform(
+    scrollProgSmooth,
+    [0.62, 1],
+    ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"],
+  );
 
   /* ---- Cursor spotlight ---- */
   const glowX = useTransform(mx, (v) => `${v}px`);
@@ -344,7 +382,10 @@ export default function Home() {
   const heroY = useTransform(scrollProgSmooth, [0, 0.4], [0, -120]);
   const heroScale = useTransform(scrollProgSmooth, [0, 0.4], [1, 1.04]);
   const heroTextY = useTransform(scrollProgSmooth, [0, 0.35], [0, -64]);
-  const heroBlur = useTransform(scrollProgSmooth, [0, 0.28], ["blur(0px)", "blur(1.5px)"]);
+  const heroBlur = useTransform(scrollProgSmooth, [0, 0.28], [
+    "blur(0px)",
+    "blur(1.5px)",
+  ]);
 
   /* ---- Intro overlay ---- */
   const [intro, setIntro] = useState(true);
@@ -360,7 +401,10 @@ export default function Home() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node)
+      ) {
         setSelectedDate(null);
       }
     };
@@ -369,7 +413,9 @@ export default function Home() {
   }, []);
 
   const now = new Date();
-  const texasToday = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  const texasToday = new Date(
+    now.toLocaleString("en-US", { timeZone: "America/Chicago" }),
+  );
   texasToday.setHours(0, 0, 0, 0);
 
   const calYear = calendarDate.getFullYear();
@@ -377,8 +423,21 @@ export default function Home() {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = useMemo(
-    () => ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-    []
+    () => [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
+    [],
   );
 
   /* ============================================================
@@ -404,15 +463,14 @@ export default function Home() {
             const location = safeStr(data.location || data.address, "");
             const description = safeStr(data.description, "");
 
-            // 1) Prefer timestamps if present
             const startMs =
               tsToMs((data as any).startAt) ||
               tsToMs((data as any).start) ||
-              // 2) Else build from date + startTime or time range
               (() => {
                 const dateStr = safeStr((data as any).date, "");
                 const range = splitTimeRange(safeStr((data as any).time, ""));
-                const startT = safeStr((data as any).startTime, "") || range.start || "";
+                const startT =
+                  safeStr((data as any).startTime, "") || range.start || "";
                 return msFromDateAndTime(dateStr, startT);
               })();
 
@@ -422,13 +480,15 @@ export default function Home() {
               (() => {
                 const dateStr = safeStr((data as any).date, "");
                 const range = splitTimeRange(safeStr((data as any).time, ""));
-                const endT = safeStr((data as any).endTime, "") || range.end || "";
+                const endT =
+                  safeStr((data as any).endTime, "") || range.end || "";
                 const ms = endT ? msFromDateAndTime(dateStr, endT) : 0;
                 return ms || startMs;
               })();
 
             const sLabel = formatTime(startMs);
-            const eLabel = endMs && endMs !== startMs ? formatTime(endMs) : "";
+            const eLabel =
+              endMs && endMs !== startMs ? formatTime(endMs) : "";
 
             if (!startMs) return null;
 
@@ -446,7 +506,6 @@ export default function Home() {
           })
           .filter(Boolean) as CalendarEvent[];
 
-        // sort by start time (better for daily list)
         next.sort((a, b) => a.startMs - b.startMs);
 
         setDbEvents(next);
@@ -456,7 +515,7 @@ export default function Home() {
         console.error("Failed to read events:", err);
         setDbEvents([]);
         setEventsLoading(false);
-      }
+      },
     );
 
     return () => unsub();
@@ -469,7 +528,6 @@ export default function Home() {
       list.push(e);
       map.set(e.dayKey, list);
     }
-    // ensure each day list is sorted
     for (const [k, list] of map.entries()) {
       list.sort((a, b) => a.startMs - b.startMs);
       map.set(k, list);
@@ -478,15 +536,12 @@ export default function Home() {
   }, [dbEvents]);
 
   const totalEventsThisMonth = useMemo(() => {
-    // count events in the current visible month
     const monthStart = new Date(calYear, calMonth, 1);
     const monthEnd = new Date(calYear, calMonth + 1, 1);
-    const startKey = dayKeyFromMs(monthStart.getTime());
-    const endKey = dayKeyFromMs(monthEnd.getTime());
-    // quick filter by ms (accurate)
     const startMs = monthStart.getTime();
     const endMs = monthEnd.getTime();
-    return dbEvents.filter((e) => e.startMs >= startMs && e.startMs < endMs).length;
+    return dbEvents.filter((e) => e.startMs >= startMs && e.startMs < endMs)
+      .length;
   }, [dbEvents, calYear, calMonth]);
 
   const calendarDays = useMemo(() => {
@@ -577,8 +632,14 @@ export default function Home() {
       ))}
 
       {/* Overlays */}
-      <motion.div style={{ backgroundColor: softGrey }} className="fixed inset-0 pointer-events-none -z-20" />
-      <motion.div style={{ backgroundColor: navyWash }} className="fixed inset-0 pointer-events-none -z-20" />
+      <motion.div
+        style={{ backgroundColor: softGrey }}
+        className="fixed inset-0 pointer-events-none -z-20"
+      />
+      <motion.div
+        style={{ backgroundColor: navyWash }}
+        className="fixed inset-0 pointer-events-none -z-20"
+      />
 
       {/* Intro */}
       <AnimatePresence>
@@ -593,7 +654,12 @@ export default function Home() {
             }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 16, filter: "blur(10px)" }}
+              initial={{
+                opacity: 0,
+                scale: 0.98,
+                y: 16,
+                filter: "blur(10px)",
+              }}
               animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="px-8 py-7 rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-xl"
@@ -620,17 +686,31 @@ export default function Home() {
                 <motion.span
                   className="h-2 w-2 rounded-full bg-blue-700"
                   animate={{ scale: [1, 1.8, 1] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{
+                    duration: 1.1,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 />
                 <motion.span
                   className="h-2 w-2 rounded-full bg-blue-500"
                   animate={{ scale: [1, 1.8, 1] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
+                  transition={{
+                    duration: 1.1,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.15,
+                  }}
                 />
                 <motion.span
                   className="h-2 w-2 rounded-full bg-blue-300"
                   animate={{ scale: [1, 1.8, 1] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                  transition={{
+                    duration: 1.1,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.3,
+                  }}
                 />
               </div>
             </motion.div>
@@ -665,8 +745,12 @@ export default function Home() {
             GATHERLY
           </motion.h1>
 
-          <motion.p style={{ y: heroTextY }} className="mt-5 max-w-2xl text-base sm:text-lg text-blue-800 text-center mx-auto">
-            Explore Cross Creek and all it has to offer! Sign up for local community events and explore new parts of our community.
+          <motion.p
+            style={{ y: heroTextY }}
+            className="mt-5 max-w-2xl text-base sm:text-lg text-blue-800 text-center mx-auto"
+          >
+            Explore Cross Creek and all it has to offer! Sign up for local
+            community events and explore new parts of our community.
           </motion.p>
 
           <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -684,7 +768,11 @@ export default function Home() {
           <motion.span
             className="inline-flex items-center gap-2"
             animate={reduce ? undefined : { y: [0, 6, 0] }}
-            transition={reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            transition={
+              reduce
+                ? undefined
+                : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+            }
           >
             <span className="font-semibold">Scroll</span>
             <span className="opacity-80">to explore</span>
@@ -692,6 +780,14 @@ export default function Home() {
           </motion.span>
         </motion.div>
       </motion.header>
+
+      {/* ✅ NEW: CROSS CREEK RANCH BANNER (fills the big white spot under "Scroll to explore") */}
+      <CrossCreekBanner
+        reduce={reduce}
+        scrollProgSmooth={scrollProgSmooth}
+        onExplore={() => router.push("/resources")}
+        onEvents={() => router.push("/events")}
+      />
 
       {/* MAIN */}
       <motion.main className="max-w-7xl mx-auto px-6 pb-28 flex flex-col lg:flex-row gap-10 lg:gap-14 mt-16">
@@ -724,27 +820,37 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
+                onClick={() =>
+                  setCalendarDate(new Date(calYear, calMonth - 1, 1))
+                }
                 className="text-blue-700 text-2xl font-bold px-2"
               >
                 ❮
               </motion.button>
 
               <div className="text-center">
-                <div className="text-[11px] text-blue-700 font-semibold tracking-[0.18em]">Cross Creek Calendar</div>
+                <div className="text-[11px] text-blue-700 font-semibold tracking-[0.18em]">
+                  Cross Creek Calendar
+                </div>
                 <h3 className="text-lg sm:text-xl font-semibold text-blue-900">
                   {monthNames[calMonth]} {calYear}
                 </h3>
 
                 <div className="mt-1 text-xs text-blue-700/80">
-                  {eventsLoading ? "Loading events…" : `${totalEventsThisMonth} event${totalEventsThisMonth === 1 ? "" : "s"}`}
+                  {eventsLoading
+                    ? "Loading events…"
+                    : `${totalEventsThisMonth} event${
+                        totalEventsThisMonth === 1 ? "" : "s"
+                      }`}
                 </div>
               </div>
 
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
+                onClick={() =>
+                  setCalendarDate(new Date(calYear, calMonth + 1, 1))
+                }
                 className="text-blue-700 text-2xl font-bold px-2"
               >
                 ❯
@@ -775,15 +881,27 @@ export default function Home() {
                     initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
                     whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.45, delay: (idx % 7) * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{
+                      duration: 0.45,
+                      delay: (idx % 7) * 0.04,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
                     whileHover={reduce ? undefined : { y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     className={[
                       "relative flex flex-col items-center justify-start h-12 w-full rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-colors",
-                      isSelected ? "bg-blue-400 text-white" : isToday ? "bg-blue-600 text-white" : "bg-blue-50 hover:bg-blue-100 text-blue-900",
+                      isSelected
+                        ? "bg-blue-400 text-white"
+                        : isToday
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-50 hover:bg-blue-100 text-blue-900",
                       "outline-none",
                     ].join(" ")}
-                    onClick={() => setSelectedDate((prev) => (prev && prev.getTime() === date.getTime() ? null : date))}
+                    onClick={() =>
+                      setSelectedDate((prev) =>
+                        prev && prev.getTime() === date.getTime() ? null : date,
+                      )
+                    }
                   >
                     <span className="block">{date.getDate()}</span>
 
@@ -792,7 +910,15 @@ export default function Home() {
                         layoutId={`dot-${key}`}
                         className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"
                         animate={reduce ? undefined : { scale: [1, 1.35, 1] }}
-                        transition={reduce ? undefined : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                        transition={
+                          reduce
+                            ? undefined
+                            : {
+                                duration: 1.6,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                              }
+                        }
                       />
                     )}
                   </motion.button>
@@ -812,7 +938,9 @@ export default function Home() {
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="font-semibold text-blue-900">
                       Events on{" "}
-                      {selectedDate.toLocaleDateString("en-US", { timeZone: "America/Chicago" })}
+                      {selectedDate.toLocaleDateString("en-US", {
+                        timeZone: "America/Chicago",
+                      })}
                     </h3>
                     <motion.button
                       whileHover={{ scale: 1.06 }}
@@ -830,25 +958,36 @@ export default function Home() {
                         <motion.li
                           key={`${event.id}-${i}`}
                           whileHover={reduce ? undefined : { scale: 1.02, x: 2 }}
-                          transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 18,
+                          }}
                           className="border-l-4 border-blue-500 pl-3 cursor-pointer"
                           onClick={() => router.push(`/events?focus=${event.id}`)}
                         >
                           <p className="font-semibold text-blue-800">
                             {event.startLabel}
-                            {event.endLabel ? ` – ${event.endLabel}` : ""} • {event.title}
+                            {event.endLabel ? ` – ${event.endLabel}` : ""} •{" "}
+                            {event.title}
                           </p>
                           {event.location ? (
-                            <p className="text-xs text-blue-700">{event.location}</p>
+                            <p className="text-xs text-blue-700">
+                              {event.location}
+                            </p>
                           ) : null}
                           {event.description ? (
-                            <p className="text-xs text-blue-700">{event.description}</p>
+                            <p className="text-xs text-blue-700">
+                              {event.description}
+                            </p>
                           ) : null}
                         </motion.li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-3 text-blue-700 text-sm">No events for this day</p>
+                    <p className="mt-3 text-blue-700 text-sm">
+                      No events for this day
+                    </p>
                   )}
                 </motion.div>
               )}
@@ -867,9 +1006,21 @@ export default function Home() {
           className="rounded-[34px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6 sm:p-10"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <FeatureStat title="Curated resources" value="Local-first" desc="Support services, food, fitness, and more." />
-            <FeatureStat title="Community events" value="Real-time" desc="Find what’s happening near you." />
-            <FeatureStat title="Trust & clarity" value="No noise" desc="Just what helps your neighborhood thrive." />
+            <FeatureStat
+              title="Curated resources"
+              value="Local-first"
+              desc="Support services, food, fitness, and more."
+            />
+            <FeatureStat
+              title="Community events"
+              value="Real-time"
+              desc="Find what’s happening near you."
+            />
+            <FeatureStat
+              title="Trust & clarity"
+              value="No noise"
+              desc="Just what helps your neighborhood thrive."
+            />
           </div>
         </motion.div>
       </motion.section>
@@ -877,7 +1028,11 @@ export default function Home() {
       {/* Content sections + curved dividers */}
       {FEATURES.map((f, i) => (
         <React.Fragment key={`${f.title}-${i}`}>
-          <motion.section initial="hidden" variants={container} className="max-w-7xl mx-auto px-6 my-20">
+          <motion.section
+            initial="hidden"
+            variants={container}
+            className="max-w-7xl mx-auto px-6 my-20"
+          >
             <motion.div
               variants={fadeUp}
               initial="hidden"
@@ -885,13 +1040,25 @@ export default function Home() {
               viewport={{ once: true, margin: "-120px" }}
               className="flex justify-center"
             >
-              <FlipFeatureRow title={f.title} shortDesc={f.shortDesc} longDesc={f.longDesc} imageLabel={f.imageLabel} />
+              <FlipFeatureRow
+                title={f.title}
+                shortDesc={f.shortDesc}
+                longDesc={f.longDesc}
+                imageLabel={f.imageLabel}
+              />
             </motion.div>
           </motion.section>
 
           <div className="-mt-14">
-            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-20">
-              <path d="M0,0 C480,120 960,0 1440,120 L1440,0 L0,0 Z" fill="rgba(229,233,239,0.28)" />
+            <svg
+              viewBox="0 0 1440 120"
+              preserveAspectRatio="none"
+              className="w-full h-20"
+            >
+              <path
+                d="M0,0 C480,120 960,0 1440,120 L1440,0 L0,0 Z"
+                fill="rgba(229,233,239,0.28)"
+              />
             </svg>
           </div>
         </React.Fragment>
@@ -908,7 +1075,11 @@ export default function Home() {
         <motion.h2
           className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-10"
           animate={reduce ? undefined : { y: [0, -3, 0] }}
-          transition={reduce ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          transition={
+            reduce
+              ? undefined
+              : { duration: 4, repeat: Infinity, ease: "easeInOut" }
+          }
         >
           Our Story!
         </motion.h2>
@@ -923,21 +1094,355 @@ export default function Home() {
 
           <p className="mb-6 relative">
             <span className="font-bold text-blue-700">2023 – Starting Out:</span>{" "}
-            Cross Creek is founded in the beautiful town of Fulshear in 2006 but our first residents did not arrive until 2008.
+            Cross Creek is founded in the beautiful town of Fulshear in 2006 but
+            our first residents did not arrive until 2008.
           </p>
           <p className="mb-6 relative">
-            <span className="font-bold text-blue-700">2024 – A little to know about us:</span>{" "}
-            Our community is massive and sits on 3,200 acres and is home to around 20,000 residents! We pride ourselves in always giving our residents the best.
+            <span className="font-bold text-blue-700">
+              2024 – A little to know about us:
+            </span>{" "}
+            Our community is massive and sits on 3,200 acres and is home to
+            around 20,000 residents! We pride ourselves in always giving our
+            residents the best.
           </p>
           <p className="mb-0 relative">
             <span className="font-bold text-blue-700">2025 – Present Day:</span>{" "}
-            Now in 2026, our staff is proud to announce our new website, Gatherly, with its main focus being to help you! We have specially made it to guide you around the area and to help participate in our community.
+            Now in 2026, our staff is proud to announce our new website,
+            Gatherly, with its main focus being to help you! We have specially
+            made it to guide you around the area and to help participate in our
+            community.
           </p>
         </motion.div>
 
-        <footer className="mt-14 text-center text-sm text-blue-800/70">© {year} Gatherly • Built for community</footer>
+        <footer className="mt-14 text-center text-sm text-blue-800/70">
+          © {year} Gatherly • Built for community
+        </footer>
       </motion.section>
     </motion.div>
+  );
+}
+
+/* ---------------- NEW Banner ---------------- */
+
+function CrossCreekBanner({
+  reduce,
+  scrollProgSmooth,
+  onExplore,
+  onEvents,
+}: {
+  reduce: boolean;
+  scrollProgSmooth: MotionValue<number>;
+  onExplore: () => void;
+  onEvents: () => void;
+}) {
+  // subtle parallax on the whole banner
+  const lift = useTransform(scrollProgSmooth, [0, 0.35, 0.7], [0, -10, -16]);
+  const glow = useTransform(
+    scrollProgSmooth,
+    [0.18, 0.42, 0.7],
+    [0.18, 0.26, 0.18],
+  );
+
+  const shimmerX = useTransform(scrollProgSmooth, [0, 1], ["-35%", "135%"]);
+  const badgeFloat = reduce ? 0 : 1;
+
+  return (
+    <section className="relative">
+      <motion.div
+        style={reduce ? undefined : { y: lift }}
+        className="max-w-7xl mx-auto px-6"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+          className="relative mt-10 mb-14 rounded-[36px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_30px_90px_rgba(15,23,42,0.12)] overflow-hidden"
+        >
+          {/* soft animated backlights */}
+          <motion.div
+            aria-hidden
+            className="absolute -top-24 -left-28 w-[520px] h-[520px] rounded-full blur-3xl"
+            style={{
+              background:
+                "radial-gradient(circle at 35% 35%, rgba(59,130,246,0.26), rgba(59,130,246,0) 60%)",
+              opacity: glow,
+            }}
+            animate={reduce ? undefined : { x: [0, 22, 0], y: [0, 14, 0] }}
+            transition={
+              reduce
+                ? undefined
+                : { duration: 10.5, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+          <motion.div
+            aria-hidden
+            className="absolute -bottom-28 -right-28 w-[560px] h-[560px] rounded-full blur-3xl opacity-60"
+            style={{
+              background:
+                "radial-gradient(circle at 45% 45%, rgba(147,197,253,0.28), rgba(147,197,253,0) 60%)",
+            }}
+            animate={reduce ? undefined : { x: [0, -20, 0], y: [0, -16, 0] }}
+            transition={
+              reduce
+                ? undefined
+                : { duration: 12.5, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+
+          {/* shimmer sweep */}
+          {!reduce && (
+            <motion.div
+              aria-hidden
+              className="absolute -top-24 left-0 h-[240px] w-[260px] rotate-12 opacity-40"
+              style={{
+                x: shimmerX,
+                background:
+                  "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.75), rgba(255,255,255,0))",
+              }}
+            />
+          )}
+
+          {/* top wave */}
+          <div className="absolute inset-x-0 -top-1 h-24 pointer-events-none">
+            <svg
+              viewBox="0 0 1440 120"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <path
+                d="M0,64 C240,120 480,16 720,64 C960,112 1200,24 1440,64 L1440,0 L0,0 Z"
+                fill="rgba(147,197,253,0.35)"
+              />
+            </svg>
+          </div>
+
+          <div className="relative p-7 sm:p-10">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start lg:items-center justify-between">
+              <div className="w-full">
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    className="h-10 w-10 rounded-2xl border border-blue-200 bg-white/70 backdrop-blur flex items-center justify-center shadow-sm"
+                    animate={
+                      reduce
+                        ? undefined
+                        : { y: [0, -4, 0], rotate: [-1, 1, -1] }
+                    }
+                    transition={
+                      reduce
+                        ? undefined
+                        : { duration: 4.2, repeat: Infinity, ease: "easeInOut" }
+                    }
+                  >
+                    <span className="text-blue-800 font-extrabold">CC</span>
+                  </motion.div>
+
+                  <div className="text-[11px] font-semibold tracking-[0.28em] text-blue-700">
+                    CROSS CREEK RANCH • FULSHEAR, TX
+                  </div>
+                </div>
+
+                <motion.h3
+                  className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600"
+                  animate={reduce ? undefined : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                  transition={
+                    reduce
+                      ? undefined
+                      : { duration: 10, repeat: Infinity, ease: "easeInOut" }
+                  }
+                  style={
+                    reduce
+                      ? undefined
+                      : {
+                          backgroundSize: "200% 200%",
+                        }
+                  }
+                >
+                  Welcome to Cross Creek Ranch
+                </motion.h3>
+
+                <p className="mt-3 max-w-2xl text-blue-800/90">
+                  A community built for neighbors — parks, trails, events, and
+                  local resources all in one calm, easy place.
+                </p>
+
+                {/* animated pills row */}
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <PulsePill reduce={reduce} text="Parks & Trails" />
+                  <PulsePill reduce={reduce} text="Community Events" />
+                  <PulsePill reduce={reduce} text="Local Resources" />
+                  <PulsePill reduce={reduce} text="Family Friendly" />
+                </div>
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  <motion.button
+                    type="button"
+                    onClick={onExplore}
+                    whileHover={reduce ? undefined : { y: -2 }}
+                    whileTap={{ scale: 0.985 }}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold border border-blue-700 bg-blue-700 text-white shadow-sm hover:bg-blue-800"
+                  >
+                    Explore Resources <span aria-hidden>→</span>
+                  </motion.button>
+
+                  <motion.button
+                    type="button"
+                    onClick={onEvents}
+                    whileHover={reduce ? undefined : { y: -2 }}
+                    whileTap={{ scale: 0.985 }}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold border border-blue-200 bg-white/70 text-blue-900 shadow-sm hover:bg-white"
+                  >
+                    Browse Events <span aria-hidden>→</span>
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* right “mini card stack” */}
+              <div className="w-full lg:w-[420px]">
+                <div className="grid grid-cols-1 gap-3">
+                  <motion.div
+                    className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl p-5 shadow-[0_18px_60px_rgba(15,23,42,0.10)]"
+                    whileHover={reduce ? undefined : { y: -3 }}
+                    transition={{ type: "spring", stiffness: 240, damping: 22 }}
+                  >
+                    <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
+                      COMMUNITY FEEL
+                    </div>
+                    <div className="mt-2 text-xl font-extrabold text-blue-900">
+                      Calm, clear, local
+                    </div>
+                    <div className="mt-2 text-sm text-blue-700">
+                      Designed to help you find what you need without the noise.
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="rounded-3xl border border-blue-200 bg-white/65 backdrop-blur-xl p-5 shadow-[0_18px_60px_rgba(15,23,42,0.10)]"
+                    whileHover={reduce ? undefined : { y: -3 }}
+                    transition={{ type: "spring", stiffness: 240, damping: 22 }}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
+                          WHAT’S NEW
+                        </div>
+                        <div className="mt-2 text-sm text-blue-700">
+                          Tap an event on the calendar to jump right in.
+                        </div>
+                      </div>
+
+                      <motion.div
+                        className="h-10 w-10 rounded-2xl border border-blue-200 bg-blue-50 flex items-center justify-center"
+                        animate={
+                          reduce
+                            ? undefined
+                            : { scale: [1, 1.08, 1], rotate: [0, 3, 0] }
+                        }
+                        transition={
+                          reduce
+                            ? undefined
+                            : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+                        }
+                      >
+                        <span className="text-blue-700 font-extrabold">★</span>
+                      </motion.div>
+                    </div>
+
+                    <div className="mt-4 h-2 w-full rounded-full bg-blue-100 overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-blue-700 to-sky-400"
+                        initial={{ width: "40%" }}
+                        animate={
+                          reduce
+                            ? undefined
+                            : { width: ["35%", "78%", "48%", "85%"] }
+                        }
+                        transition={
+                          reduce
+                            ? undefined
+                            : { duration: 6.4, repeat: Infinity, ease: "easeInOut" }
+                        }
+                      />
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* tiny floating badges (extra life) */}
+                {!reduce && (
+                  <div className="relative mt-4 h-10">
+                    <motion.div
+                      className="absolute left-2 top-0 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
+                      animate={{ y: [0, -6, 0], x: [0, 6, 0] }}
+                      transition={{
+                        duration: 4.6,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      style={{ opacity: 0.95 * badgeFloat }}
+                    >
+                      Trails
+                    </motion.div>
+                    <motion.div
+                      className="absolute left-[40%] top-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
+                      animate={{ y: [0, -5, 0], x: [0, -5, 0] }}
+                      transition={{
+                        duration: 5.2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 0.2,
+                      }}
+                      style={{ opacity: 0.95 * badgeFloat }}
+                    >
+                      Meetups
+                    </motion.div>
+                    <motion.div
+                      className="absolute right-2 top-0 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
+                      animate={{ y: [0, -6, 0], x: [0, 5, 0] }}
+                      transition={{
+                        duration: 4.9,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 0.1,
+                      }}
+                      style={{ opacity: 0.95 * badgeFloat }}
+                    >
+                      Resources
+                    </motion.div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* bottom wave */}
+          <div className="absolute inset-x-0 -bottom-1 h-20 pointer-events-none opacity-90">
+            <svg
+              viewBox="0 0 1440 120"
+              preserveAspectRatio="none"
+              className="w-full h-full"
+            >
+              <path
+                d="M0,64 C260,24 520,110 720,64 C940,12 1180,112 1440,64 L1440,120 L0,120 Z"
+                fill="rgba(229,233,239,0.55)"
+              />
+            </svg>
+          </div>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+function PulsePill({ text, reduce }: { text: string; reduce: boolean }) {
+  return (
+    <motion.span
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800 shadow-sm"
+      animate={reduce ? undefined : { y: [0, -2, 0] }}
+      transition={reduce ? undefined : { duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <span className="h-2 w-2 rounded-full bg-blue-600" />
+      {text}
+    </motion.span>
   );
 }
 
@@ -1001,14 +1506,20 @@ function MagneticButton({
       whileTap={{ scale: 0.985 }}
       className={[
         "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold border transition-colors shadow-sm",
-        primary ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800" : "bg-white/70 text-blue-900 border-blue-200 hover:bg-white",
+        primary
+          ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800"
+          : "bg-white/70 text-blue-900 border-blue-200 hover:bg-white",
       ].join(" ")}
     >
       <span>{label}</span>
       <motion.span
         aria-hidden
         animate={reduce ? undefined : { x: [0, 3, 0] }}
-        transition={reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        transition={
+          reduce
+            ? undefined
+            : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+        }
       >
         →
       </motion.span>
@@ -1036,7 +1547,9 @@ function FeatureStat({
       whileHover={reduce ? undefined : { y: -3 }}
       className="rounded-3xl border border-blue-200 bg-white/60 backdrop-blur-xl p-6"
     >
-      <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">{title.toUpperCase()}</div>
+      <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
+        {title.toUpperCase()}
+      </div>
       <div className="mt-2 text-2xl font-extrabold text-blue-900">{value}</div>
       <div className="mt-2 text-sm text-blue-700">{desc}</div>
     </motion.div>
@@ -1080,7 +1593,9 @@ function FlipFeatureRow({
           className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
           <div className="h-[280px] bg-[#8e8e8e] flex items-center justify-center">
-            <span className="text-xl font-semibold text-black/70">{imageLabel}</span>
+            <span className="text-xl font-semibold text-black/70">
+              {imageLabel}
+            </span>
           </div>
         </motion.div>
       </motion.div>
@@ -1104,11 +1619,19 @@ function FlipInfoCard({
   const reduce = useReducedMotion();
 
   return (
-    <button type="button" onClick={() => setFlipped((v) => !v)} className="text-left w-full" aria-pressed={flipped}>
+    <button
+      type="button"
+      onClick={() => setFlipped((v) => !v)}
+      className="text-left w-full"
+      aria-pressed={flipped}
+    >
       <motion.div className="relative w-full" style={{ perspective: 1200 }}>
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: reduce ? 0 : 0.75, ease: [0.16, 1, 0.3, 1] }}
+          transition={{
+            duration: reduce ? 0 : 0.75,
+            ease: [0.16, 1, 0.3, 1],
+          }}
           className="relative w-full"
           style={{ transformStyle: "preserve-3d" }}
         >
@@ -1124,18 +1647,25 @@ function FlipInfoCard({
             <div className="p-6">
               <h3 className="text-lg font-semibold text-blue-900">{title}</h3>
               <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
-              <div className="mt-4 text-sm font-semibold text-blue-600">Learn more →</div>
+              <div className="mt-4 text-sm font-semibold text-blue-600">
+                Learn more →
+              </div>
             </div>
           </div>
 
           {/* BACK */}
           <div
             className="absolute inset-0 rounded-3xl border border-blue-200 bg-blue-50 p-6"
-            style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
+            style={{
+              transform: "rotateY(180deg)",
+              backfaceVisibility: "hidden",
+            }}
           >
             <h3 className="text-xl font-extrabold text-blue-900">{title}</h3>
             <p className="mt-3 text-sm text-blue-800">{longDesc}</p>
-            <div className="mt-6 text-sm font-semibold text-blue-700">Click to flip back ↺</div>
+            <div className="mt-6 text-sm font-semibold text-blue-700">
+              Click to flip back ↺
+            </div>
           </div>
         </motion.div>
       </motion.div>
