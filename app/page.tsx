@@ -305,9 +305,10 @@ type CalendarEvent = {
 export default function Home() {
   const router = useRouter();
   const reduce = useReducedMotion();
+  const reduceBool = !!reduce; // ✅ FIX: force boolean (no null)
 
   // Smooth scroll fallback (no Lenis)
-  useSmoothScrollFallback(!reduce);
+  useSmoothScrollFallback(!reduceBool);
 
   const year = new Date().getFullYear();
 
@@ -390,9 +391,9 @@ export default function Home() {
   /* ---- Intro overlay ---- */
   const [intro, setIntro] = useState(true);
   useEffect(() => {
-    const t = window.setTimeout(() => setIntro(false), reduce ? 350 : 1200);
+    const t = window.setTimeout(() => setIntro(false), reduceBool ? 350 : 1200);
     return () => window.clearTimeout(t);
-  }, [reduce]);
+  }, [reduceBool]);
 
   /* ---- Calendar ---- */
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -602,7 +603,7 @@ export default function Home() {
       {/* Grain */}
       <motion.div
         aria-hidden
-        style={{ x: grainX, y: grainY, opacity: reduce ? 0.06 : 0.09 }}
+        style={{ x: grainX, y: grainY, opacity: reduceBool ? 0.06 : 0.09 }}
         className="fixed inset-0 pointer-events-none -z-30"
       >
         <div
@@ -619,8 +620,8 @@ export default function Home() {
         <motion.div
           key={i}
           style={{
-            x: reduce ? 0 : orbX[i],
-            y: reduce ? 0 : orbY[i],
+            x: reduceBool ? 0 : orbX[i],
+            y: reduceBool ? 0 : orbY[i],
             width: orb.size,
             height: orb.size,
             top: `${orb.top}%`,
@@ -643,7 +644,7 @@ export default function Home() {
 
       {/* Intro */}
       <AnimatePresence>
-        {intro && !reduce && (
+        {intro && !reduceBool && (
           <motion.div
             className="fixed inset-0 z-[80] flex items-center justify-center"
             initial={{ opacity: 1 }}
@@ -723,7 +724,7 @@ export default function Home() {
         style={{
           y: heroY,
           scale: heroScale,
-          rotate: reduce ? 0 : tilt,
+          rotate: reduceBool ? 0 : tilt,
           filter: heroBlur,
         }}
         className="min-h-[96vh] relative flex flex-col justify-center max-w-7xl mx-auto px-6"
@@ -767,9 +768,9 @@ export default function Home() {
         >
           <motion.span
             className="inline-flex items-center gap-2"
-            animate={reduce ? undefined : { y: [0, 6, 0] }}
+            animate={reduceBool ? undefined : { y: [0, 6, 0] }}
             transition={
-              reduce
+              reduceBool
                 ? undefined
                 : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
             }
@@ -781,9 +782,9 @@ export default function Home() {
         </motion.div>
       </motion.header>
 
-      {/* ✅ NEW: CROSS CREEK RANCH BANNER (fills the big white spot under "Scroll to explore") */}
+      {/* ✅ NEW: CROSS CREEK RANCH BANNER */}
       <CrossCreekBanner
-        reduce={reduce}
+        reduce={reduceBool} // ✅ FIXED HERE
         scrollProgSmooth={scrollProgSmooth}
         onExplore={() => router.push("/map")}
         onEvents={() => router.push("/events")}
@@ -886,7 +887,7 @@ export default function Home() {
                       delay: (idx % 7) * 0.04,
                       ease: [0.16, 1, 0.3, 1],
                     }}
-                    whileHover={reduce ? undefined : { y: -2 }}
+                    whileHover={reduceBool ? undefined : { y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     className={[
                       "relative flex flex-col items-center justify-start h-12 w-full rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-colors",
@@ -909,9 +910,9 @@ export default function Home() {
                       <motion.span
                         layoutId={`dot-${key}`}
                         className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"
-                        animate={reduce ? undefined : { scale: [1, 1.35, 1] }}
+                        animate={reduceBool ? undefined : { scale: [1, 1.35, 1] }}
                         transition={
-                          reduce
+                          reduceBool
                             ? undefined
                             : {
                                 duration: 1.6,
@@ -957,7 +958,7 @@ export default function Home() {
                       {selectedEvents.map((event, i) => (
                         <motion.li
                           key={`${event.id}-${i}`}
-                          whileHover={reduce ? undefined : { scale: 1.02, x: 2 }}
+                          whileHover={reduceBool ? undefined : { scale: 1.02, x: 2 }}
                           transition={{
                             type: "spring",
                             stiffness: 260,
@@ -1074,9 +1075,9 @@ export default function Home() {
       >
         <motion.h2
           className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-10"
-          animate={reduce ? undefined : { y: [0, -3, 0] }}
+          animate={reduceBool ? undefined : { y: [0, -3, 0] }}
           transition={
-            reduce
+            reduceBool
               ? undefined
               : { duration: 4, repeat: Infinity, ease: "easeInOut" }
           }
@@ -1086,7 +1087,7 @@ export default function Home() {
 
         <motion.div
           className="w-full max-w-4xl mx-auto p-10 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] text-blue-900 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200 relative overflow-hidden"
-          whileHover={reduce ? undefined : { y: -4 }}
+          whileHover={reduceBool ? undefined : { y: -4 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
         >
           <div className="absolute -top-20 -left-16 w-[380px] h-[380px] rounded-full bg-blue-300/20 blur-3xl" />
@@ -1244,7 +1245,11 @@ function CrossCreekBanner({
 
                 <motion.h3
                   className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600"
-                  animate={reduce ? undefined : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                  animate={
+                    reduce
+                      ? undefined
+                      : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }
+                  }
                   transition={
                     reduce
                       ? undefined
@@ -1341,7 +1346,11 @@ function CrossCreekBanner({
                         transition={
                           reduce
                             ? undefined
-                            : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+                            : {
+                                duration: 2.8,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                              }
                         }
                       >
                         <span className="text-blue-700 font-extrabold">★</span>
@@ -1360,7 +1369,11 @@ function CrossCreekBanner({
                         transition={
                           reduce
                             ? undefined
-                            : { duration: 6.4, repeat: Infinity, ease: "easeInOut" }
+                            : {
+                                duration: 6.4,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                              }
                         }
                       />
                     </div>
@@ -1438,7 +1451,9 @@ function PulsePill({ text, reduce }: { text: string; reduce: boolean }) {
     <motion.span
       className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800 shadow-sm"
       animate={reduce ? undefined : { y: [0, -2, 0] }}
-      transition={reduce ? undefined : { duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+      transition={
+        reduce ? undefined : { duration: 3.8, repeat: Infinity, ease: "easeInOut" }
+      }
     >
       <span className="h-2 w-2 rounded-full bg-blue-600" />
       {text}
