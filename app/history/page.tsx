@@ -1,7 +1,7 @@
 // app/history/page.tsx
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   motion,
@@ -21,6 +21,7 @@ import {
    Motion + Theme Helpers
 ======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const EASE_IN_OUT: [number, number, number, number] = [0.42, 0, 0.58, 1];
 
 const container: Variants = {
   hidden: {},
@@ -48,11 +49,6 @@ const cardPop: Variants = {
   },
 };
 
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
-
-/** Smooth scrolling fallback (no Lenis). */
 function useSmoothScrollFallback(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
@@ -143,12 +139,10 @@ export default function HistoryPage() {
   const { scrollY, scrollYProgress } = useScroll();
   const prog = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
 
-  // micro tilt (scroll velocity)
   const vel = useVelocity(scrollY);
   const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
   const tilt = useTransform(velSmooth, [-1800, 0, 1800], [-1.2, 0, 1.2]);
 
-  // background palette
   const bg = useTransform(
     prog,
     [0, 0.35, 0.7, 1],
@@ -165,7 +159,6 @@ export default function HistoryPage() {
     ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"],
   );
 
-  // cursor spotlight
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
 
@@ -181,7 +174,6 @@ export default function HistoryPage() {
   const glowX = useTransform(mx, (v) => `${v}px`);
   const glowY = useTransform(my, (v) => `${v}px`);
 
-  // Orbs: mouse + scroll drift
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   useEffect(() => {
     const onMove = (e: MouseEvent) => setMouse({ x: e.clientX, y: e.clientY });
@@ -201,27 +193,22 @@ export default function HistoryPage() {
       const mouseFx = (mouse.x / w - 0.5) * 220 * orb.speed;
       const mouseFy = (mouse.y / h - 0.5) * 220 * orb.speed;
       const scrollFy = -260 * orb.speed * (y / scrollRange);
-
       orbX[i].set(mouseFx);
       orbY[i].set(scrollFy + mouseFy);
     });
   });
 
-  // progress bar
   const progScaleX = useTransform(prog, [0, 1], [0.06, 1]);
 
-  // grain drift
   const grainX = useTransform(scrollY, [0, 1200], [0, -120]);
   const grainY = useTransform(scrollY, [0, 1200], [0, -90]);
 
-  // intro overlay (quick)
   const [intro, setIntro] = useState(true);
   useEffect(() => {
     const t = window.setTimeout(() => setIntro(false), reduce ? 220 : 900);
     return () => window.clearTimeout(t);
   }, [reduce]);
 
-  // timeline focus highlight
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
   return (
@@ -232,13 +219,11 @@ export default function HistoryPage() {
       style={{ background: bg }}
       className="min-h-screen overflow-x-hidden text-slate-950 relative"
     >
-      {/* Scroll progress */}
       <motion.div
         style={{ scaleX: progScaleX }}
         className="fixed left-0 top-0 h-1 w-full origin-left bg-gradient-to-r from-blue-900 via-blue-600 to-blue-300 z-[60]"
       />
 
-      {/* Cursor spotlight */}
       <motion.div
         aria-hidden
         style={{
@@ -249,7 +234,6 @@ export default function HistoryPage() {
         className="fixed inset-0 pointer-events-none -z-30"
       />
 
-      {/* Grain */}
       <motion.div
         aria-hidden
         style={{ x: grainX, y: grainY, opacity: !!reduce ? 0.06 : 0.09 }}
@@ -264,7 +248,6 @@ export default function HistoryPage() {
         />
       </motion.div>
 
-      {/* Floating orbs */}
       {ORBS.map((orb, i) => (
         <motion.div
           key={i}
@@ -281,11 +264,9 @@ export default function HistoryPage() {
         />
       ))}
 
-      {/* Overlays */}
       <motion.div style={{ backgroundColor: softGrey }} className="fixed inset-0 pointer-events-none -z-20" />
       <motion.div style={{ backgroundColor: navyWash }} className="fixed inset-0 pointer-events-none -z-20" />
 
-      {/* Intro overlay */}
       <AnimatePresence>
         {intro && !reduce && (
           <motion.div
@@ -309,32 +290,15 @@ export default function HistoryPage() {
               <div className="mt-2 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 text-center">
                 Timeline
               </div>
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <motion.span
-                  className="h-2 w-2 rounded-full bg-blue-700"
-                  animate={{ scale: [1, 1.8, 1] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.span
-                  className="h-2 w-2 rounded-full bg-blue-500"
-                  animate={{ scale: [1, 1.8, 1] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
-                />
-                <motion.span
-                  className="h-2 w-2 rounded-full bg-blue-300"
-                  animate={{ scale: [1, 1.8, 1] }}
-                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-                />
-              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* HERO */}
       <motion.header
         style={{ rotate: !!reduce ? 0 : tilt }}
-        className="min-h-[78vh] relative flex flex-col justify-center max-w-7xl mx-auto px-6"
+        className="min-h-[78vh]
+        relative flex flex-col justify-center max-w-7xl mx-auto px-6"
       >
         <div className="absolute -top-20 left-0 w-full h-[58vh] bg-gradient-to-br from-blue-100 via-blue-50 to-blue-200 rounded-b-[80px] shadow-lg -z-10" />
 
@@ -353,8 +317,11 @@ export default function HistoryPage() {
             Cross Creek Ranch History
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mt-5 max-w-3xl text-base sm:text-lg text-blue-800 text-center mx-auto">
-            A clean, interactive timeline that shows key moments — from early planning to the present day — with the same calm, fluid Gatherly style.
+          <motion.p
+            variants={fadeUp}
+            className="mt-5 max-w-3xl text-base sm:text-lg text-blue-800 text-center mx-auto"
+          >
+            A calm, interactive timeline of key moments — in the same fluid Gatherly style.
           </motion.p>
 
           <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -374,7 +341,7 @@ export default function HistoryPage() {
           <motion.span
             className="inline-flex items-center gap-2"
             animate={!!reduce ? undefined : { y: [0, 6, 0] }}
-            transition={!!reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            transition={!!reduce ? undefined : { duration: 1.8, repeat: Infinity, ease: EASE_IN_OUT }}
           >
             <span className="font-semibold">Scroll</span>
             <span className="opacity-80">through the timeline</span>
@@ -383,9 +350,8 @@ export default function HistoryPage() {
         </motion.div>
       </motion.header>
 
-      {/* STATS STRIP */}
-      <section className="max-w-7xl mx-auto px-6 -mt-6">
-        <motion.div
+      <main className="max-w-7xl mx-auto px-6 pb-28 mt-10">
+        <motion.section
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "-120px" }}
@@ -404,28 +370,13 @@ export default function HistoryPage() {
                   {s.label.toUpperCase()}
                 </div>
                 <div className="mt-2 text-2xl font-extrabold text-blue-900">{s.value}</div>
-                <div className="mt-2 text-sm text-blue-700">
-                  Built to feel modern, friendly, and easy to explore.
-                </div>
+                <div className="mt-2 text-sm text-blue-700">Modern, friendly, easy to explore.</div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
-      </section>
-
-      {/* TIMELINE */}
-      <main className="max-w-7xl mx-auto px-6 pb-28 mt-16">
-        <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-140px" }}>
-          <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-blue-950">
-            The timeline
-          </motion.h2>
-          <motion.p variants={fadeUp} className="mt-2 text-blue-800/90 max-w-2xl">
-            Tap a year to spotlight it — and scroll to see the story flow.
-          </motion.p>
-        </motion.div>
+        </motion.section>
 
         <div className="mt-10 grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-8">
-          {/* LEFT: Sticky navigator */}
           <aside className="lg:sticky lg:top-24 h-fit">
             <motion.div
               initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
@@ -441,7 +392,6 @@ export default function HistoryPage() {
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {HISTORY.map((h, idx) => {
                   const active = activeIdx === idx;
-                  const isHighlight = !!h.highlight;
                   return (
                     <motion.button
                       key={`${h.year}-${idx}`}
@@ -454,7 +404,7 @@ export default function HistoryPage() {
                         active
                           ? "bg-blue-700 text-white border-blue-700"
                           : "bg-white/70 text-blue-900 border-blue-200 hover:bg-white",
-                        isHighlight ? "ring-2 ring-blue-300/60" : "",
+                        h.highlight ? "ring-2 ring-blue-300/60" : "",
                       ].join(" ")}
                     >
                       {h.year}
@@ -462,51 +412,10 @@ export default function HistoryPage() {
                   );
                 })}
               </div>
-
-              <div className="mt-4 text-sm text-blue-700">
-                <span className="font-semibold text-blue-900">Tip:</span>{" "}
-                You can customize the history text in the <code className="px-1 rounded bg-blue-50 border border-blue-200">HISTORY</code> array.
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: true, margin: "-120px" }}
-              transition={{ duration: 0.75, ease: EASE, delay: 0.05 }}
-              className="mt-4 rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden relative"
-            >
-              <div className="absolute -top-16 -left-16 h-56 w-56 rounded-full bg-blue-300/20 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
-
-              <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
-                EXPLORE
-              </div>
-              <div className="mt-2 text-xl font-extrabold text-blue-950">See the community in action</div>
-              <div className="mt-2 text-sm text-blue-800/90">
-                Jump into resources and events — the “now” part of the story.
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                <Link
-                  href="/map"
-                  className="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold border border-blue-700 bg-blue-700 text-white hover:bg-blue-800 transition"
-                >
-                  Resources →
-                </Link>
-                <Link
-                  href="/events"
-                  className="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold border border-blue-200 bg-white/70 text-blue-900 hover:bg-white transition"
-                >
-                  Events →
-                </Link>
-              </div>
             </motion.div>
           </aside>
 
-          {/* RIGHT: Timeline cards */}
           <section className="relative">
-            {/* center line */}
             <div className="absolute left-4 sm:left-6 top-0 bottom-0 w-px bg-gradient-to-b from-blue-200 via-blue-300/70 to-transparent" />
             <div className="space-y-5">
               {HISTORY.map((h, idx) => (
@@ -526,46 +435,6 @@ export default function HistoryPage() {
           </section>
         </div>
 
-        {/* CLOSER */}
-        <motion.section
-          initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-140px" }}
-          transition={{ duration: 0.9, ease: EASE }}
-          className="mt-20 rounded-[36px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_30px_90px_rgba(15,23,42,0.12)] overflow-hidden"
-        >
-          <div className="p-8 sm:p-10 relative">
-            <div className="absolute -top-24 -left-28 w-[520px] h-[520px] rounded-full blur-3xl bg-blue-500/10 pointer-events-none" />
-            <div className="absolute -bottom-28 -right-28 w-[560px] h-[560px] rounded-full blur-3xl bg-blue-300/20 pointer-events-none" />
-
-            <div className="text-[11px] font-semibold tracking-[0.24em] text-blue-700">
-              THE NEXT CHAPTER
-            </div>
-            <h3 className="mt-2 text-3xl sm:text-4xl font-extrabold text-blue-950">
-              Built for residents — and made to keep evolving
-            </h3>
-            <p className="mt-3 text-blue-800/90 max-w-2xl">
-              This history page is designed to feel alive — and you can keep adding new milestones as Cross Creek Ranch grows.
-            </p>
-
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <SoftLink href="/events" primary>
-                See events happening now →
-              </SoftLink>
-              <SoftLink href="/">Back to home →</SoftLink>
-            </div>
-          </div>
-
-          <div className="h-20 opacity-90 pointer-events-none">
-            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full">
-              <path
-                d="M0,64 C260,24 520,110 720,64 C940,12 1180,112 1440,64 L1440,120 L0,120 Z"
-                fill="rgba(229,233,239,0.55)"
-              />
-            </svg>
-          </div>
-        </motion.section>
-
         <footer className="mt-14 text-center text-sm text-blue-800/70">
           © {new Date().getFullYear()} Gatherly • Cross Creek Ranch History
         </footer>
@@ -573,10 +442,6 @@ export default function HistoryPage() {
     </motion.div>
   );
 }
-
-/* =======================
-   Components
-======================= */
 
 function SoftLink({
   href,
@@ -622,7 +487,9 @@ function TimelineCard({
   highlight: boolean;
 }) {
   const bounce = reduce ? undefined : { y: [0, -3, 0] };
-  const bounceT = reduce ? undefined : { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: idx * 0.05 };
+  const bounceT = reduce
+    ? undefined
+    : { duration: 4.8, repeat: Infinity, ease: EASE_IN_OUT, delay: idx * 0.05 };
 
   return (
     <motion.article
@@ -630,12 +497,8 @@ function TimelineCard({
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-140px" }}
-      className={[
-        "relative pl-10 sm:pl-14",
-        highlight ? "scroll-mt-28" : "scroll-mt-24",
-      ].join(" ")}
+      className="relative pl-10 sm:pl-14"
     >
-      {/* dot */}
       <motion.div
         aria-hidden
         className={[
@@ -651,17 +514,11 @@ function TimelineCard({
         transition={{ type: "spring", stiffness: 240, damping: 22 }}
         className={[
           "rounded-[30px] border backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden",
-          active
-            ? "border-blue-300 bg-white/75"
-            : "border-blue-200 bg-white/60",
+          active ? "border-blue-300 bg-white/75" : "border-blue-200 bg-white/60",
           highlight ? "ring-2 ring-blue-300/50" : "",
         ].join(" ")}
       >
-        {/* header band */}
         <div className="p-6 sm:p-7 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border-b border-blue-200 relative overflow-hidden">
-          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-blue-300/20 blur-3xl pointer-events-none" />
-
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-[11px] font-semibold tracking-[0.22em] text-blue-700">
@@ -675,7 +532,7 @@ function TimelineCard({
             <motion.div
               className="shrink-0 rounded-2xl border border-blue-200 bg-white/70 px-3 py-2 text-blue-900 font-extrabold"
               animate={reduce ? undefined : { scale: active ? [1, 1.05, 1] : [1, 1.02, 1] }}
-              transition={reduce ? undefined : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+              transition={reduce ? undefined : { duration: 3.2, repeat: Infinity, ease: EASE_IN_OUT }}
             >
               {year}
             </motion.div>
@@ -696,10 +553,9 @@ function TimelineCard({
           </div>
         </div>
 
-        {/* body */}
         <div className="p-6 sm:p-7">
           <div className="text-sm text-blue-800/90">
-            Want this to be even more “official”? Add real photos + verified dates and we can turn this into a museum-style page.
+            Add more milestones anytime by editing the <code className="px-1 rounded bg-blue-50 border border-blue-200">HISTORY</code> array at the top.
           </div>
 
           <div className="mt-5 flex flex-col sm:flex-row gap-3">
