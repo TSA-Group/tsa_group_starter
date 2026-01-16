@@ -110,6 +110,8 @@ export default function Page() {
   // center of map//
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   type Prediction = { description: string; place_id: string };
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -243,9 +245,13 @@ export default function Page() {
     (radiusMode === "Near Center" ? 1 : 0) +
     (directoryQuery.trim() ? 1 : 0);
 
-  const handleCenter = (loc: LocationItem) => {
-    setCenter(loc.position);
-    setZoom(15);
+  const handleCenter = (loc: LocationItem | LatLng) => {
+    if (!mapRef.current) return;
+
+    mapRef.current.panTo("position" in loc ? loc.position : loc);
+    mapRef.current.setZoom(15);
+
+    setCenter("position" in loc ? loc.position : loc);
     setSelectedPlace(null);
   };
 
@@ -430,9 +436,15 @@ export default function Page() {
                 <div className="p-4 sm:p-5">
                   <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
                     <Map
+                      ref={(map) => {
+                        if (map && !mapRef.current) {
+                          mapRef.current = map;
+                          setMapReady(true);
+                        }
+                      }}
                       mapId="8859a83a13a834f6eeef1c63"
-                      center={center}
-                      zoom={zoom}
+                      defaultCenter={center}
+                      defaultZoom={zoom}
                       gestureHandling="greedy"
                       disableDefaultUI={true}
                       zoomControl={false}
@@ -999,7 +1011,7 @@ function SearchBox({
 }
 
 /** ---------- Enhanced Marker (time removed) ---------- */
-function HoverMarker({
+export function HoverMarker({
   location,
   activeId,
   setActiveId,
@@ -1029,7 +1041,6 @@ function HoverMarker({
         position: "relative",
         cursor: "pointer",
         zIndex: isExpanded ? 9999 : 1,
-        transform: "translate(-50%, -100%)",
       }}
     >
       <AnimatePresence mode="wait">
