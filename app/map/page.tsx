@@ -13,7 +13,7 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, type DocumentData } from "firebase/firestore";
 
-// ALL EVENT TYPES IN OUR SEARCH FUNCTION ( IF U ADD A NEW TYPE PLS MAKE SURE TO ADD IT IN THE BOX AND KEEP IT EVEN )//
+// ALL EVENT TYPES IN OUR SEARCH FUNCTION ( IF U ADD A NEW TYPE PLS MAKE SURE TO ADD IT IN THE BOX AND KEEP IT EVEN )
 interface LatLng {
   lat: number;
   lng: number;
@@ -52,12 +52,12 @@ type ResourceDoc = {
   description?: string;
   featured?: boolean;
 };
-// do not touch this (firestore id)//
+// do not touch this (firestore id)
 type LocationItem = ResourceDoc & {
   id: string;
 };
 
-//All animations for map page//
+//All animations for map page
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -78,7 +78,7 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-//Main options for filter( if you add a new option to the pls also add it to the event ttype above)//
+//Main options for filter( if you add a new option to the pls also add it to the event ttype above)
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
   "Park & Trails",
@@ -102,12 +102,12 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
   "Shopping",
 ];
 
-//start of tthe page!//
+//start of tthe page!
 export default function Page() {
-  // DO NOT TOUCH THIS//
+  // DO NOT TOUCH THIS
   const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
-  // center of map//
+  // center of map
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -126,7 +126,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
 
-  // This links the firestore to the map so u the users are able to add events//
+  // This links the firestore to the map so u the users are able to add events
   useEffect(() => {
     setLoading(true);
     setDbError(null);
@@ -179,7 +179,7 @@ export default function Page() {
     return () => unsub();
   }, []);
 
-  // filters for map//
+  // filters for map
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
   const [activityFilters, setActivityFilters] = useState<ActivityType[]>([]);
   const [radiusMode, setRadiusMode] = useState<"All" | "Near Center">("All");
@@ -319,12 +319,13 @@ export default function Page() {
                   exit={{ opacity: 0, y: -6 }}
                   className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
                 >
-                   {dbError}
+                  ❌ {dbError}
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
+          {/* Spotlight Resources */}
           <motion.section
             variants={fadeUp}
             className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
@@ -404,9 +405,9 @@ export default function Page() {
               />
             </motion.aside>
 
-            {/* Map and search */}
+            {/* Map + Search + List */}
             <div className="lg:col-span-8 space-y-6">
-              
+              {/* Map Card — unchanged */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
@@ -436,11 +437,9 @@ export default function Page() {
                 <div className="p-4 sm:p-5">
                   <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
                     <Map
-                      ref={(map) => {
-                        if (map && !mapRef.current) {
-                          mapRef.current = map;
-                          setMapReady(true);
-                        }
+                      onLoad={(map) => {
+                        mapRef.current = map;
+                        setMapReady(true);
                       }}
                       mapId="8859a83a13a834f6eeef1c63"
                       defaultCenter={center}
@@ -493,7 +492,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Results List */}
+              {/* Results List (tiles) */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
@@ -579,7 +578,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              
+              {/* Helpful Info */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
@@ -620,7 +619,7 @@ export default function Page() {
   );
 }
 
-// more for filters (uses events at top)
+/** ---------- Filter Box ---------- */
 function FilterBox({
   eventFilters,
   setEventFilters,
@@ -676,7 +675,7 @@ function FilterBox({
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
-        
+        {/* Radius */}
         <div>
           <div className="text-sm font-semibold text-slate-900">Area</div>
           <div className="mt-2 flex gap-2">
@@ -701,7 +700,7 @@ function FilterBox({
           </div>
         </div>
 
-       
+        {/* Category */}
         <div>
           <div className="text-sm font-semibold text-slate-900">Category</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -726,7 +725,7 @@ function FilterBox({
           </div>
         </div>
 
-        
+        {/* Activities */}
         <div>
           <div className="text-sm font-semibold text-slate-900">Activities</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -760,7 +759,7 @@ function FilterBox({
   );
 }
 
-
+/** ---------- SearchBox (Directory + Places) ---------- */
 function SearchBox({
   directoryQuery,
   setDirectoryQuery,
@@ -880,7 +879,7 @@ function SearchBox({
       ref={boxRef}
       className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3"
     >
-      
+      {/* Mode toggle */}
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
           const active = mode === m;
@@ -950,7 +949,7 @@ function SearchBox({
         )}
       </div>
 
-      
+      {/* Dropdown */}
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
