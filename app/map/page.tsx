@@ -52,12 +52,12 @@ type ResourceDoc = {
   description?: string;
   featured?: boolean;
 };
-
+// do not touch this (firestore id)
 type LocationItem = ResourceDoc & {
-  id: string; // Firestore doc id
+  id: string; 
 };
 
-/** ---------- Motion ---------- */
+//All animations for map page
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
