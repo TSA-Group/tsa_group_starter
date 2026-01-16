@@ -319,7 +319,6 @@ export default function Page() {
             </AnimatePresence>
           </motion.div>
 
-          
           <motion.section
             variants={fadeUp}
             className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
@@ -399,9 +398,9 @@ export default function Page() {
               />
             </motion.aside>
 
-            {/* Map + Search + List */}
+            {/* Map and search */}
             <div className="lg:col-span-8 space-y-6">
-              {/* Map Card — unchanged */}
+              
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
@@ -482,7 +481,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Results List (tiles) */}
+              {/* Results List */}
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
@@ -568,7 +567,7 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              {/* Helpful Info */}
+              
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
@@ -609,7 +608,7 @@ export default function Page() {
   );
 }
 
-/** ---------- Filter Box ---------- */
+// more for filters (uses events at top)
 function FilterBox({
   eventFilters,
   setEventFilters,
@@ -665,7 +664,7 @@ function FilterBox({
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
-        {/* Radius */}
+        
         <div>
           <div className="text-sm font-semibold text-slate-900">Area</div>
           <div className="mt-2 flex gap-2">
@@ -690,7 +689,7 @@ function FilterBox({
           </div>
         </div>
 
-        {/* Category */}
+       
         <div>
           <div className="text-sm font-semibold text-slate-900">Category</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -715,7 +714,7 @@ function FilterBox({
           </div>
         </div>
 
-        {/* Activities */}
+        
         <div>
           <div className="text-sm font-semibold text-slate-900">Activities</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -749,7 +748,7 @@ function FilterBox({
   );
 }
 
-/** ---------- SearchBox (Directory + Places) ---------- */
+
 function SearchBox({
   directoryQuery,
   setDirectoryQuery,
@@ -869,7 +868,7 @@ function SearchBox({
       ref={boxRef}
       className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3"
     >
-      {/* Mode toggle */}
+      
       <div className="flex gap-2 mb-3">
         {(["directory", "places"] as const).map((m) => {
           const active = mode === m;
@@ -939,7 +938,7 @@ function SearchBox({
         )}
       </div>
 
-      {/* Dropdown */}
+      
       <AnimatePresence>
         {open && mode === "directory" && dirMatches.length > 0 && (
           <motion.ul
