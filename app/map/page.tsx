@@ -1,4 +1,3 @@
-// app/map/page.tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -14,7 +13,7 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, type DocumentData } from "firebase/firestore";
 
-/** ---------- Types ---------- */
+// ALL EVENT TYPES IN OUR SEARCH FUNCTION ( IF U ADD A NEW TYPE PLS MAKE SURE TO ADD IT IN THE BOX AND KEEP IT EVEN )
 interface LatLng {
   lat: number;
   lng: number;
