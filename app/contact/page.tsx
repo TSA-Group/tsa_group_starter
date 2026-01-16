@@ -1,23 +1,39 @@
+// app/contact/page.tsx
 "use client";
 
-import React from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import React, { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 
-const sectionAnim: Variants = {
-  hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
+/* =======================
+   Animations
+======================= */
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+const page: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.6, ease: EASE } },
+};
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 14, filter: "blur(8px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.65, ease: EASE },
   },
 };
 
+const card: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+};
+
 export default function ContactPage() {
-  const [sent, setSent] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [sending, setSending] = React.useState(false);
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,80 +41,76 @@ export default function ContactPage() {
 
     try {
       setSending(true);
-
-      // placeholder for API / email / firestore later
       await new Promise((r) => setTimeout(r, 900));
-
       setSent(true);
       setTimeout(() => setSent(false), 2200);
     } catch {
-      setError("Failed to send message. Please try again.");
+      setError("Something went wrong. Please try again.");
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#070b16] text-white px-6 py-12">
-      <motion.div
-        variants={sectionAnim}
-        initial="hidden"
-        animate="show"
-        className="mx-auto max-w-5xl"
-      >
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-            Contact Gatherly
+    <motion.div
+      variants={page}
+      initial="hidden"
+      animate="show"
+      className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900"
+    >
+      {/* Header */}
+      <div className="max-w-7xl mx-auto px-6 pt-10 pb-8">
+        <motion.div variants={fadeUp}>
+          <div className="text-xs font-semibold tracking-[0.22em] text-blue-700">
+            GATHERLY • CONTACT
+          </div>
+          <h1 className="mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight text-blue-950">
+            Get in Touch
           </h1>
-          <p className="mt-2 text-white/60 max-w-2xl">
+          <p className="mt-3 max-w-2xl text-blue-800/90">
             Have a question, feedback, or a community resource to suggest? Send us
             a message and we’ll get back to you.
           </p>
-        </div>
+        </motion.div>
+      </div>
 
-        {/* Card */}
-        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_25px_70px_rgba(0,0,0,0.45)] overflow-hidden">
-          <div className="p-6 border-b border-white/10">
-            <div className="text-white/80 font-semibold">Send a Message</div>
-            <div className="mt-1 text-sm text-white/55">
-              We usually reply within 1–2 business days.
-            </div>
-          </div>
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-6 pb-20">
+        <motion.div
+          variants={card}
+          className="rounded-3xl border border-blue-200 bg-white/75 backdrop-blur p-6 sm:p-8 shadow-sm"
+        >
+          {/* Alerts */}
+          <AnimatePresence>
+            {sent && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+              >
+                ✅ Message sent successfully!
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="mb-4 rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+              >
+                ❌ {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <form
             onSubmit={onSubmit}
-            className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
           >
-            {/* Alerts */}
-            <div className="md:col-span-2">
-              <AnimatePresence>
-                {sent && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100"
-                  >
-                    ✅ Message sent successfully!
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="mt-3 rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-100"
-                  >
-                    ❌ {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             <Field label="First Name">
               <input className="input" placeholder="Jane" required />
             </Field>
@@ -115,7 +127,7 @@ export default function ContactPage() {
               <input className="input" placeholder="New resource suggestion" required />
             </Field>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-2">
               <Field label="Message">
                 <textarea
                   required
@@ -125,36 +137,44 @@ export default function ContactPage() {
               </Field>
             </div>
 
-            <div className="md:col-span-2 flex items-center justify-between gap-4 pt-2 flex-wrap">
+            <div className="sm:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
               <Link
                 href="/"
-                className="text-sm text-white/60 hover:text-white transition"
+                className="text-sm font-semibold text-blue-800 hover:text-blue-900 transition"
               >
                 ← Back to Home
               </Link>
 
               <motion.button
                 whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.99 }}
+                whileTap={{ scale: 0.98 }}
                 disabled={sending}
                 type="submit"
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold shadow-[0_20px_55px_rgba(37,99,235,0.25)] hover:brightness-110 transition disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-2xl px-6 py-3 font-semibold
+                           border border-blue-700 bg-blue-700 text-white hover:bg-blue-800 transition
+                           disabled:opacity-60"
               >
                 {sending ? "Sending..." : "Send Message"}
               </motion.button>
             </div>
           </form>
-        </div>
-      </motion.div>
-    </main>
+        </motion.div>
+      </div>
+
+      <footer className="pb-10 text-center text-sm text-blue-800/70">
+        © {new Date().getFullYear()} Gatherly
+      </footer>
+    </motion.div>
   );
 }
 
-/* Shared field styling (same pattern as Resource page) */
+/* =======================
+   Shared Field Styles
+======================= */
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <div className="text-sm font-semibold text-white/85">{label}</div>
+      <label className="text-sm font-semibold text-blue-900">{label}</label>
       {children}
     </div>
   );
