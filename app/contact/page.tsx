@@ -74,65 +74,88 @@ export default function ContactPage() {
         </motion.div>
       </div>
 
-      {/* Content */}
+      {/* Form Card */}
       <div className="max-w-4xl mx-auto px-6 pb-20">
         <motion.div
           variants={card}
-          className="rounded-3xl border border-blue-200 bg-white/75 backdrop-blur p-6 sm:p-8 shadow-sm"
+          className="rounded-3xl border border-blue-300 bg-white shadow-md"
         >
           {/* Alerts */}
-          <AnimatePresence>
-            {sent && (
-              <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-              >
-                ✅ Message sent successfully!
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="px-6 pt-6">
+            <AnimatePresence>
+              {sent && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                >
+                  ✅ Message sent successfully!
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="mb-4 rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800"
-              >
-                ❌ {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+                >
+                  ❌ {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
+          {/* Form */}
           <form
             onSubmit={onSubmit}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            className="px-6 pb-8 grid grid-cols-1 sm:grid-cols-2 gap-5"
           >
             <Field label="First Name">
-              <input className="input" placeholder="Jane" required />
+              <input
+                className="input"
+                placeholder="Jane"
+                autoComplete="given-name"
+                required
+              />
             </Field>
 
             <Field label="Last Name">
-              <input className="input" placeholder="Doe" required />
+              <input
+                className="input"
+                placeholder="Doe"
+                autoComplete="family-name"
+                required
+              />
             </Field>
 
             <Field label="Email">
-              <input type="email" className="input" placeholder="jane@email.com" required />
+              <input
+                type="email"
+                className="input"
+                placeholder="jane@email.com"
+                autoComplete="email"
+                required
+              />
             </Field>
 
             <Field label="Subject">
-              <input className="input" placeholder="New resource suggestion" required />
+              <input
+                className="input"
+                placeholder="New resource suggestion"
+                required
+              />
             </Field>
 
             <div className="sm:col-span-2">
               <Field label="Message">
                 <textarea
+                  className="input min-h-[160px]"
+                  placeholder="Tell us your question or share a resource (name, address, category, hours, etc.)"
                   required
-                  placeholder="Share your question or a resource (name, address, category, hours, etc.)"
-                  className="input min-h-[140px]"
                 />
               </Field>
             </div>
@@ -150,9 +173,7 @@ export default function ContactPage() {
                 whileTap={{ scale: 0.98 }}
                 disabled={sending}
                 type="submit"
-                className="inline-flex items-center justify-center rounded-2xl px-6 py-3 font-semibold
-                           border border-blue-700 bg-blue-700 text-white hover:bg-blue-800 transition
-                           disabled:opacity-60"
+                className="rounded-2xl px-6 py-3 font-semibold border border-blue-700 bg-blue-700 text-white hover:bg-blue-800 transition disabled:opacity-60"
               >
                 {sending ? "Sending..." : "Send Message"}
               </motion.button>
@@ -173,9 +194,35 @@ export default function ContactPage() {
 ======================= */
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <label className="text-sm font-semibold text-blue-900">{label}</label>
       {children}
     </div>
   );
+}
+
+/* =======================
+   Input Base Styles
+======================= */
+/**
+ * Tailwind utility class reference:
+ * bg-white + border-blue-300 makes inputs obvious
+ * focus ring mirrors History page highlight
+ */
+const inputBase =
+  "mt-1 w-full rounded-xl border border-blue-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500";
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      input: React.DetailedHTMLProps<
+        React.InputHTMLAttributes<HTMLInputElement>,
+        HTMLInputElement
+      >;
+      textarea: React.DetailedHTMLProps<
+        React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+        HTMLTextAreaElement
+      >;
+    }
+  }
 }
