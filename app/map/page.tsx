@@ -107,7 +107,7 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
 export default function Page() {
   // ✅ Use env var. Put this in .env.local and Vercel env:
   // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxxxx
-  const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   // Cross Creek Ranch-ish default center
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
@@ -253,7 +253,7 @@ export default function Page() {
   const handleCenter = (loc: LocationItem) => {
     setCenter(loc.position);
     setZoom(15);
-    setSelectedPlace(loc.position);
+    setSelectedPlace(null);
   };
 
   if (!apiKey) {
@@ -453,7 +453,11 @@ export default function Page() {
                       className="w-full h-full"
                     >
                       {filteredLocations.map((loc) => (
-                        <AdvancedMarker key={loc.id} position={loc.position}>
+                        <AdvancedMarker
+                          key={loc.id}
+                          position={loc.position}
+                          anchor="bottom"
+                        >
                           <HoverMarker
                             location={loc}
                             activeId={activeId}
@@ -1036,7 +1040,6 @@ function HoverMarker({
       onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
       style={{
-        transform: "translate(-50%, -100%)",
         cursor: "pointer",
         zIndex: isExpanded ? 9999 : 1,
         position: "relative",
