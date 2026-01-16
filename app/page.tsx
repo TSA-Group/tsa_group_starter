@@ -918,48 +918,7 @@ export default function Home() {
         </React.Fragment>
       ))}
 
-      {/* Our story */}
-      <motion.section
-        className="w-full mt-32 mb-40 px-6"
-        initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: true, margin: "-120px" }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <motion.h2
-          className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-10"
-          animate={reduceBool ? undefined : { y: [0, -3, 0] }}
-          transition={reduceBool ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        >
-          Our Story!
-        </motion.h2>
-
-        <motion.div
-          className="w-full max-w-4xl mx-auto p-10 rounded-3xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] text-blue-900 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200 relative overflow-hidden"
-          whileHover={reduceBool ? undefined : { y: -4 }}
-          transition={{ type: "spring", stiffness: 260, damping: 22 }}
-        >
-          <div className="absolute -top-20 -left-16 w-[380px] h-[380px] rounded-full bg-blue-300/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-16 w-[420px] h-[420px] rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-
-          <p className="mb-6 relative">
-            <span className="font-bold text-blue-700">2006 – Starting Out:</span>{" "}
-            Cross Creek is founded in the beautiful town of Fulshear in 2006 but our first residents did not arrive until 2008.
-          </p>
-          <p className="mb-6 relative">
-            <span className="font-bold text-blue-700">2024 – About us:</span>{" "}
-            Our community sits on 3,200 acres and is home to thousands of residents. We work hard to give our residents the best experience possible.
-          </p>
-          <p className="mb-0 relative">
-            <span className="font-bold text-blue-700">2026 – Present Day:</span>{" "}
-            Now we’re proud to introduce Gatherly — a calm hub built to help you explore resources and participate in the community.
-          </p>
-        </motion.div>
-
-        <footer className="mt-14 text-center text-sm text-blue-800/70">
-          © {year} Gatherly • Built for community
-        </footer>
-      </motion.section>
+      
     </motion.div>
   );
 }
