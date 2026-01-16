@@ -54,7 +54,7 @@ type ResourceDoc = {
 };
 // do not touch this (firestore id)
 type LocationItem = ResourceDoc & {
-  id: string; 
+  id: string;
 };
 
 //All animations for map page
@@ -105,7 +105,7 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
 //start of tthe page!
 export default function Page() {
   // DO NOT TOUCH THIS
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
   // center of map
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
@@ -116,10 +116,8 @@ export default function Page() {
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
-  
   const [directoryQuery, setDirectoryQuery] = useState("");
 
-  
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const [locations, setLocations] = useState<LocationItem[]>([]);
@@ -214,7 +212,7 @@ export default function Page() {
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      return dist < 0.09; 
+      return dist < 0.09;
     };
 
     return locations.filter(
@@ -273,7 +271,6 @@ export default function Page() {
 
   return (
     <APIProvider apiKey={apiKey} libraries={["places"]}>
-      
       <div className="min-h-screen bg-white text-slate-900">
         <motion.div
           variants={container}
