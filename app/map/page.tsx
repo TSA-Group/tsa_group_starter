@@ -78,7 +78,7 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-/** ---------- Options ---------- */
+//Main options for filter( if you add a new option to the pls also add it to the event ttype above)
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
   "Park & Trails",
@@ -102,34 +102,31 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
   "Shopping",
 ];
 
-/** ---------- Page ---------- */
+//start of tthe page!
 export default function Page() {
-  // ✅ Use env var. Put this in .env.local and Vercel env:
-  // NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxxxx
+  // DO NOT TOUCH THIS
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // Cross Creek Ranch-ish default center
+  // center of map
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
 
-  // Places autocomplete (map search)
   type Prediction = { description: string; place_id: string };
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [input, setInput] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
-  // Directory search
+  
   const [directoryQuery, setDirectoryQuery] = useState("");
 
-  // Active marker
+  
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Firestore resources
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
 
-  /** ---------- Load resources from Firestore (NO seed button) ---------- */
+  // This links the firestore to the map so u the users are able to add events
   useEffect(() => {
     setLoading(true);
     setDbError(null);
@@ -141,7 +138,6 @@ export default function Page() {
         snap.forEach((doc) => {
           const data = doc.data() as DocumentData;
 
-          // Soft-validate required fields
           const title = String(data?.title ?? "").trim();
           const address = String(data?.address ?? "").trim();
           const pos = data?.position;
@@ -183,7 +179,7 @@ export default function Page() {
     return () => unsub();
   }, []);
 
-  /** ---------- Filters ---------- */
+  // filters for map
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
   const [activityFilters, setActivityFilters] = useState<ActivityType[]>([]);
   const [radiusMode, setRadiusMode] = useState<"All" | "Near Center">("All");
@@ -218,7 +214,7 @@ export default function Page() {
       const dx = loc.position.lat - center.lat;
       const dy = loc.position.lng - center.lng;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      return dist < 0.09; // "nearby"
+      return dist < 0.09; 
     };
 
     return locations.filter(
@@ -277,7 +273,7 @@ export default function Page() {
 
   return (
     <APIProvider apiKey={apiKey} libraries={["places"]}>
-      {/* LIGHT THEME */}
+      
       <div className="min-h-screen bg-white text-slate-900">
         <motion.div
           variants={container}
@@ -285,7 +281,6 @@ export default function Page() {
           animate="show"
           className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 py-8 sm:py-10"
         >
-          {/* Header */}
           <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
