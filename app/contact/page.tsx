@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 
 /* =======================
-   Animations (History-style)
+   Animations
 ======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -58,7 +58,7 @@ export default function ContactPage() {
       className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900"
     >
       {/* ================= Header ================= */}
-      <div className="max-w-7xl mx-auto px-6 pt-10 pb-8">
+      <div className="max-w-5xl mx-auto px-6 pt-10 pb-8">
         <motion.div variants={fadeUp}>
           <div className="text-xs font-semibold tracking-[0.22em] text-blue-700">
             GATHERLY • CONTACT
@@ -74,20 +74,20 @@ export default function ContactPage() {
       </div>
 
       {/* ================= Form Card ================= */}
-      <div className="max-w-4xl mx-auto px-6 pb-20">
+      <div className="max-w-5xl mx-auto px-6 pb-24">
         <motion.div
           variants={card}
           className="rounded-3xl border border-blue-300 bg-white shadow-md"
         >
           {/* Alerts */}
-          <div className="px-6 pt-6">
+          <div className="px-8 pt-8">
             <AnimatePresence>
               {sent && (
                 <motion.div
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="mb-5 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+                  className="mb-6 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
                 >
                   ✅ Message sent successfully!
                 </motion.div>
@@ -100,7 +100,7 @@ export default function ContactPage() {
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="mb-5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
+                  className="mb-6 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800"
                 >
                   ❌ {error}
                 </motion.div>
@@ -111,24 +111,14 @@ export default function ContactPage() {
           {/* Form */}
           <form
             onSubmit={onSubmit}
-            className="px-6 pb-8 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6"
+            className="px-8 pb-10 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6"
           >
             <Field label="First Name">
-              <input
-                className="form-input"
-                placeholder="Jane"
-                autoComplete="given-name"
-                required
-              />
+              <input className="form-input" placeholder="Jane" required />
             </Field>
 
             <Field label="Last Name">
-              <input
-                className="form-input"
-                placeholder="Doe"
-                autoComplete="family-name"
-                required
-              />
+              <input className="form-input" placeholder="Doe" required />
             </Field>
 
             <Field label="Email">
@@ -136,7 +126,6 @@ export default function ContactPage() {
                 type="email"
                 className="form-input"
                 placeholder="jane@email.com"
-                autoComplete="email"
                 required
               />
             </Field>
@@ -152,7 +141,7 @@ export default function ContactPage() {
             <div className="sm:col-span-2">
               <Field label="Message">
                 <textarea
-                  className="form-input min-h-[160px] resize-none"
+                  className="form-input min-h-[170px] resize-none"
                   placeholder="Tell us your question or share a resource (name, address, category, hours, etc.)"
                   required
                 />
@@ -160,7 +149,7 @@ export default function ContactPage() {
             </div>
 
             {/* Actions */}
-            <div className="sm:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+            <div className="sm:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
               <Link
                 href="/"
                 className="text-sm font-semibold text-blue-800 hover:text-blue-900 transition"
@@ -189,13 +178,13 @@ export default function ContactPage() {
         © {new Date().getFullYear()} Gatherly
       </footer>
 
-      {/* ================= Input Styles (LOCAL) ================= */}
+      {/* ================= Input Styles ================= */}
       <style jsx global>{`
         .form-input {
           width: 100%;
           border-radius: 0.75rem;
-          border: 1.5px solid rgb(96 165 250); /* blue-400 */
-          background: rgb(239 246 255); /* blue-50 */
+          border: 1.5px solid rgb(96 165 250);
+          background: rgb(239 246 255);
           padding: 0.75rem 1rem;
           font-size: 0.95rem;
           color: rgb(15 23 42);
@@ -211,7 +200,7 @@ export default function ContactPage() {
         .form-input:focus {
           outline: none;
           background: #ffffff;
-          border-color: rgb(37 99 235); /* blue-600 */
+          border-color: rgb(37 99 235);
           box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
         }
       `}</style>
@@ -232,4 +221,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
-
