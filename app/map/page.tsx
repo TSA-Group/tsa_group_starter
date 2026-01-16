@@ -7,7 +7,9 @@ import {
   Map,
   AdvancedMarker,
   useMapsLibrary,
+  useMap,
 } from "@vis.gl/react-google-maps";
+
 import Image from "next/image";
 
 import { db } from "@/lib/firebase";
@@ -110,8 +112,7 @@ export default function Page() {
   // center of map
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const [mapReady, setMapReady] = useState(false);
+  const map = useMap();
 
   type Prediction = { description: string; place_id: string };
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -246,12 +247,14 @@ export default function Page() {
     (directoryQuery.trim() ? 1 : 0);
 
   const handleCenter = (loc: LocationItem | LatLng) => {
-    if (!mapRef.current) return;
+    if (!map) return;
 
-    mapRef.current.panTo("position" in loc ? loc.position : loc);
-    mapRef.current.setZoom(15);
+    const target = "position" in loc ? loc.position : loc;
 
-    setCenter("position" in loc ? loc.position : loc);
+    map.panTo(target);
+    map.setZoom(15);
+
+    setCenter(target);
     setSelectedPlace(null);
   };
 
@@ -437,10 +440,6 @@ export default function Page() {
                 <div className="p-4 sm:p-5">
                   <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
                     <Map
-                      onLoad={(map) => {
-                        mapRef.current = map;
-                        setMapReady(true);
-                      }}
                       mapId="8859a83a13a834f6eeef1c63"
                       defaultCenter={center}
                       defaultZoom={zoom}
