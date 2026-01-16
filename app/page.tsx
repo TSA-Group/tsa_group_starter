@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { QuickActions } from "./QuickActions";
 import { useRouter } from "next/navigation";
 import {
   motion,
@@ -165,41 +164,11 @@ function msFromDateAndTime(dateStr: string, timeStr?: string): number {
 
 /* ---------------- Orbs ---------------- */
 const ORBS = [
-  {
-    size: 220,
-    color: "rgba(59,130,246,0.18)",
-    top: 12,
-    left: 8,
-    speed: 0.22,
-  },
-  {
-    size: 320,
-    color: "rgba(147,197,253,0.16)",
-    top: 45,
-    left: 75,
-    speed: 0.35,
-  },
-  {
-    size: 180,
-    color: "rgba(15,23,42,0.12)",
-    top: 70,
-    left: 18,
-    speed: 0.15,
-  },
-  {
-    size: 260,
-    color: "rgba(147,197,253,0.10)",
-    top: 18,
-    left: 82,
-    speed: 0.3,
-  },
-  {
-    size: 200,
-    color: "rgba(59,130,246,0.14)",
-    top: 62,
-    left: 52,
-    speed: 0.25,
-  },
+  { size: 220, color: "rgba(59,130,246,0.18)", top: 12, left: 8, speed: 0.22 },
+  { size: 320, color: "rgba(147,197,253,0.16)", top: 45, left: 75, speed: 0.35 },
+  { size: 180, color: "rgba(15,23,42,0.12)", top: 70, left: 18, speed: 0.15 },
+  { size: 260, color: "rgba(147,197,253,0.10)", top: 18, left: 82, speed: 0.3 },
+  { size: 200, color: "rgba(59,130,246,0.14)", top: 62, left: 52, speed: 0.25 },
 ];
 
 /* ---------------- Feature Data ---------------- */
@@ -305,7 +274,7 @@ type CalendarEvent = {
 export default function Home() {
   const router = useRouter();
   const reduce = useReducedMotion();
-  const reduceBool = !!reduce; // ✅ FIX: force boolean (no null)
+  const reduceBool = !!reduce; // ✅ force boolean
 
   // Smooth scroll fallback (no Lenis)
   useSmoothScrollFallback(!reduceBool);
@@ -388,12 +357,12 @@ export default function Home() {
     "blur(1.5px)",
   ]);
 
-  /* ---- Intro overlay ---- */
+  /* ---- Intro overlay (0.5s) ---- */
   const [intro, setIntro] = useState(true);
   useEffect(() => {
-    const t = window.setTimeout(() => setIntro(false), reduceBool ? 350 : 1200);
+    const t = window.setTimeout(() => setIntro(false), 500);
     return () => window.clearTimeout(t);
-  }, [reduceBool]);
+  }, []);
 
   /* ---- Calendar ---- */
   const [calendarDate, setCalendarDate] = useState(new Date());
@@ -442,7 +411,7 @@ export default function Home() {
   );
 
   /* ============================================================
-      FIRESTORE EVENTS (replaces hardcoded events array)
+      FIRESTORE EVENTS
      ============================================================ */
   const [dbEvents, setDbEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -648,7 +617,7 @@ export default function Home() {
           <motion.div
             className="fixed inset-0 z-[80] flex items-center justify-center"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.6 } }}
+            exit={{ opacity: 0, transition: { duration: 0.35 } }}
             style={{
               background:
                 "radial-gradient(900px circle at 50% 40%, rgba(147,197,253,0.35), rgba(255,255,255,1) 55%, rgba(238,244,250,1) 100%)",
@@ -662,36 +631,21 @@ export default function Home() {
                 filter: "blur(10px)",
               }}
               animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               className="px-8 py-7 rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-xl"
             >
-              <motion.div
-                initial={{ letterSpacing: "0.2em", opacity: 0.7 }}
-                animate={{ letterSpacing: "0.08em", opacity: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="text-xs font-semibold text-blue-700 text-center"
-              >
+              <div className="text-xs font-semibold text-blue-700 text-center tracking-[0.2em]">
                 COMMUNITY • RESOURCES • EVENTS
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="mt-2 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 text-center"
-              >
+              </div>
+              <div className="mt-2 text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 text-center">
                 GATHERLY
-              </motion.div>
+              </div>
 
               <div className="mt-4 flex items-center justify-center gap-2">
                 <motion.span
                   className="h-2 w-2 rounded-full bg-blue-700"
                   animate={{ scale: [1, 1.8, 1] }}
-                  transition={{
-                    duration: 1.1,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
+                  transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.span
                   className="h-2 w-2 rounded-full bg-blue-500"
@@ -750,10 +704,9 @@ export default function Home() {
             style={{ y: heroTextY }}
             className="mt-5 max-w-2xl text-base sm:text-lg text-blue-800 text-center mx-auto"
           >
-            Explore Cross Creek and all it has to offer! Sign up for local
-            community events and explore new parts of our community.
+            Explore Cross Creek and all it has to offer! Sign up for local community
+            events and explore new parts of our community.
           </motion.p>
-
         </motion.div>
 
         <motion.div
@@ -766,9 +719,7 @@ export default function Home() {
             className="inline-flex items-center gap-2"
             animate={reduceBool ? undefined : { y: [0, 6, 0] }}
             transition={
-              reduceBool
-                ? undefined
-                : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+              reduceBool ? undefined : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
             }
           >
             <span className="font-semibold">Scroll</span>
@@ -778,32 +729,21 @@ export default function Home() {
         </motion.div>
       </motion.header>
 
-      {/* ✅ NEW: CROSS CREEK RANCH BANNER */}
+      {/* Banner */}
       <CrossCreekBanner
-        reduce={reduceBool} // ✅ FIXED HERE
+        reduce={reduceBool}
         scrollProgSmooth={scrollProgSmooth}
         onExplore={() => router.push("/map")}
         onEvents={() => router.push("/events")}
       />
 
-      {/* MAIN */}
-      <motion.main className="max-w-7xl mx-auto px-6 pb-28 flex flex-col lg:flex-row gap-10 lg:gap-14 mt-16">
+      {/* ✅ Calendar section now full width (QuickActions removed) */}
+      <motion.main className="max-w-7xl mx-auto px-6 pb-28 mt-16">
         <motion.section
-          initial={{ opacity: 0, x: -30, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:w-1/3 flex flex-col justify-end"
-        >
-          <QuickActions />
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, x: 30, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:w-2/3 flex flex-col justify-end"
         >
           <motion.div
             ref={calendarRef}
@@ -811,15 +751,13 @@ export default function Home() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-60px" }}
-            className="bg-white/70 backdrop-blur-xl rounded-3xl border border-blue-200 shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6"
+            className="bg-white/70 backdrop-blur-xl rounded-3xl border border-blue-200 shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6 sm:p-8"
           >
             <div className="flex items-center justify-between mb-4">
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() =>
-                  setCalendarDate(new Date(calYear, calMonth - 1, 1))
-                }
+                onClick={() => setCalendarDate(new Date(calYear, calMonth - 1, 1))}
                 className="text-blue-700 text-2xl font-bold px-2"
               >
                 ❮
@@ -836,25 +774,21 @@ export default function Home() {
                 <div className="mt-1 text-xs text-blue-700/80">
                   {eventsLoading
                     ? "Loading events…"
-                    : `${totalEventsThisMonth} event${
-                        totalEventsThisMonth === 1 ? "" : "s"
-                      }`}
+                    : `${totalEventsThisMonth} event${totalEventsThisMonth === 1 ? "" : "s"}`}
                 </div>
               </div>
 
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() =>
-                  setCalendarDate(new Date(calYear, calMonth + 1, 1))
-                }
+                onClick={() => setCalendarDate(new Date(calYear, calMonth + 1, 1))}
                 className="text-blue-700 text-2xl font-bold px-2"
               >
                 ❯
               </motion.button>
             </div>
 
-            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-1">
+            <div className="grid grid-cols-7 text-xs sm:text-sm text-blue-700 font-medium mb-2">
               {daysOfWeek.map((d) => (
                 <div key={d} className="text-center">
                   {d}
@@ -862,7 +796,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-2">
               {calendarDays.map((date, idx) => {
                 if (!date) return <div key={idx} />;
                 const isToday = date.getTime() === texasToday.getTime();
@@ -886,7 +820,7 @@ export default function Home() {
                     whileHover={reduceBool ? undefined : { y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     className={[
-                      "relative flex flex-col items-center justify-start h-12 w-full rounded-xl text-sm sm:text-base font-semibold cursor-pointer transition-colors",
+                      "relative flex flex-col items-center justify-start h-14 sm:h-16 w-full rounded-2xl text-sm sm:text-base font-semibold cursor-pointer transition-colors",
                       isSelected
                         ? "bg-blue-400 text-white"
                         : isToday
@@ -905,16 +839,12 @@ export default function Home() {
                     {hasEvent && (
                       <motion.span
                         layoutId={`dot-${key}`}
-                        className="block mt-1 w-2 h-2 bg-blue-500 rounded-full"
+                        className="block mt-1 w-2.5 h-2.5 bg-blue-500 rounded-full"
                         animate={reduceBool ? undefined : { scale: [1, 1.35, 1] }}
                         transition={
                           reduceBool
                             ? undefined
-                            : {
-                                duration: 1.6,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                              }
+                            : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }
                         }
                       />
                     )}
@@ -930,7 +860,7 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   exit={{ opacity: 0, y: 10, filter: "blur(10px)" }}
                   transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                  className="mt-4 bg-white/80 backdrop-blur-xl border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
+                  className="mt-5 bg-white/80 backdrop-blur-xl border border-blue-200 rounded-2xl shadow p-4 overflow-y-auto max-h-96"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="font-semibold text-blue-900">
@@ -955,36 +885,25 @@ export default function Home() {
                         <motion.li
                           key={`${event.id}-${i}`}
                           whileHover={reduceBool ? undefined : { scale: 1.02, x: 2 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 260,
-                            damping: 18,
-                          }}
+                          transition={{ type: "spring", stiffness: 260, damping: 18 }}
                           className="border-l-4 border-blue-500 pl-3 cursor-pointer"
                           onClick={() => router.push(`/events?focus=${event.id}`)}
                         >
                           <p className="font-semibold text-blue-800">
                             {event.startLabel}
-                            {event.endLabel ? ` – ${event.endLabel}` : ""} •{" "}
-                            {event.title}
+                            {event.endLabel ? ` – ${event.endLabel}` : ""} • {event.title}
                           </p>
                           {event.location ? (
-                            <p className="text-xs text-blue-700">
-                              {event.location}
-                            </p>
+                            <p className="text-xs text-blue-700">{event.location}</p>
                           ) : null}
                           {event.description ? (
-                            <p className="text-xs text-blue-700">
-                              {event.description}
-                            </p>
+                            <p className="text-xs text-blue-700">{event.description}</p>
                           ) : null}
                         </motion.li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-3 text-blue-700 text-sm">
-                      No events for this day
-                    </p>
+                    <p className="mt-3 text-blue-700 text-sm">No events for this day</p>
                   )}
                 </motion.div>
               )}
@@ -1003,21 +922,9 @@ export default function Home() {
           className="rounded-[34px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] p-6 sm:p-10"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <FeatureStat
-              title="Curated resources"
-              value="Local-first"
-              desc="Support services, food, fitness, and more."
-            />
-            <FeatureStat
-              title="Community events"
-              value="Real-time"
-              desc="Find what’s happening near you."
-            />
-            <FeatureStat
-              title="Trust & clarity"
-              value="No noise"
-              desc="Just what helps your neighborhood thrive."
-            />
+            <FeatureStat title="Curated resources" value="Local-first" desc="Support services, food, fitness, and more." />
+            <FeatureStat title="Community events" value="Real-time" desc="Find what’s happening near you." />
+            <FeatureStat title="Trust & clarity" value="No noise" desc="Just what helps your neighborhood thrive." />
           </div>
         </motion.div>
       </motion.section>
@@ -1025,11 +932,7 @@ export default function Home() {
       {/* Content sections + curved dividers */}
       {FEATURES.map((f, i) => (
         <React.Fragment key={`${f.title}-${i}`}>
-          <motion.section
-            initial="hidden"
-            variants={container}
-            className="max-w-7xl mx-auto px-6 my-20"
-          >
+          <motion.section initial="hidden" variants={container} className="max-w-7xl mx-auto px-6 my-20">
             <motion.div
               variants={fadeUp}
               initial="hidden"
@@ -1047,11 +950,7 @@ export default function Home() {
           </motion.section>
 
           <div className="-mt-14">
-            <svg
-              viewBox="0 0 1440 120"
-              preserveAspectRatio="none"
-              className="w-full h-20"
-            >
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-20">
               <path
                 d="M0,0 C480,120 960,0 1440,120 L1440,0 L0,0 Z"
                 fill="rgba(229,233,239,0.28)"
@@ -1072,11 +971,7 @@ export default function Home() {
         <motion.h2
           className="text-4xl sm:text-5xl font-extrabold text-blue-900 text-center mb-10"
           animate={reduceBool ? undefined : { y: [0, -3, 0] }}
-          transition={
-            reduceBool
-              ? undefined
-              : { duration: 4, repeat: Infinity, ease: "easeInOut" }
-          }
+          transition={reduceBool ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           Our Story!
         </motion.h2>
@@ -1086,28 +981,20 @@ export default function Home() {
           whileHover={reduceBool ? undefined : { y: -4 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
         >
-          <div className="absolute -top-20 -left-16 w-[380px] h-[380px] rounded-full bg-blue-300/20 blur-3xl" />
-          <div className="absolute -bottom-24 -right-16 w-[420px] h-[420px] rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="absolute -top-20 -left-16 w-[380px] h-[380px] rounded-full bg-blue-300/20 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-16 w-[420px] h-[420px] rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
           <p className="mb-6 relative">
-            <span className="font-bold text-blue-700">2023 – Starting Out:</span>{" "}
-            Cross Creek is founded in the beautiful town of Fulshear in 2006 but
-            our first residents did not arrive until 2008.
+            <span className="font-bold text-blue-700">2006 – Starting Out:</span>{" "}
+            Cross Creek is founded in the beautiful town of Fulshear in 2006 but our first residents did not arrive until 2008.
           </p>
           <p className="mb-6 relative">
-            <span className="font-bold text-blue-700">
-              2024 – A little to know about us:
-            </span>{" "}
-            Our community is massive and sits on 3,200 acres and is home to
-            around 20,000 residents! We pride ourselves in always giving our
-            residents the best.
+            <span className="font-bold text-blue-700">2024 – About us:</span>{" "}
+            Our community sits on 3,200 acres and is home to thousands of residents. We work hard to give our residents the best experience possible.
           </p>
           <p className="mb-0 relative">
-            <span className="font-bold text-blue-700">2025 – Present Day:</span>{" "}
-            Now in 2026, our staff is proud to announce our new website,
-            Gatherly, with its main focus being to help you! We have specially
-            made it to guide you around the area and to help participate in our
-            community.
+            <span className="font-bold text-blue-700">2026 – Present Day:</span>{" "}
+            Now we’re proud to introduce Gatherly — a calm hub built to help you explore resources and participate in the community.
           </p>
         </motion.div>
 
@@ -1119,7 +1006,7 @@ export default function Home() {
   );
 }
 
-/* ---------------- NEW Banner ---------------- */
+/* ---------------- Banner ---------------- */
 
 function CrossCreekBanner({
   reduce,
@@ -1132,23 +1019,14 @@ function CrossCreekBanner({
   onExplore: () => void;
   onEvents: () => void;
 }) {
-  // subtle parallax on the whole banner
   const lift = useTransform(scrollProgSmooth, [0, 0.35, 0.7], [0, -10, -16]);
-  const glow = useTransform(
-    scrollProgSmooth,
-    [0.18, 0.42, 0.7],
-    [0.18, 0.26, 0.18],
-  );
-
+  const glow = useTransform(scrollProgSmooth, [0.18, 0.42, 0.7], [0.18, 0.26, 0.18]);
   const shimmerX = useTransform(scrollProgSmooth, [0, 1], ["-35%", "135%"]);
   const badgeFloat = reduce ? 0 : 1;
 
   return (
     <section className="relative">
-      <motion.div
-        style={reduce ? undefined : { y: lift }}
-        className="max-w-7xl mx-auto px-6"
-      >
+      <motion.div style={reduce ? undefined : { y: lift }} className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -1156,42 +1034,32 @@ function CrossCreekBanner({
           transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
           className="relative mt-10 mb-14 rounded-[36px] border border-blue-200 bg-white/60 backdrop-blur-xl shadow-[0_30px_90px_rgba(15,23,42,0.12)] overflow-hidden"
         >
-          {/* soft animated backlights */}
           <motion.div
             aria-hidden
-            className="absolute -top-24 -left-28 w-[520px] h-[520px] rounded-full blur-3xl"
+            className="absolute -top-24 -left-28 w-[520px] h-[520px] rounded-full blur-3xl pointer-events-none"
             style={{
               background:
                 "radial-gradient(circle at 35% 35%, rgba(59,130,246,0.26), rgba(59,130,246,0) 60%)",
               opacity: glow,
             }}
             animate={reduce ? undefined : { x: [0, 22, 0], y: [0, 14, 0] }}
-            transition={
-              reduce
-                ? undefined
-                : { duration: 10.5, repeat: Infinity, ease: "easeInOut" }
-            }
+            transition={reduce ? undefined : { duration: 10.5, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             aria-hidden
-            className="absolute -bottom-28 -right-28 w-[560px] h-[560px] rounded-full blur-3xl opacity-60"
+            className="absolute -bottom-28 -right-28 w-[560px] h-[560px] rounded-full blur-3xl opacity-60 pointer-events-none"
             style={{
               background:
                 "radial-gradient(circle at 45% 45%, rgba(147,197,253,0.28), rgba(147,197,253,0) 60%)",
             }}
             animate={reduce ? undefined : { x: [0, -20, 0], y: [0, -16, 0] }}
-            transition={
-              reduce
-                ? undefined
-                : { duration: 12.5, repeat: Infinity, ease: "easeInOut" }
-            }
+            transition={reduce ? undefined : { duration: 12.5, repeat: Infinity, ease: "easeInOut" }}
           />
 
-          {/* shimmer sweep */}
           {!reduce && (
             <motion.div
               aria-hidden
-              className="absolute -top-24 left-0 h-[240px] w-[260px] rotate-12 opacity-40"
+              className="absolute -top-24 left-0 h-[240px] w-[260px] rotate-12 opacity-40 pointer-events-none"
               style={{
                 x: shimmerX,
                 background:
@@ -1200,13 +1068,8 @@ function CrossCreekBanner({
             />
           )}
 
-          {/* top wave */}
           <div className="absolute inset-x-0 -top-1 h-24 pointer-events-none">
-            <svg
-              viewBox="0 0 1440 120"
-              preserveAspectRatio="none"
-              className="w-full h-full"
-            >
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full">
               <path
                 d="M0,64 C240,120 480,16 720,64 C960,112 1200,24 1440,64 L1440,0 L0,0 Z"
                 fill="rgba(147,197,253,0.35)"
@@ -1220,16 +1083,8 @@ function CrossCreekBanner({
                 <div className="flex items-center gap-3">
                   <motion.div
                     className="h-10 w-10 rounded-2xl border border-blue-200 bg-white/70 backdrop-blur flex items-center justify-center shadow-sm"
-                    animate={
-                      reduce
-                        ? undefined
-                        : { y: [0, -4, 0], rotate: [-1, 1, -1] }
-                    }
-                    transition={
-                      reduce
-                        ? undefined
-                        : { duration: 4.2, repeat: Infinity, ease: "easeInOut" }
-                    }
+                    animate={reduce ? undefined : { y: [0, -4, 0], rotate: [-1, 1, -1] }}
+                    transition={reduce ? undefined : { duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
                   >
                     <span className="text-blue-800 font-extrabold">CC</span>
                   </motion.div>
@@ -1241,33 +1096,17 @@ function CrossCreekBanner({
 
                 <motion.h3
                   className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600"
-                  animate={
-                    reduce
-                      ? undefined
-                      : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }
-                  }
-                  transition={
-                    reduce
-                      ? undefined
-                      : { duration: 10, repeat: Infinity, ease: "easeInOut" }
-                  }
-                  style={
-                    reduce
-                      ? undefined
-                      : {
-                          backgroundSize: "200% 200%",
-                        }
-                  }
+                  animate={reduce ? undefined : { backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                  transition={reduce ? undefined : { duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                  style={reduce ? undefined : { backgroundSize: "200% 200%" }}
                 >
                   Welcome to Cross Creek Ranch
                 </motion.h3>
 
                 <p className="mt-3 max-w-2xl text-blue-800/90">
-                  A community built for neighbors — parks, trails, events, and
-                  local resources all in one calm, easy place.
+                  A community built for neighbors — parks, trails, events, and local resources all in one calm, easy place.
                 </p>
 
-                {/* animated pills row */}
                 <div className="mt-5 flex flex-wrap gap-2">
                   <PulsePill reduce={reduce} text="Parks & Trails" />
                   <PulsePill reduce={reduce} text="Community Events" />
@@ -1298,7 +1137,6 @@ function CrossCreekBanner({
                 </div>
               </div>
 
-              {/* right “mini card stack” */}
               <div className="w-full lg:w-[420px]">
                 <div className="grid grid-cols-1 gap-3">
                   <motion.div
@@ -1334,20 +1172,8 @@ function CrossCreekBanner({
 
                       <motion.div
                         className="h-10 w-10 rounded-2xl border border-blue-200 bg-blue-50 flex items-center justify-center"
-                        animate={
-                          reduce
-                            ? undefined
-                            : { scale: [1, 1.08, 1], rotate: [0, 3, 0] }
-                        }
-                        transition={
-                          reduce
-                            ? undefined
-                            : {
-                                duration: 2.8,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                              }
-                        }
+                        animate={reduce ? undefined : { scale: [1, 1.08, 1], rotate: [0, 3, 0] }}
+                        transition={reduce ? undefined : { duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
                       >
                         <span className="text-blue-700 font-extrabold">★</span>
                       </motion.div>
@@ -1357,36 +1183,19 @@ function CrossCreekBanner({
                       <motion.div
                         className="h-full bg-gradient-to-r from-blue-700 to-sky-400"
                         initial={{ width: "40%" }}
-                        animate={
-                          reduce
-                            ? undefined
-                            : { width: ["35%", "78%", "48%", "85%"] }
-                        }
-                        transition={
-                          reduce
-                            ? undefined
-                            : {
-                                duration: 6.4,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                              }
-                        }
+                        animate={reduce ? undefined : { width: ["35%", "78%", "48%", "85%"] }}
+                        transition={reduce ? undefined : { duration: 6.4, repeat: Infinity, ease: "easeInOut" }}
                       />
                     </div>
                   </motion.div>
                 </div>
 
-                {/* tiny floating badges (extra life) */}
                 {!reduce && (
                   <div className="relative mt-4 h-10">
                     <motion.div
                       className="absolute left-2 top-0 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
                       animate={{ y: [0, -6, 0], x: [0, 6, 0] }}
-                      transition={{
-                        duration: 4.6,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
+                      transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
                       style={{ opacity: 0.95 * badgeFloat }}
                     >
                       Trails
@@ -1394,12 +1203,7 @@ function CrossCreekBanner({
                     <motion.div
                       className="absolute left-[40%] top-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
                       animate={{ y: [0, -5, 0], x: [0, -5, 0] }}
-                      transition={{
-                        duration: 5.2,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 0.2,
-                      }}
+                      transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
                       style={{ opacity: 0.95 * badgeFloat }}
                     >
                       Meetups
@@ -1407,12 +1211,7 @@ function CrossCreekBanner({
                     <motion.div
                       className="absolute right-2 top-0 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
                       animate={{ y: [0, -6, 0], x: [0, 5, 0] }}
-                      transition={{
-                        duration: 4.9,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 0.1,
-                      }}
+                      transition={{ duration: 4.9, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
                       style={{ opacity: 0.95 * badgeFloat }}
                     >
                       Resources
@@ -1423,13 +1222,8 @@ function CrossCreekBanner({
             </div>
           </div>
 
-          {/* bottom wave */}
           <div className="absolute inset-x-0 -bottom-1 h-20 pointer-events-none opacity-90">
-            <svg
-              viewBox="0 0 1440 120"
-              preserveAspectRatio="none"
-              className="w-full h-full"
-            >
+            <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="w-full h-full">
               <path
                 d="M0,64 C260,24 520,110 720,64 C940,12 1180,112 1440,64 L1440,120 L0,120 Z"
                 fill="rgba(229,233,239,0.55)"
@@ -1447,9 +1241,7 @@ function PulsePill({ text, reduce }: { text: string; reduce: boolean }) {
     <motion.span
       className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800 shadow-sm"
       animate={reduce ? undefined : { y: [0, -2, 0] }}
-      transition={
-        reduce ? undefined : { duration: 3.8, repeat: Infinity, ease: "easeInOut" }
-      }
+      transition={reduce ? undefined : { duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
     >
       <span className="h-2 w-2 rounded-full bg-blue-600" />
       {text}
@@ -1458,85 +1250,6 @@ function PulsePill({ text, reduce }: { text: string; reduce: boolean }) {
 }
 
 /* ---------------- Subcomponents ---------------- */
-
-function MagneticButton({
-  href,
-  label,
-  primary,
-}: {
-  href: string;
-  label: string;
-  primary?: boolean;
-}) {
-  const reduce = useReducedMotion();
-  const ref = useRef<HTMLAnchorElement>(null);
-
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const x = useSpring(rawX, { stiffness: 220, damping: 28, mass: 0.7 });
-  const y = useSpring(rawY, { stiffness: 220, damping: 28, mass: 0.7 });
-
-  const [hovered, setHovered] = useState(false);
-
-  useEffect(() => {
-    if (reduce || !hovered) return;
-    const el = ref.current;
-    if (!el) return;
-
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-
-      rawX.set(clamp(dx * 0.06, -8, 8));
-      rawY.set(clamp(dy * 0.08, -6, 6));
-    };
-
-    const reset = () => {
-      rawX.set(0);
-      rawY.set(0);
-    };
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    el.addEventListener("mouseleave", reset);
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      el.removeEventListener("mouseleave", reset);
-    };
-  }, [reduce, hovered, rawX, rawY]);
-
-  return (
-    <motion.a
-      ref={ref}
-      href={href}
-      style={{ x, y }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      whileHover={reduce ? undefined : { scale: 1.02 }}
-      whileTap={{ scale: 0.985 }}
-      className={[
-        "inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold border transition-colors shadow-sm",
-        primary
-          ? "bg-blue-700 text-white border-blue-700 hover:bg-blue-800"
-          : "bg-white/70 text-blue-900 border-blue-200 hover:bg-white",
-      ].join(" ")}
-    >
-      <span>{label}</span>
-      <motion.span
-        aria-hidden
-        animate={reduce ? undefined : { x: [0, 3, 0] }}
-        transition={
-          reduce
-            ? undefined
-            : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
-        }
-      >
-        →
-      </motion.span>
-    </motion.a>
-  );
-}
 
 function FeatureStat({
   title,
@@ -1604,9 +1317,7 @@ function FlipFeatureRow({
           className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
           <div className="h-[280px] bg-[#8e8e8e] flex items-center justify-center">
-            <span className="text-xl font-semibold text-black/70">
-              {imageLabel}
-            </span>
+            <span className="text-xl font-semibold text-black/70">{imageLabel}</span>
           </div>
         </motion.div>
       </motion.div>
@@ -1630,27 +1341,16 @@ function FlipInfoCard({
   const reduce = useReducedMotion();
 
   return (
-    <button
-      type="button"
-      onClick={() => setFlipped((v) => !v)}
-      className="text-left w-full"
-      aria-pressed={flipped}
-    >
+    <button type="button" onClick={() => setFlipped((v) => !v)} className="text-left w-full" aria-pressed={flipped}>
       <motion.div className="relative w-full" style={{ perspective: 1200 }}>
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{
-            duration: reduce ? 0 : 0.75,
-            ease: [0.16, 1, 0.3, 1],
-          }}
+          transition={{ duration: reduce ? 0 : 0.75, ease: [0.16, 1, 0.3, 1] }}
           className="relative w-full"
           style={{ transformStyle: "preserve-3d" }}
         >
           {/* FRONT */}
-          <div
-            className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-lg overflow-hidden"
-            style={{ backfaceVisibility: "hidden" }}
-          >
+          <div className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-lg overflow-hidden" style={{ backfaceVisibility: "hidden" }}>
             <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 p-6">
               <div className="text-3xl font-medium text-black/80">{title}</div>
             </div>
@@ -1658,25 +1358,18 @@ function FlipInfoCard({
             <div className="p-6">
               <h3 className="text-lg font-semibold text-blue-900">{title}</h3>
               <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
-              <div className="mt-4 text-sm font-semibold text-blue-600">
-                Learn more →
-              </div>
+              <div className="mt-4 text-sm font-semibold text-blue-600">Learn more →</div>
             </div>
           </div>
 
           {/* BACK */}
           <div
             className="absolute inset-0 rounded-3xl border border-blue-200 bg-blue-50 p-6"
-            style={{
-              transform: "rotateY(180deg)",
-              backfaceVisibility: "hidden",
-            }}
+            style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
           >
             <h3 className="text-xl font-extrabold text-blue-900">{title}</h3>
             <p className="mt-3 text-sm text-blue-800">{longDesc}</p>
-            <div className="mt-6 text-sm font-semibold text-blue-700">
-              Click to flip back ↺
-            </div>
+            <div className="mt-6 text-sm font-semibold text-blue-700">Click to flip back ↺</div>
           </div>
         </motion.div>
       </motion.div>
