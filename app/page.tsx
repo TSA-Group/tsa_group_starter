@@ -174,60 +174,16 @@ const ORBS = [
 /* ---------------- Feature Data ---------------- */
 const FEATURES = [
   {
-    title: "Resources",
     shortDesc: "Find trusted local services and support in seconds.",
     longDesc:
       "Browse a curated directory of community resources — food support, fitness, libraries, and more. Search quickly and find what matters without the noise.",
     imageLabel: "Resource Directory Preview",
   },
   {
-    title: "Events",
     shortDesc: "See what’s happening in Cross Creek this week.",
     longDesc:
       "Discover meetups, drives, and neighborhood gatherings. Save dates, share with friends, and stay connected to what’s going on near you.",
     imageLabel: "Events & Calendar Preview",
-  },
-  {
-    title: "Volunteer",
-    shortDesc: "Make a difference with easy ways to help.",
-    longDesc:
-      "Find volunteer opportunities and community initiatives. Whether you have 30 minutes or a weekend, there’s a way to pitch in.",
-    imageLabel: "Volunteer Opportunities Preview",
-  },
-  {
-    title: "Guides",
-    shortDesc: "Simple guides to get settled and explore.",
-    longDesc:
-      "From amenities to local tips, our guides help you navigate the community quickly — with clear, friendly info made for residents.",
-    imageLabel: "Neighborhood Guide Preview",
-  },
-  {
-    title: "Safety",
-    shortDesc: "Stay informed with practical safety info.",
-    longDesc:
-      "Find quick links to emergency contacts, preparedness tips, and community updates. Designed to be clear and calm when it matters.",
-    imageLabel: "Safety & Alerts Preview",
-  },
-  {
-    title: "Parks & Trails",
-    shortDesc: "Explore outdoor spots and favorite routes.",
-    longDesc:
-      "Find parks, trails, and outdoor recreation in and around Cross Creek. Great for families, walkers, and anyone wanting fresh air.",
-    imageLabel: "Parks & Trails Preview",
-  },
-  {
-    title: "Food & Dining",
-    shortDesc: "Find nearby food options and local favorites.",
-    longDesc:
-      "Discover casual eats, local spots, and family-friendly dining. A quick way to explore what’s around your neighborhood.",
-    imageLabel: "Food & Dining Preview",
-  },
-  {
-    title: "Community",
-    shortDesc: "Connect with neighbors and local groups.",
-    longDesc:
-      "Join community groups, discover neighborhood initiatives, and connect with people who share your interests — all in one place.",
-    imageLabel: "Community Groups Preview",
   },
 ];
 
