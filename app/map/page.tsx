@@ -452,11 +452,7 @@ export default function Page() {
                       className="w-full h-full"
                     >
                       {filteredLocations.map((loc) => (
-                        <AdvancedMarker
-                          key={loc.id}
-                          position={loc.position}
-                          anchor="bottom"
-                        >
+                        <AdvancedMarker key={loc.id} position={loc.position}>
                           <HoverMarker
                             location={loc}
                             activeId={activeId}
@@ -1039,9 +1035,10 @@ function HoverMarker({
       onMouseLeave={() => setHovered(false)}
       onClick={handleClick}
       style={{
+        position: "relative",
         cursor: "pointer",
         zIndex: isExpanded ? 9999 : 1,
-        position: "relative",
+        transform: "translate(-50%, -100%)",
       }}
     >
       <AnimatePresence mode="wait">
