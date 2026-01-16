@@ -13,7 +13,7 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, type DocumentData } from "firebase/firestore";
 
-// ALL EVENT TYPES IN OUR SEARCH FUNCTION ( IF U ADD A NEW TYPE PLS MAKE SURE TO ADD IT IN THE BOX AND KEEP IT EVEN )
+// ALL EVENT TYPES IN OUR SEARCH FUNCTION ( IF U ADD A NEW TYPE PLS MAKE SURE TO ADD IT IN THE BOX AND KEEP IT EVEN )//
 interface LatLng {
   lat: number;
   lng: number;
@@ -52,12 +52,12 @@ type ResourceDoc = {
   description?: string;
   featured?: boolean;
 };
-// do not touch this (firestore id)
+// do not touch this (firestore id)//
 type LocationItem = ResourceDoc & {
   id: string;
 };
 
-//All animations for map page
+//All animations for map page//
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -78,7 +78,7 @@ const pop: Variants = {
   show: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
 };
 
-//Main options for filter( if you add a new option to the pls also add it to the event ttype above)
+//Main options for filter( if you add a new option to the pls also add it to the event ttype above)//
 const EVENT_OPTIONS: EventType[] = [
   "Community Event",
   "Park & Trails",
@@ -102,12 +102,12 @@ const ACTIVITY_OPTIONS: ActivityType[] = [
   "Shopping",
 ];
 
-//start of tthe page!
+//start of tthe page!//
 export default function Page() {
-  // DO NOT TOUCH THIS
+  // DO NOT TOUCH THIS//
   const apiKey = "AIzaSyCiMFgLk0Yr6r-no_flkRFIlYNU0PNvlZM";
 
-  // center of map
+  // center of map//
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
 
@@ -124,7 +124,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
 
-  // This links the firestore to the map so u the users are able to add events
+  // This links the firestore to the map so u the users are able to add events//
   useEffect(() => {
     setLoading(true);
     setDbError(null);
@@ -177,7 +177,7 @@ export default function Page() {
     return () => unsub();
   }, []);
 
-  // filters for map
+  // filters for map//
   const [eventFilters, setEventFilters] = useState<EventType[]>([]);
   const [activityFilters, setActivityFilters] = useState<ActivityType[]>([]);
   const [radiusMode, setRadiusMode] = useState<"All" | "Near Center">("All");
@@ -313,13 +313,13 @@ export default function Page() {
                   exit={{ opacity: 0, y: -6 }}
                   className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
                 >
-                  ❌ {dbError}
+                   {dbError}
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
-          {/* Spotlight Resources */}
+          
           <motion.section
             variants={fadeUp}
             className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-5 sm:p-6 mb-6"
