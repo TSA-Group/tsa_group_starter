@@ -1007,7 +1007,7 @@ function SearchBox({
   );
 }
 
-/** ---------- Enhanced Marker (time removed) ---------- */
+// all markers here (DO NOT REMOVE ONLY ADDD)
 export function HoverMarker({
   location,
   activeId,
