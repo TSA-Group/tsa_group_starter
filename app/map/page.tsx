@@ -172,7 +172,7 @@ export default function Page() {
         setLoading(false);
       },
       (err) => {
-        setDbError(err?.message || "Failed to read from Firestore.");
+        setDbError(err?.message || "Error, unable to read");
         setLoading(false);
       },
     );
