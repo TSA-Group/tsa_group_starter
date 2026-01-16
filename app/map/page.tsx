@@ -291,11 +291,10 @@ export default function Page() {
             <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1E3A8A]">
-                  Cross Creek Community Resource Hub
+                  Map of Cross Creek Ranch
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600">
-                  Explore community resources, events, and support — all in one
-                  place.
+                  Explore all that Cross Creek Ranch has and discover new places!
                 </p>
               </div>
 
