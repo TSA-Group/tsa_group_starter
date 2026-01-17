@@ -919,9 +919,6 @@ export default function Home() {
         </React.Fragment>
       ))}
       
-            <footer className="mt-14 text-center text-sm text-blue-800/70">
-          © {year} Gatherly • Built for community
-        </footer>
       
     </motion.div>
   );
