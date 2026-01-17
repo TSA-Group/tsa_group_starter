@@ -919,6 +919,9 @@ export default function Home() {
         </React.Fragment>
       ))}
       
+            <footer className="mt-14 text-center text-sm text-blue-800/70">
+          © {year} Gatherly • Built for community
+        </footer>
       
     </motion.div>
   );
@@ -1235,32 +1238,31 @@ function FlipFeatureRow({
           className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
           <div className="relative h-[280px] w-full">
-          <Image
-            src="/cross_creek.jpg"
-            alt={imageLabel}
-            fill
-            className="object-cover"
-          />
-        </div>
+            <Image
+              src="/cross_creek.jpg"
+              alt={imageLabel}
+              fill
+              className="object-cover"
+            />
+          </div>
         </motion.div>
       </motion.div>
     </div>
   );
 }
 
-function FlipFeatureRow({
+function FlipInfoCard({
   title,
   shortDesc,
   longDesc,
-  imageLabel,
-  imageSrc,
+  flipped,
+  setFlipped,
 }: {
   title: string;
   shortDesc: string;
   longDesc: string;
-  longDesc: string;
-  imageLabel: string;
-  imageSrc: string;
+  flipped: boolean;
+  setFlipped: (v: boolean | ((v: boolean) => boolean)) => void;
 }) {
   const reduce = useReducedMotion();
 
