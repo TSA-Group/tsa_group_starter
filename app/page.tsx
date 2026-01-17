@@ -1236,7 +1236,7 @@ function FlipFeatureRow({
         >
           <div className="relative h-[280px] w-full">
             <Image
-              src="/cross_creek.jpg"
+              src={imageSrc}
               alt={imageLabel}
               fill
               className="object-cover"
@@ -1248,18 +1248,19 @@ function FlipFeatureRow({
   );
 }
 
-function FlipInfoCard({
+function FlipFeatureRow({
   title,
   shortDesc,
   longDesc,
-  flipped,
-  setFlipped,
+  imageLabel,
+  imageSrc,
 }: {
   title: string;
   shortDesc: string;
   longDesc: string;
-  flipped: boolean;
-  setFlipped: (v: boolean | ((v: boolean) => boolean)) => void;
+  longDesc: string;
+  imageLabel: string;
+  imageSrc: string;
 }) {
   const reduce = useReducedMotion();
 
