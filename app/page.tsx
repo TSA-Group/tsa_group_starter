@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   motion,
@@ -1236,8 +1237,13 @@ function FlipFeatureRow({
           transition={{ type: "spring", stiffness: 220, damping: 20 }}
           className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
-          <div className="h-[280px] bg-[#8e8e8e] flex items-center justify-center">
-            <span className="text-xl font-semibold text-black/70">{imageLabel}</span>
+          <div className="relative h-[280px] w-full">
+            <Image
+              src="/cross_creek.jpg"
+              alt={imageLabel}
+              fill
+              className="object-cover"
+            />
           </div>
         </motion.div>
       </motion.div>
