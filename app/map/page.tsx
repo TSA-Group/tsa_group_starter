@@ -112,7 +112,6 @@ export default function Page() {
   // center of map
   const [center, setCenter] = useState<LatLng>({ lat: 29.6995, lng: -95.904 });
   const [zoom, setZoom] = useState(13);
-  const map = useMap();
 
   type Prediction = { description: string; place_id: string };
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -120,13 +119,45 @@ export default function Page() {
   const [selectedPlace, setSelectedPlace] = useState<LatLng | null>(null);
 
   const [directoryQuery, setDirectoryQuery] = useState("");
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const animateTo = (target: LatLng, targetZoom = 15, duration = 600) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const startCenter = map.getCenter();
+    const startZoom = map.getZoom() ?? targetZoom;
+
+    const startLat = startCenter.lat();
+    const startLng = startCenter.lng();
+
+    const start = performance.now();
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const frame = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = easeOutCubic(t);
+
+      const lat = startLat + (target.lat - startLat) * eased;
+      const lng = startLng + (target.lng - startLng) * eased;
+      const zoom = startZoom + (targetZoom - startZoom) * eased;
+
+      map.setCenter({ lat, lng });
+      map.setZoom(zoom);
+
+      if (t < 1) requestAnimationFrame(frame);
+    };
+
+    requestAnimationFrame(frame);
+  };
 
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
-
+  const [mapExpanded, setMapExpanded] = useState(false);
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   // This links the firestore to the map so u the users are able to add events
   useEffect(() => {
     setLoading(true);
@@ -247,15 +278,13 @@ export default function Page() {
     (directoryQuery.trim() ? 1 : 0);
 
   const handleCenter = (loc: LocationItem | LatLng) => {
-    if (!map) return;
-
     const target = "position" in loc ? loc.position : loc;
 
-    map.panTo(target);
-    map.setZoom(15);
+    animateTo(target, 15);
 
-    setCenter(target);
-    setSelectedPlace(null);
+    if ("id" in loc) {
+      setActiveId(loc.id);
+    }
   };
 
   if (!apiKey) {
@@ -294,7 +323,8 @@ export default function Page() {
                   Map of Cross Creek Ranch
                 </h1>
                 <p className="mt-2 text-sm sm:text-base text-slate-600">
-                  Explore all that Cross Creek Ranch has and discover new places!
+                  Explore all that Cross Creek Ranch has and discover new
+                  places!
                 </p>
               </div>
 
@@ -321,7 +351,7 @@ export default function Page() {
                   exit={{ opacity: 0, y: -6 }}
                   className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
                 >
-                   {dbError}
+                  {dbError}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -390,7 +420,7 @@ export default function Page() {
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Filters */}
-            <motion.aside variants={fadeUp} className="lg:col-span-4">
+            <motion.aside variants={fadeUp} className="lg:col-span-4 space-y-6">
               <FilterBox
                 eventFilters={eventFilters}
                 setEventFilters={setEventFilters}
@@ -405,16 +435,51 @@ export default function Page() {
                   setDirectoryQuery("");
                 }}
               />
+              <motion.section
+                variants={fadeUp}
+                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
+              >
+                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
+                    Helpful Info
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Tips for using the hub + quick guidance for residents.
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5 space-y-4">
+                  <InfoCard
+                    title="How to use this hub"
+                    lines={[
+                      "Use Filters to narrow by category and activities.",
+                      "Use Search directory to find resources by keyword.",
+                      "Use Search map to jump to any place by typing an address/place name.",
+                      "Tap any resource card to center it on the map.",
+                    ]}
+                  />
+                  <InfoCard
+                    title="Emergency & urgent needs"
+                    lines={[
+                      "If this is an emergency, call local emergency services.",
+                      "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
+                      "For after-hours info, use the community Welcome Center during business hours for guidance.",
+                    ]}
+                  />
+                </div>
+              </motion.section>
             </motion.aside>
 
             {/* Map + Search + List */}
             <div className="lg:col-span-8 space-y-6">
-              
+              {/* MAP ONLY FULLSCREEN LOGIC */}
+
               <motion.section
                 variants={fadeUp}
-                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-visible"
+                className="flex flex-col rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
               >
-                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                {/* map content */}
+
+                <div className="relative p-4 sm:p-5 border-b border-blue-200/60 shrink-0">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div>
                       <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
@@ -425,52 +490,67 @@ export default function Page() {
                       </p>
                     </div>
 
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
-                    >
-                      {`Showing ${filteredLocations.length} location${
-                        filteredLocations.length === 1 ? "" : "s"
-                      }`}
-                    </motion.div>
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        className="text-xs sm:text-sm px-3 py-2 rounded-full border border-blue-200 bg-white text-blue-900"
+                      >
+                        {`Showing ${filteredLocations.length} location${
+                          filteredLocations.length === 1 ? "" : "s"
+                        }`}
+                      </motion.div>
+
+                      {!mapExpanded && (
+                        <motion.button
+                          whileHover={{ scale: 1.04 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => {
+                            setMapExpanded(true);
+                            setShowSearchOverlay(false);
+                          }}
+                          className="text-xs sm:text-sm px-4 py-2 rounded-full
+                                       bg-blue-600 text-white font-semibold shadow"
+                        >
+                          Expand map
+                        </motion.button>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white relative">
+                  <Map
+                    mapId="8859a83a13a834f6eeef1c63"
+                    defaultCenter={center}
+                    defaultZoom={zoom}
+                    gestureHandling="greedy"
+                    disableDefaultUI={true}
+                    zoomControl={false}
+                    fullscreenControl={false}
+                    streetViewControl={false}
+                    mapTypeControl={false}
+                    onClick={() => setActiveId(null)}
+                    className="w-full h-full"
+                  >
+                    <MapController onReady={(m) => (mapRef.current = m)} />
 
-                <div className="p-4 sm:p-5">
-                  <div className="w-full h-[320px] sm:h-[380px] lg:h-[420px] rounded-3xl border border-blue-200 overflow-hidden bg-white">
-                    <Map
-                      mapId="8859a83a13a834f6eeef1c63"
-                      defaultCenter={center}
-                      defaultZoom={zoom}
-                      gestureHandling="greedy"
-                      disableDefaultUI={true}
-                      zoomControl={false}
-                      fullscreenControl={false}
-                      streetViewControl={false}
-                      mapTypeControl={false}
-                      onClick={() => setActiveId(null)}
-                      className="w-full h-full"
-                    >
-                      {filteredLocations.map((loc) => (
-                        <AdvancedMarker key={loc.id} position={loc.position}>
-                          <HoverMarker
-                            location={loc}
-                            activeId={activeId}
-                            setActiveId={setActiveId}
-                            onCenter={handleCenter}
-                          />
-                        </AdvancedMarker>
-                      ))}
+                    {filteredLocations.map((loc) => (
+                      <AdvancedMarker key={loc.id} position={loc.position}>
+                        <HoverMarker
+                          location={loc}
+                          activeId={activeId}
+                          setActiveId={setActiveId}
+                          onCenter={handleCenter}
+                        />
+                      </AdvancedMarker>
+                    ))}
 
-                      {selectedPlace && (
-                        <AdvancedMarker position={selectedPlace}>
-                          <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
-                        </AdvancedMarker>
-                      )}
-                    </Map>
-                  </div>
-
-                  <div className="mt-4 relative z-50">
+                    {selectedPlace && (
+                      <AdvancedMarker position={selectedPlace}>
+                        <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
+                      </AdvancedMarker>
+                    )}
+                  </Map>
+                  <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[1000] w-[min(92%,480px)]">
                     <SearchBox
                       directoryQuery={directoryQuery}
                       setDirectoryQuery={setDirectoryQuery}
@@ -481,8 +561,7 @@ export default function Page() {
                       predictions={predictions}
                       setPredictions={setPredictions}
                       setCenter={(loc) => {
-                        setCenter(loc);
-                        setZoom(15);
+                        animateTo(loc, 15);
                       }}
                       setSelectedPlace={setSelectedPlace}
                     />
@@ -490,12 +569,11 @@ export default function Page() {
                 </div>
               </motion.section>
 
-              
               <motion.section
                 variants={fadeUp}
                 className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
               >
-                <div className="p-4 sm:p-5 border-b border-blue-200/60">
+                <div className="relative p-4 sm:p-5 border-b border-blue-200/60">
                   <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
                     Resource Directory
                   </h3>
@@ -575,48 +653,93 @@ export default function Page() {
                   )}
                 </div>
               </motion.section>
-
-              
-              <motion.section
-                variants={fadeUp}
-                className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm overflow-hidden"
-              >
-                <div className="p-4 sm:p-5 border-b border-blue-200/60">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
-                    Helpful Info
-                  </h3>
-                  <p className="text-sm text-slate-600">
-                    Tips for using the hub + quick guidance for residents.
-                  </p>
-                </div>
-                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InfoCard
-                    title="How to use this hub"
-                    lines={[
-                      "Use Filters to narrow by category and activities.",
-                      "Use Search directory to find resources by keyword.",
-                      "Use Search map to jump to any place by typing an address/place name.",
-                      "Tap any resource card to center it on the map.",
-                    ]}
-                  />
-                  <InfoCard
-                    title="Emergency & urgent needs"
-                    lines={[
-                      "If this is an emergency, call local emergency services.",
-                      "For urgent food or support needs, check 'Food Pantry' or 'Support Services' filters.",
-                      "For after-hours info, use the community Welcome Center during business hours for guidance.",
-                    ]}
-                  />
-                </div>
-              </motion.section>
             </div>
           </div>
+          {mapExpanded && (
+            <div className="fixed inset-0 z-[2000] bg-white flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-blue-200">
+                <div>
+                  <h2 className="text-lg font-bold text-[#1E3A8A]">
+                    Interactive Resource Map
+                  </h2>
+                  <p className="text-sm text-slate-600">
+                    Search the directory or search the map.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setMapExpanded(false)}
+                  className="rounded-full bg-blue-600 text-white px-4 py-2 text-sm font-semibold shadow"
+                >
+                  Exit fullscreen
+                </button>
+              </div>
+
+              {/* Map */}
+              <div className="relative w-full pointer-events-auto h-[520px] sm:h-[620px] lg:h-[700px]">
+                <Map
+                  mapId="8859a83a13a834f6eeef1c63"
+                  defaultCenter={center}
+                  defaultZoom={zoom}
+                  gestureHandling="greedy"
+                  disableDefaultUI={true}
+                  zoomControl={false}
+                  fullscreenControl={false}
+                  streetViewControl={false}
+                  mapTypeControl={false}
+                  onClick={() => setActiveId(null)}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <MapController onReady={(m) => (mapRef.current = m)} />
+
+                  {filteredLocations.map((loc) => (
+                    <AdvancedMarker key={loc.id} position={loc.position}>
+                      <HoverMarker
+                        location={loc}
+                        activeId={activeId}
+                        setActiveId={setActiveId}
+                        onCenter={handleCenter}
+                      />
+                    </AdvancedMarker>
+                  ))}
+
+                  {selectedPlace && (
+                    <AdvancedMarker position={selectedPlace}>
+                      <div className="w-4 h-4 rounded-full bg-blue-700 border-2 border-white shadow" />
+                    </AdvancedMarker>
+                  )}
+                </Map>
+
+                {/* 🔍 FLOATING SEARCH OVER MAP */}
+                {/* 🔍 FULLSCREEN SEARCH OVER MAP */}
+                <div
+                  className="absolute top-6 left-1/2 -translate-x-1/2 z-[3000]
+                             w-[min(92%,480px)]"
+                >
+                  <SearchBox
+                    directoryQuery={directoryQuery}
+                    setDirectoryQuery={setDirectoryQuery}
+                    directoryResults={locations}
+                    onDirectoryPick={(loc) => handleCenter(loc)}
+                    input={input}
+                    setInput={setInput}
+                    predictions={predictions}
+                    setPredictions={setPredictions}
+                    setCenter={(loc) => {
+                      animateTo(loc, 15);
+                    }}
+                    setSelectedPlace={setSelectedPlace}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </APIProvider>
   );
 }
-
 
 function FilterBox({
   eventFilters,
@@ -673,7 +796,6 @@ function FilterBox({
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
-        
         <div>
           <div className="text-sm font-semibold text-slate-900">Area</div>
           <div className="mt-2 flex gap-2">
@@ -698,7 +820,6 @@ function FilterBox({
           </div>
         </div>
 
-        
         <div>
           <div className="text-sm font-semibold text-slate-900">Category</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -723,7 +844,6 @@ function FilterBox({
           </div>
         </div>
 
-        
         <div>
           <div className="text-sm font-semibold text-slate-900">Activities</div>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -785,6 +905,7 @@ function SearchBox({
   const placesLib = useMapsLibrary("places");
   const serviceRef = useRef<any>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
+  const [collapsed, setCollapsed] = useState(true);
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"directory" | "places">("directory");
@@ -845,7 +966,7 @@ function SearchBox({
           .toLowerCase();
         return haystack.includes(q);
       })
-      .slice(0, 8);
+      .slice(0, 3);
   }, [directoryQuery, directoryResults]);
 
   const handleSelectPlace = (placeId: string) => {
@@ -873,136 +994,156 @@ function SearchBox({
   const currentValue = mode === "directory" ? directoryQuery : input;
 
   return (
-    <div
-      ref={boxRef}
-      className="relative rounded-3xl border border-blue-200 bg-white shadow-sm p-3"
-    >
-      
-      <div className="flex gap-2 mb-3">
-        {(["directory", "places"] as const).map((m) => {
-          const active = mode === m;
-          return (
-            <motion.button
-              key={m}
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                setMode(m);
+    <div ref={boxRef} className="relative w-full">
+      {/* 🔽 HALF-CIRCLE TOGGLE TAB */}
+      <motion.button
+        onClick={() => setCollapsed((v) => !v)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="absolute -top-7 left-1/2 -translate-x-1/2
+                   w-20 h-10 rounded-b-full
+                   bg-blue-600 text-white shadow-lg
+                   flex items-center justify-center z-[20]"
+      >
+        <motion.span
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+          className="text-lg"
+        >
+          {collapsed ? "⬇" : "⬆"}
+        </motion.span>
+      </motion.button>
+
+      {!collapsed && (
+        <>
+          <div className="flex items-center mb-2">
+            {(["directory", "places"] as const).map((m) => {
+              const active = mode === m;
+              const isMap = m === "places";
+
+              return (
+                <motion.button
+                  key={m}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setMode(m);
+                    setOpen(true);
+                    setPredictions([]);
+                  }}
+                  className={`px-3 py-2 rounded-xl border text-sm transition
+                    ${isMap ? "ml-auto" : ""}
+                    ${
+                      active
+                        ? "border-blue-400 bg-blue-600 text-white shadow-sm"
+                        : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
+                    }`}
+                >
+                  {m === "directory" ? "Search directory" : "Search map"}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              value={currentValue}
+              onFocus={() => setOpen(true)}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (mode === "directory") setDirectoryQuery(v);
+                else setInput(v);
                 setOpen(true);
-                setPredictions([]);
               }}
-              className={`px-3 py-2 rounded-xl border text-sm transition ${
-                active
-                  ? "border-blue-400 bg-blue-600 text-white shadow-sm"
-                  : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-white"
-              }`}
-            >
-              {m === "directory" ? "Search directory" : "Search map"}
-            </motion.button>
-          );
-        })}
-      </div>
+              placeholder={
+                mode === "directory"
+                  ? "Search resources (fitness, park, pantry, tutoring...)"
+                  : "Search a place/address (autocomplete)..."
+              }
+              className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 pr-12
+                         text-slate-900 placeholder:text-slate-400
+                         focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
 
-      //input
-      <div className="relative">
-        <input
-          type="text"
-          value={currentValue}
-          onFocus={() => setOpen(true)}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (mode === "directory") setDirectoryQuery(v);
-            else setInput(v);
-            setOpen(true);
-          }}
-          placeholder={
-            mode === "directory"
-              ? "Search resources (fitness, park, pantry, tutoring...)"
-              : "Search a place/address (autocomplete)..."
-          }
-          className="w-full rounded-2xl border border-blue-200 bg-white px-4 py-3 pr-12 text-slate-900
-                     placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-        />
-
-        {currentValue.trim().length > 0 && (
-          <motion.button
-            type="button"
-            aria-label="Clear search"
-            onClick={() => {
-              if (mode === "directory") setDirectoryQuery("");
-              else setInput("");
-              setOpen(false);
-              setPredictions([]);
-              setSelectedPlace(null);
-            }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.96 }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full
-                       bg-blue-600 text-white shadow-sm flex items-center justify-center"
-          >
-            ✕
-          </motion.button>
-        )}
-      </div>
-
-      {/* Dropdown */}
-      <AnimatePresence>
-        {open && mode === "directory" && dirMatches.length > 0 && (
-          <motion.ul
-            initial={{ opacity: 0, y: -6, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.99 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
-                       border border-blue-200 bg-white shadow-xl z-[9999]
-                       max-h-[320px] overflow-y-auto"
-          >
-            {dirMatches.map((loc, idx) => (
-              <li
-                key={loc.id}
+            {currentValue.trim().length > 0 && (
+              <motion.button
+                type="button"
+                aria-label="Clear search"
                 onClick={() => {
-                  onDirectoryPick(loc);
+                  if (mode === "directory") setDirectoryQuery("");
+                  else setInput("");
                   setOpen(false);
+                  setPredictions([]);
+                  setSelectedPlace(null);
                 }}
-                className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
-                  idx !== 0 ? "border-t border-blue-100" : ""
-                }`}
+                className="absolute right-2 top-1/2 -translate-y-1/2
+                           w-9 h-9 rounded-full bg-blue-600 text-white shadow-sm"
               >
-                <div className="font-semibold text-slate-900">{loc.title}</div>
-                <div className="text-xs text-slate-600">
-                  {loc.eventType} • {loc.address}
-                </div>
-              </li>
-            ))}
-          </motion.ul>
-        )}
+                ✕
+              </motion.button>
+            )}
+          </div>
 
-        {open && mode === "places" && predictions.length > 0 && (
-          <motion.ul
-            initial={{ opacity: 0, y: -6, scale: 0.99 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.99 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
-                       border border-blue-200 bg-white shadow-xl z-[9999]
-                       max-h-[320px] overflow-y-auto"
-          >
-            {predictions.slice(0, 8).map((p, idx) => (
-              <li
-                key={p.place_id}
-                onClick={() => handleSelectPlace(p.place_id)}
-                className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
-                  idx !== 0 ? "border-t border-blue-100" : ""
-                }`}
+          <AnimatePresence>
+            {open && mode === "directory" && dirMatches.length > 0 && (
+              <motion.ul
+                initial={{ opacity: 0, y: -6, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.99 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
+                           border border-blue-200 bg-white shadow-xl z-[9999]
+                           max-h-[320px] overflow-y-auto"
               >
-                {p.description}
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+                {dirMatches.map((loc, idx) => (
+                  <li
+                    key={loc.id}
+                    onClick={() => {
+                      onDirectoryPick(loc);
+                      setOpen(false);
+                    }}
+                    className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
+                      idx !== 0 ? "border-t border-blue-100" : ""
+                    }`}
+                  >
+                    <div className="font-semibold text-slate-900">
+                      {loc.title}
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      {loc.eventType} • {loc.address}
+                    </div>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+
+            {open && mode === "places" && predictions.length > 0 && (
+              <motion.ul
+                initial={{ opacity: 0, y: -6, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.99 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="absolute left-0 right-0 mt-3 rounded-3xl overflow-hidden
+                           border border-blue-200 bg-white shadow-xl z-[9999]
+                           max-h-[320px] overflow-y-auto"
+              >
+                {predictions.slice(0, 3).map((p, idx) => (
+                  <li
+                    key={p.place_id}
+                    onClick={() => handleSelectPlace(p.place_id)}
+                    className={`px-4 py-3 cursor-pointer text-sm hover:bg-blue-50 ${
+                      idx !== 0 ? "border-t border-blue-100" : ""
+                    }`}
+                  >
+                    {p.description}
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }
@@ -1153,4 +1294,17 @@ function InfoCard({ title, lines }: { title: string; lines: string[] }) {
       </ul>
     </div>
   );
+}
+function MapController({
+  onReady,
+}: {
+  onReady: (map: google.maps.Map) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map) onReady(map);
+  }, [map, onReady]);
+
+  return null;
 }
