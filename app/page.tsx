@@ -1203,13 +1203,11 @@ function FlipFeatureRow({
   shortDesc,
   longDesc,
   imageLabel,
-  imageSrc,
 }: {
   title: string;
   shortDesc: string;
   longDesc: string;
   imageLabel: string;
-  imageSrc: string;
 }) {
   const reduce = useReducedMotion();
   const [flipped, setFlipped] = useState(false);
@@ -1237,13 +1235,13 @@ function FlipFeatureRow({
           className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] overflow-hidden"
         >
           <div className="relative h-[280px] w-full">
-            <Image
-              src={imageSrc}
-              alt={imageLabel}
-              fill
-              className="object-cover"
-            />
-          </div>
+          <Image
+            src="/cross_creek.jpg"
+            alt={imageLabel}
+            fill
+            className="object-cover"
+          />
+        </div>
         </motion.div>
       </motion.div>
     </div>
