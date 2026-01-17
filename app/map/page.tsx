@@ -125,6 +125,9 @@ export default function Page() {
     if (!map) return;
 
     const startCenter = map.getCenter();
+
+    if (!startCenter) return; // ⬅️ guard (fixes TS error)
+
     const startZoom = map.getZoom() ?? targetZoom;
 
     const startLat = startCenter.lat();
