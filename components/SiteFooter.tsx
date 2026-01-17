@@ -92,10 +92,10 @@ export default function SiteFooter() {
           <span className="text-white/70">© {year} Gatherly. All rights reserved.</span>
 
           <div className="flex items-center gap-4 text-white/60">
-            <Link href="/privacy" className="hover:text-white transition-colors">
+            <Link className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="hover:text-white transition-colors">
+            <Link className="hover:text-white transition-colors">
               Terms
             </Link>
           </div>
