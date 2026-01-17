@@ -1203,11 +1203,13 @@ function FlipFeatureRow({
   shortDesc,
   longDesc,
   imageLabel,
+  imageSrc,
 }: {
   title: string;
   shortDesc: string;
   longDesc: string;
   imageLabel: string;
+  imageSrc: string;
 }) {
   const reduce = useReducedMotion();
   const [flipped, setFlipped] = useState(false);
