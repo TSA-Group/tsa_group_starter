@@ -258,10 +258,6 @@ export default function HistoryPage() {
               </motion.div>
             ))}
           </div>
-
-          <footer className="mt-12 text-center text-sm text-blue-800/70">
-            © {new Date().getFullYear()} Gatherly • Cross Creek Ranch History
-          </footer>
         </section>
       </div>
     </motion.div>
