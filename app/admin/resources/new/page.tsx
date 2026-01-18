@@ -575,7 +575,7 @@ export default function AddResourcePage() {
               </Field>
             </div>
 
-            <Field label="Host (optional)">
+            <Field label="Host">
               <input
                 value={host}
                 onChange={(e) => setHost(e.target.value)}
@@ -584,7 +584,7 @@ export default function AddResourcePage() {
               />
             </Field>
 
-            <Field label="Description (optional)">
+            <Field label="Description">
               <input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
