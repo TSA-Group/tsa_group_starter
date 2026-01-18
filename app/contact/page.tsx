@@ -174,10 +174,6 @@ export default function ContactPage() {
         </motion.div>
       </div>
 
-      <footer className="pb-10 text-center text-sm text-blue-800/70">
-        © {new Date().getFullYear()} Gatherly
-      </footer>
-
       {/* ================= Input Styles ================= */}
       <style jsx global>{`
         .form-input {
