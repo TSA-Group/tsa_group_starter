@@ -139,7 +139,7 @@ export default function RegisterClient() {
     e.preventDefault();
     setSubmitError(null);
 
-    if (!eventId) return setSubmitError("Missing event id.");
+    if (!eventId) return setSubmitError("Missing event name.");
     if (!agree) return setSubmitError("Please agree to the code of conduct.");
     if (!email.trim()) return setSubmitError("Please enter an email.");
 
@@ -158,7 +158,7 @@ export default function RegisterClient() {
         const cur = typeof data.attendees === "number" ? data.attendees : 0;
 
         if (cap > 0 && cur >= cap) {
-          throw new Error("Sorry — this event is full.");
+          throw new Error("Sorry but this event is full.");
         }
 
         // Create registration under the same event id:
@@ -318,7 +318,7 @@ export default function RegisterClient() {
                         value={first}
                         onChange={(e) => setFirst(e.target.value)}
                         className="mt-1 w-full bg-white border border-blue-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Jane"
+                        placeholder="James"
                       />
                     </div>
                     <div>
@@ -328,7 +328,7 @@ export default function RegisterClient() {
                         value={last}
                         onChange={(e) => setLast(e.target.value)}
                         className="mt-1 w-full bg-white border border-blue-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
-                        placeholder="Doe"
+                        placeholder="Smith"
                       />
                     </div>
                   </div>
