@@ -1448,7 +1448,7 @@ function FlipInfoCard({
             style={{ backfaceVisibility: "hidden" }}
           >
             <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 p-6">
-              <div className="text-3xl font-medium text-black/80">{title}</div>
+              
             </div>
 
             {/* ✅ ONLY CHANGED FRONT CONTENT */}
