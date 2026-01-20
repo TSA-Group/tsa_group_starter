@@ -1,9 +1,7 @@
 @import "tailwindcss";
 @import "tailwindcss/theme";
 
-/* =========================
-   LIGHT THEME
-========================= */
+/*light theme */
 :root[data-theme="light"] {
     --primary: #fbfffe;
     --secondary: #607d8b;
@@ -21,10 +19,7 @@
     --warning-content: #cfd8dc;
     --error-content: #cfd8dc;
 }
-
-/* =========================
-   DARK THEME
-========================= */
+/*dark theme */
 :root[data-theme="dark"] {
     --primary: #222222;
     --secondary: #222222;
@@ -43,9 +38,7 @@
     --error-content: #cfd8dc;
 }
 
-/* =========================
-   GLOBAL STYLES
-========================= */
+/*GLOBAL STYLES*/
 html {
     transition:
         background 0.45s ease,
@@ -62,18 +55,14 @@ body {
         color 0.45s ease;
 }
 
-/* =========================
-   MONO FONT (CODE BLOCKS)
-========================= */
+/* MONO FONT (CODE BLOCKS)*/
 code,
 pre {
     font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular,
         Menlo, Monaco, Consolas, monospace;
 }
 
-/* =========================
-   OPTIONAL EFFECTS
-========================= */
+/* OPTIONAL EFFECTS*/
 .planet {
     transition: box-shadow 0.35s ease;
 }
