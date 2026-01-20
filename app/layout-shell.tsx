@@ -1,5 +1,4 @@
 "use client";
-
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/Header";
 
@@ -11,12 +10,10 @@ export default function LayoutShell({
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
 
-  // ✅ Admin pages: no global header, no padding, no forced background
   if (isAdmin) {
     return <>{children}</>;
   }
 
-  // ✅ Normal pages: header + padded content + light theme background
   return (
     <>
       <Header />
