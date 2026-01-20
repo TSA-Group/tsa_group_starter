@@ -1,6 +1,4 @@
-// app/route-shell.tsx
 "use client";
-
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/Header";
 
