@@ -1,4 +1,3 @@
-// app/resources/page.tsx
 import { Suspense } from "react";
 import ResourcesClient from "./resources-client";
 
