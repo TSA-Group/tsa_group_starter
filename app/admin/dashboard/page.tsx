@@ -1,7 +1,4 @@
-//Choose Event/ Resource
-
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -16,7 +13,7 @@ const card: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
-      ease: [0.16, 1, 0.3, 1], // ✅ instead of "easeOut"
+      ease: [0.16, 1, 0.3, 1], 
       delay: 0.05 * i,
     },
   }),
