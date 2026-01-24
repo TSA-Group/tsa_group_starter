@@ -1,6 +1,4 @@
-// app/resources/resources-client.tsx
 "use client";
-
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { collection, onSnapshot, type Timestamp } from "firebase/firestore";
@@ -63,8 +61,6 @@ export default function ResourcesClient() {
   const [rows, setRows] = useState<ResourceUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
-
-  // search + filter UI
   const [q, setQ] = useState("");
   const [activeType, setActiveType] = useState<string>("All");
 
@@ -96,7 +92,6 @@ export default function ResourcesClient() {
           };
         });
 
-        // newest first (doesn't depend on Firestore orderBy)
         next.sort((a, b) => b.createdAtMs - a.createdAtMs);
 
         setRows(next);
@@ -150,7 +145,6 @@ export default function ResourcesClient() {
         animate="show"
         className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8 py-8 sm:py-10"
       >
-        {/* Header */}
         <motion.div variants={fadeUp} className="mb-6 sm:mb-8">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
@@ -188,7 +182,6 @@ export default function ResourcesClient() {
           )}
         </motion.div>
 
-        {/* Controls */}
         <motion.section
           variants={fadeUp}
           className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5 mb-6"
@@ -222,8 +215,6 @@ export default function ResourcesClient() {
             />
           </div>
         </motion.section>
-
-        {/* Tiles */}
         <motion.section
           variants={fadeUp}
           className="rounded-3xl border border-blue-200 bg-[#eaf3ff] shadow-sm p-4 sm:p-5"
