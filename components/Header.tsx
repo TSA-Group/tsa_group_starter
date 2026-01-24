@@ -10,6 +10,7 @@ const navItems = [
   { label: "History", href: "/history" },
   { label: "Contact", href: "/contact" },
   { label: "Login", href: "/admin" },
+  { label: "References", href: "/references" },
 ];
 
 export const Header: React.FC = () => {
