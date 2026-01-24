@@ -9,11 +9,6 @@ export default function ReferencesPage() {
           <h1 className="text-4xl font-bold text-blue-900">
             References & Work Log
           </h1>
-          <p className="mt-3 text-slate-600 max-w-2xl">
-            This page documents sources used in the creation of Gatherly and
-            records the time contributed by each team member.
-          </p>
-
           <div className="mt-6">
             <Link
               href="/"
@@ -46,17 +41,11 @@ export default function ReferencesPage() {
               <div>—</div>
             </div>
           </div>
-
-          <p className="mt-3 text-sm text-slate-600">
-            Hours are recorded to reflect time spent on design, development,
-            research, and testing.
-          </p>
         </section>
         <section>
           <h2 className="text-2xl font-semibold text-blue-900 mb-4">
             Citations
           </h2>
-
           <div className="space-y-6">
             <div className="border border-slate-200 rounded-lg bg-white p-4">
               <p className="font-semibold text-slate-800">
@@ -82,11 +71,6 @@ export default function ReferencesPage() {
               </p>
             </div>
           </div>
-
-          <p className="mt-4 text-sm text-slate-600">
-            All sources used for community information, design inspiration, and
-            data references are listed above.
-          </p>
         </section>
       </div>
     </main>
