@@ -707,9 +707,6 @@ export default function Page() {
                     </AdvancedMarker>
                   )}
                 </Map>
-
-                {/* 🔍 FLOATING SEARCH OVER MAP */}
-                {/* 🔍 FULLSCREEN SEARCH OVER MAP */}
                 <div
                   className="absolute top-6 left-1/2 -translate-x-1/2 z-[3000]
                              w-[min(92%,480px)]"
@@ -992,7 +989,6 @@ function SearchBox({
 
   return (
     <div ref={boxRef} className="relative w-full">
-      {/* 🔽 HALF-CIRCLE TOGGLE TAB */}
       <motion.button
         onClick={() => setCollapsed((v) => !v)}
         whileHover={{ scale: 1.05 }}
