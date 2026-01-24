@@ -9,8 +9,8 @@ const navItems = [
   { label: "Events", href: "/events" },
   { label: "History", href: "/history" },
   { label: "Contact", href: "/contact" },
-  { label: "Login", href: "/admin" },
   { label: "References", href: "/references" },
+  { label: "Login", href: "/admin" },
 ];
 
 export const Header: React.FC = () => {
