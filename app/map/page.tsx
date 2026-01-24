@@ -370,9 +370,6 @@ export default function Page() {
                 <h2 className="text-xl sm:text-2xl font-extrabold text-[#1E3A8A]">
                   Spotlight Resources
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  Featured items from your Firestore resources collection.
-                </p>
               </div>
             </div>
 
@@ -488,9 +485,6 @@ export default function Page() {
                       <h2 className="text-lg sm:text-xl font-bold text-[#1E3A8A]">
                         Interactive Resource Map
                       </h2>
-                      <p className="text-sm text-slate-600">
-                        Search the directory or search the map (autocomplete).
-                      </p>
                     </div>
 
                     <div className="flex items-center gap-3">
