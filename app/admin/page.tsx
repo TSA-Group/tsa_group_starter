@@ -197,7 +197,7 @@ export default function AdminLoginPage() {
               </motion.button>
 
               <div className="text-xs text-white/55 leading-relaxed">
-                <span className="ml-2 font-semibold text-white/80">Username: admin</span> /
+                <span className="ml-2 font-semibold text-white/80">Judges Demo Credidentials-   Username: admin</span> /
                 <span className="ml-1 font-semibold text-white/80">Password: crosscreek</span>
               </div>
             </form>
