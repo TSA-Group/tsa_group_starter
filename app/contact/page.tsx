@@ -1,12 +1,7 @@
 "use client";
-
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-
-/* =======================
-   Animations
-======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const page: Variants = {
@@ -57,7 +52,6 @@ export default function ContactPage() {
       animate="show"
       className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900"
     >
-      {/* ================= Header ================= */}
       <div className="max-w-5xl mx-auto px-6 pt-10 pb-8">
         <motion.div variants={fadeUp}>
           <div className="text-xs font-semibold tracking-[0.22em] text-blue-700">
@@ -73,13 +67,11 @@ export default function ContactPage() {
         </motion.div>
       </div>
 
-      {/* ================= Form Card ================= */}
       <div className="max-w-5xl mx-auto px-6 pb-24">
         <motion.div
           variants={card}
           className="rounded-3xl border border-blue-300 bg-white shadow-md"
         >
-          {/* Alerts */}
           <div className="px-8 pt-8">
             <AnimatePresence>
               {sent && (
@@ -108,7 +100,6 @@ export default function ContactPage() {
             </AnimatePresence>
           </div>
 
-          {/* Form */}
           <form
             onSubmit={onSubmit}
             className="px-8 pb-10 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6"
@@ -148,7 +139,6 @@ export default function ContactPage() {
               </Field>
             </div>
 
-            {/* Actions */}
             <div className="sm:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
               <Link
                 href="/"
@@ -173,8 +163,6 @@ export default function ContactPage() {
           </form>
         </motion.div>
       </div>
-
-      {/* ================= Input Styles ================= */}
       <style jsx global>{`
         .form-input {
           width: 100%;
@@ -204,9 +192,6 @@ export default function ContactPage() {
   );
 }
 
-/* =======================
-   Field Wrapper
-======================= */
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
