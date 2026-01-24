@@ -462,9 +462,6 @@ export default function AddEventPage() {
             </div>
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
-              <div className="text-xs text-white/55">
-                Saves to Firestore: <span className="font-semibold">events</span>
-              </div>
 
               <motion.button
                 whileHover={{ y: -1 }}
