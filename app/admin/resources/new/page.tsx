@@ -1,6 +1,4 @@
-// app/admin/resources/new/page.tsx
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,10 +26,6 @@ const sectionAnim: Variants = {
 };
 
 const COMMUNITIES = ["Cross Creek Ranch"] as const;
-
-/**
- * ✅ Map filters expect THESE exact values
- */
 const EVENT_OPTIONS = [
   "Community Event",
   "Park & Trails",
@@ -55,9 +49,6 @@ const ACTIVITY_OPTIONS = [
   "Shopping",
 ] as const;
 
-/**
- * ✅ Resources tab (admin tiles) expects these "types"
- */
 const RESOURCE_TYPES = [
   "Gym/Fitness",
   "Park/Trails",
@@ -72,7 +63,6 @@ const RESOURCE_TYPES = [
 type LatLng = { lat: number; lng: number };
 
 export type ResourceDoc = {
-  // existing fields your /resources page reads
   community: (typeof COMMUNITIES)[number];
   types: (typeof RESOURCE_TYPES)[number][];
   name: string;
@@ -80,11 +70,8 @@ export type ResourceDoc = {
   indoorOutdoor: "Indoor" | "Outdoor" | "Both";
   contact: string;
   location?: { lat: number; lng: number } | null;
-
-  // ✅ FIX: serverTimestamp() is FieldValue, not Timestamp
   createdAt: Timestamp | FieldValue | null;
 
-  // fields your MAP page reads
   title: string;
   position: LatLng;
   eventType: (typeof EVENT_OPTIONS)[number];
@@ -134,12 +121,10 @@ export default function AddResourcePage() {
     "Cross Creek Ranch",
   );
 
-  // resources tab types
   const [types, setTypes] = React.useState<(typeof RESOURCE_TYPES)[number][]>(["Park/Trails"]);
   const [typesOpen, setTypesOpen] = React.useState(false);
   const typesRef = React.useRef<HTMLDivElement | null>(null);
 
-  // map fields
   const [eventType, setEventType] = React.useState<(typeof EVENT_OPTIONS)[number]>("Other");
 
   const [activities, setActivities] = React.useState<(typeof ACTIVITY_OPTIONS)[number][]>([]);
@@ -206,7 +191,6 @@ export default function AddResourcePage() {
       }
 
       await addDoc(collection(db, "resources"), {
-        // /resources page fields
         community,
         types,
         name: name.trim(),
@@ -214,9 +198,8 @@ export default function AddResourcePage() {
         indoorOutdoor,
         contact: contact.trim(),
         location: null,
-        createdAt: serverTimestamp(), // ✅ now allowed by type
+        createdAt: serverTimestamp(), 
 
-        // /map page fields
         title: name.trim(),
         position: pos,
         eventType,
@@ -236,7 +219,7 @@ export default function AddResourcePage() {
       setTypes(["Park/Trails"]);
 
       setEventType("Other");
-      setActivities([]); // ✅ prevents “Family auto on”
+      setActivities([]); 
       setHost("");
       setDescription("");
       setFeatured(false);
