@@ -1,12 +1,8 @@
-// app/events/register/register-client.tsx
 "use client";
-
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
-
-// ✅ use YOUR real path:
 import { db } from "@/lib/firebase";
 
 import {
@@ -16,8 +12,6 @@ import {
   runTransaction,
   serverTimestamp,
 } from "firebase/firestore";
-
-/* ===== Motion (TS-safe easing) ===== */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const pageFade: Variants = {
@@ -42,14 +36,9 @@ type EventFromDB = {
   endTime?: string; // "22:14"
   venue?: string;
   address?: string;
-
   description?: string;
-
-  // capacity + registered count
   spots?: number; // capacity
   attendees?: number; // registered count
-
-  // optional extras
   indoorOutdoor?: "Indoor" | "Outdoor" | "Both";
   contact?: string;
 };
@@ -58,13 +47,12 @@ export default function RegisterClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const eventId = searchParams.get("id"); // Firestore doc id string
+  const eventId = searchParams.get("id"); 
 
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState<(EventFromDB & { id: string }) | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // form
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");
   const [email, setEmail] = useState("");
@@ -74,8 +62,7 @@ export default function RegisterClient() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // ✅ live event read
+  
   useEffect(() => {
     setLoadError(null);
     setSubmitted(false);
@@ -103,7 +90,6 @@ export default function RegisterClient() {
         setEvent({
           id: snap.id,
           ...data,
-          // normalize numbers (Firestore can store as undefined)
           spots: typeof data.spots === "number" ? data.spots : 0,
           attendees: typeof data.attendees === "number" ? data.attendees : 0,
         });
@@ -161,7 +147,6 @@ export default function RegisterClient() {
           throw new Error("Sorry but this event is full.");
         }
 
-        // Create registration under the same event id:
         const regRef = doc(collection(db, "events", eventId, "registrations"));
         tx.set(regRef, {
           first: first.trim(),
@@ -171,7 +156,6 @@ export default function RegisterClient() {
           createdAt: serverTimestamp(),
         });
 
-        // Increment attendees (registered count)
         tx.update(eventRef, { attendees: cur + 1 });
       });
 
@@ -260,7 +244,6 @@ export default function RegisterClient() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left summary */}
           <motion.section
             variants={cardUp}
             initial="hidden"
@@ -291,8 +274,6 @@ export default function RegisterClient() {
               </div>
             ) : null}
           </motion.section>
-
-          {/* Right form */}
           <motion.section
             variants={cardUp}
             initial="hidden"
