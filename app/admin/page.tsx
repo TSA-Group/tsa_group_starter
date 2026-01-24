@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -80,7 +79,6 @@ export default function AdminLoginPage() {
       animate="animate"
       className="min-h-screen bg-[#070A12] text-white relative overflow-hidden"
     >
-      {/* ✅ Back to home (top-left) */}
       <motion.div
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0, transition: { duration: 0.5, ease: EASE_OUT, delay: 0.1 } }}
@@ -101,7 +99,6 @@ export default function AdminLoginPage() {
         </Link>
       </motion.div>
 
-      {/* animated backdrop */}
       <motion.div
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: [0.65, 0, 0.35, 1] }}
