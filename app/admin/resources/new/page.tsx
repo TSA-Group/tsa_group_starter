@@ -596,9 +596,6 @@ export default function AddResourcePage() {
             </div>
 
             <div className="md:col-span-2 flex items-center justify-between gap-3 flex-wrap pt-2">
-              <div className="text-xs text-white/55">
-                 <span className="font-semibold">resources</span>
-              </div>
 
               <motion.button
                 whileHover={{ y: -1 }}
