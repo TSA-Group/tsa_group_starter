@@ -1,7 +1,4 @@
-//Shared layout + Protection + header
-
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -37,7 +34,6 @@ export default function AdminShell({
 
   return (
     <div className="min-h-screen bg-[#070A12] text-white">
-      {/* top bar */}
       <div className="sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -83,8 +79,6 @@ export default function AdminShell({
           </div>
         </div>
       </div>
-
-      {/* page header */}
       <div className="max-w-6xl mx-auto px-6 pt-8 pb-5">
         <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
         {subtitle && <p className="mt-2 text-white/70">{subtitle}</p>}
