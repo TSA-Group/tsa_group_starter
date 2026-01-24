@@ -197,7 +197,6 @@ export default function AdminLoginPage() {
               </motion.button>
 
               <div className="text-xs text-white/55 leading-relaxed">
-                Demo credentials (unless you set env vars):
                 <span className="ml-2 font-semibold text-white/80">admin</span> /
                 <span className="ml-1 font-semibold text-white/80">crosscreek</span>
               </div>
