@@ -1,13 +1,8 @@
-// app/history/page.tsx
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, type Variants, useReducedMotion } from "framer-motion";
-
-/* =======================
-   Animations (simple + clean)
-======================= */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const page: Variants = {
@@ -29,10 +24,6 @@ const card: Variants = {
   hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
 };
-
-/* =======================
-   Content (edit anytime)
-======================= */
 const HISTORY = [
   {
     year: "2006",
@@ -90,7 +81,6 @@ export default function HistoryPage() {
   const reduce = useReducedMotion();
   const [active, setActive] = useState<string>("");
 
-  // refs for jump-to
   const refs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const years = useMemo(() => HISTORY.map((h) => h.year), []);
@@ -109,7 +99,6 @@ export default function HistoryPage() {
       animate="show"
       className="min-h-screen bg-gradient-to-b from-[#F6FAFF] via-[#F2F7FF] to-[#EEF5FF] text-slate-900"
     >
-      {/* Top Header */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6">
         <motion.div variants={fadeUp}>
           <div className="text-xs font-semibold tracking-[0.22em] text-blue-700">
@@ -140,9 +129,7 @@ export default function HistoryPage() {
         </motion.div>
       </div>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-6 pb-20 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-        {/* Sticky jump */}
         <aside className="lg:sticky lg:top-24 h-fit">
           <motion.div
             variants={fadeUp}
@@ -176,9 +163,7 @@ export default function HistoryPage() {
           </motion.div>
         </aside>
 
-        {/* Timeline */}
         <section className="relative">
-          {/* line */}
           <div className="absolute left-3 sm:left-4 top-0 bottom-0 w-px bg-blue-200" />
 
           <div className="space-y-5">
@@ -194,7 +179,6 @@ export default function HistoryPage() {
                 }}
                 className="relative pl-10 sm:pl-12"
               >
-                {/* dot */}
                 <div
                   className={[
                     "absolute left-[9px] sm:left-[13px] top-7 h-3 w-3 rounded-full border",
@@ -203,8 +187,6 @@ export default function HistoryPage() {
                       : "bg-white border-blue-300",
                   ].join(" ")}
                 />
-
-                {/* card */}
                 <div
                   className={[
                     "rounded-3xl border bg-white/75 backdrop-blur p-6 shadow-sm",
