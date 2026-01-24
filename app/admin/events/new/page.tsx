@@ -1,12 +1,9 @@
 "use client";
-
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 import AdminShell from "../../_components/AdminShell";
-
-// ✅ IMPORTANT: your firebase file path (change if needed)
 import { db } from "@/lib/firebase";
 
 import {
@@ -16,9 +13,6 @@ import {
   Timestamp,
 } from "firebase/firestore";
 
-/* =====================
-   Motion
-===================== */
 const sectionAnim: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
   show: {
@@ -29,9 +23,6 @@ const sectionAnim: Variants = {
   },
 };
 
-/* =====================
-   Options
-===================== */
 const COMMUNITIES = ["Cross Creek Ranch"] as const;
 
 const EVENT_TYPES = [
@@ -57,18 +48,17 @@ const ACTIVITIES = [
 export type EventDoc = {
   community: (typeof COMMUNITIES)[number];
 
-  // multi select
+
   types: (typeof EVENT_TYPES)[number][];
   activities: (typeof ACTIVITIES)[number][];
 
   title: string;
 
-  // strings for UI
+
   date: string; // yyyy-mm-dd
   startTime: string; // HH:MM
   endTime: string; // HH:MM
 
-  // timestamps for sorting/querying
   startAt: Timestamp;
   endAt: Timestamp;
 
@@ -79,25 +69,18 @@ export type EventDoc = {
   contact: string;
   description: string;
 
-  // ✅ registration capacity + current attendees
   spots: number;
   attendees: number;
 
-  createdAt: any; // serverTimestamp
+  createdAt: any; 
 };
 
-/* =====================
-   Helpers
-===================== */
 function toTimestamp(date: string, time: string) {
   // date = "2026-01-09", time = "18:30"
   const d = new Date(`${date}T${time}:00`);
   return Timestamp.fromDate(d);
 }
 
-/* =====================
-   Page
-===================== */
 export default function AddEventPage() {
   const router = useRouter();
 
@@ -109,7 +92,6 @@ export default function AddEventPage() {
     "Cross Creek Ranch",
   );
 
-  // Multi selects
   const [types, setTypes] = React.useState<(typeof EVENT_TYPES)[number][]>([
     "Community",
   ]);
@@ -122,7 +104,6 @@ export default function AddEventPage() {
   const typesRef = React.useRef<HTMLDivElement | null>(null);
   const actsRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Fields
   const [title, setTitle] = React.useState("");
   const [date, setDate] = React.useState("");
   const [startTime, setStartTime] = React.useState("");
@@ -137,11 +118,8 @@ export default function AddEventPage() {
 
   const [contact, setContact] = React.useState("");
   const [description, setDescription] = React.useState("");
-
-  // ✅ NEW: capacity / spots
   const [spots, setSpots] = React.useState<number>(30);
 
-  // close dropdowns when clicking outside
   React.useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -428,7 +406,6 @@ export default function AddEventPage() {
               </div>
             </Field>
 
-            {/* ✅ NEW: capacity */}
             <Field label="Registration Capacity (spots)">
               <input
                 type="number"
@@ -506,9 +483,6 @@ export default function AddEventPage() {
   );
 }
 
-/* =====================
-   Components
-===================== */
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
