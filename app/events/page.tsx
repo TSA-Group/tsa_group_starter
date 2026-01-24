@@ -15,14 +15,8 @@ import {
   useTransform,
   useVelocity,
 } from "framer-motion";
-
-// ✅ your firebase file
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
-
-/* =====================
-   Types
-===================== */
 type Category = { id: string; name: string };
 type Activity = { id: string; name: string };
 
@@ -32,7 +26,6 @@ type EventDoc = {
   title?: string;
   community?: string;
 
-  // from your admin form
   activities?: string[];
   types?: string[];
 
@@ -50,10 +43,6 @@ type EventDoc = {
   spots?: number;
   description?: string;
 };
-
-/* =====================
-   UI Bits
-===================== */
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
     {children}
@@ -113,10 +102,6 @@ function formatTimeRange(ev: EventDoc) {
 
   return "";
 }
-
-/* =====================
-   Motion
-===================== */
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const pageWrap: Variants = {
@@ -173,8 +158,6 @@ const shimmerIn: Variants = {
 
 export default function EventsPage() {
   const reduce = useReducedMotion();
-
-  /* ======== DO NOT CHANGE FUNCTIONALITY ======== */
   const [events, setEvents] = useState<EventDoc[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -272,10 +255,6 @@ export default function EventsPage() {
     setQueryText("");
     setSortBy("upcoming");
   };
-
-  /* =====================
-     Visual Motion (ONLY)
-  ===================== */
   const { scrollY, scrollYProgress } = useScroll();
   const scrollProgSmooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
 
@@ -369,13 +348,10 @@ export default function EventsPage() {
       style={{ background: bg }}
       className="relative min-h-screen overflow-hidden text-slate-900 antialiased"
     >
-      {/* Scroll progress bar */}
       <motion.div
         style={{ scaleX: progScaleX }}
         className="fixed left-0 top-0 h-1 w-full origin-left bg-gradient-to-r from-blue-900 via-blue-600 to-blue-300 z-[60]"
       />
-
-      {/* Cursor spotlight */}
       <motion.div
         aria-hidden
         style={{
@@ -385,8 +361,6 @@ export default function EventsPage() {
         }}
         className="fixed inset-0 pointer-events-none -z-30"
       />
-
-      {/* Grain */}
       <motion.div
         aria-hidden
         style={{ x: grainX, y: grainY, opacity: reduce ? 0.05 : 0.085 }}
@@ -400,8 +374,6 @@ export default function EventsPage() {
           }}
         />
       </motion.div>
-
-      {/* Floating Orbs */}
       {ORBS.map((orb, i) => (
         <motion.div
           key={i}
@@ -417,8 +389,6 @@ export default function EventsPage() {
           className="absolute rounded-full pointer-events-none -z-20 blur-3xl"
         />
       ))}
-
-      {/* Soft overlays */}
       <motion.div
         style={{ backgroundColor: softGrey }}
         className="fixed inset-0 pointer-events-none -z-20"
@@ -427,20 +397,16 @@ export default function EventsPage() {
         style={{ backgroundColor: navyWash }}
         className="fixed inset-0 pointer-events-none -z-20"
       />
-
-      {/* Background grid */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 opacity-[0.20] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        {/* Header */}
         <motion.header variants={headerUp} style={{ rotate: reduce ? 0 : tilt }} className="mb-8">
           <motion.div
             variants={shimmerIn}
             className="rounded-[28px] border border-blue-200 bg-white/65 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] px-6 sm:px-10 py-8 relative overflow-hidden"
           >
-            {/* ✅ FIX: pointer-events-none so it NEVER blocks clicks */}
             <div className="pointer-events-none absolute -top-20 -left-16 w-[420px] h-[420px] rounded-full bg-blue-300/20 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 -right-16 w-[460px] h-[460px] rounded-full bg-blue-500/10 blur-3xl" />
 
@@ -472,13 +438,10 @@ export default function EventsPage() {
             </motion.div>
           </motion.div>
         </motion.header>
-
-        {/* Filter panel */}
         <motion.div
           variants={panelUp}
           className="bg-white/70 backdrop-blur-xl border border-blue-200 rounded-3xl p-5 mb-10 shadow-[0_18px_60px_rgba(15,23,42,0.08)] relative overflow-hidden"
         >
-          {/* ✅ FIX: pointer-events-none so the blobs NEVER block filter clicks */}
           <div className="pointer-events-none absolute -top-16 -right-20 w-[360px] h-[360px] rounded-full bg-blue-300/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-24 w-[420px] h-[420px] rounded-full bg-sky-300/10 blur-3xl" />
 
@@ -497,8 +460,6 @@ export default function EventsPage() {
               Clear
             </motion.button>
           </div>
-
-          {/* Categories */}
           <div className="flex flex-wrap gap-2 mb-4">
             {categories.map((c) => (
               <motion.button
@@ -516,8 +477,6 @@ export default function EventsPage() {
               </motion.button>
             ))}
           </div>
-
-          {/* Activities */}
           <div className="flex flex-wrap gap-2 mb-4">
             {activities.map((a) => (
               <motion.button
@@ -535,8 +494,6 @@ export default function EventsPage() {
               </motion.button>
             ))}
           </div>
-
-          {/* Search + Sort */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="relative flex-1">
               <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-blue-700/60">
@@ -568,8 +525,6 @@ export default function EventsPage() {
             </div>
           </div>
         </motion.div>
-
-        {/* Cards */}
         <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence mode="popLayout">
             {loading ? (
