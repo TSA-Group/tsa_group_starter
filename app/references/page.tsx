@@ -10,7 +10,7 @@ const WORK_LOG: Record<
     entries: LogEntry[];
   }
 > = {
-  Dhanush: {
+  DP: {
     entries: [
       { hours: 1, date: "7-Nov" },
       { hours: 1.5, date: "8-Nov" },
@@ -35,7 +35,7 @@ const WORK_LOG: Record<
     ],
   },
 
-  Shivvesh: {
+  SS: {
     entries: [
       { hours: 2, date: "7-Nov" },
       { hours: 3, date: "8-Nov" },
@@ -73,7 +73,7 @@ const WORK_LOG: Record<
     ],
   },
 
-  Padyun: {
+  PV: {
     entries: [
       { hours: 1.5, date: "5-Nov" },
       { hours: 6, date: "9-Nov" },
@@ -85,7 +85,7 @@ const WORK_LOG: Record<
     ],
   },
 
-  Subhan: {
+  SP: {
     entries: [
       { hours: 1.5, date: "7-Dec" },
       { hours: 2, date: "11-Jan" },
@@ -93,7 +93,7 @@ const WORK_LOG: Record<
     ],
   },
 
-  Brendan: {
+  BD: {
     entries: [
       { hours: 2, date: "7-Nov" },
       { hours: 3, date: "8-Nov" },
@@ -121,7 +121,7 @@ const WORK_LOG: Record<
     ],
   },
 
-  Trey: {
+  TW: {
     entries: [
       { hours: 1, date: "8-Nov" },
       { hours: 1, date: "19-Nov" },
@@ -157,7 +157,7 @@ export default function ReferencesPage() {
         </header>
         <section className="mb-16">
           <h2 className="text-2xl font-semibold text-blue-900 mb-4">
-            Team Hours
+            Team Hours (Student Initials)
           </h2>
 
           <div className="border border-slate-200 rounded-lg bg-white overflow-hidden">
