@@ -327,6 +327,21 @@ export default function ReferencesPage() {
               desc="Utility-first CSS framework used for styling layout, spacing, colors, and responsive design quickly."
               url="https://tailwindcss.com/docs"
             />
+            <CitationCard
+              name="Vercel"
+              desc="Used for deployment and hosting."
+              url="https://vercel.com"
+            />
+            <CitationCard
+              name="Image 1"
+              desc="Our mission image in home page."
+              url="http://insitearchitecture.net/project/cross-creek-ranch/"
+            />
+            <CitationCard
+              name="Image 2"
+              desc="Our future image in home page."
+              url="https://communityimpact.com/houston/katy/development/2022/03/26/cross-creek-ranch-in-fulshear-begins-to-fulfill-its-last-300-acres/"
+            />
           </div>
         </section>
       </div>
