@@ -339,6 +339,11 @@ export default function ReferencesPage() {
               desc="Our future image in home page."
               url="https://communityimpact.com/houston/katy/development/2022/03/26/cross-creek-ranch-in-fulshear-begins-to-fulfill-its-last-300-acres/"
             />
+            <CitationCard
+              name="Geist Font"
+              desc="Different font sizes and styles"
+              url="https://fonts.google.com/specimen/Geist"
+            />
           </div>
         </section>
       </div>
