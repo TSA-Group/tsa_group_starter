@@ -1,6 +1,4 @@
-// app/page.tsx
 "use client";
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -58,12 +56,9 @@ const shimmerIn: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-/* ---------------- Helpers ---------------- */
 function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));
 }
-
-/** Smooth scrolling fallback (NO external libraries needed). */
 function useSmoothScrollFallback(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
@@ -75,16 +70,12 @@ function useSmoothScrollFallback(enabled: boolean) {
     };
   }, [enabled]);
 }
-
-/** Safe Timestamp/FieldValue-ish to ms */
 function tsToMs(v: any): number {
   if (!v) return 0;
   if (typeof v?.toMillis === "function") return v.toMillis();
   if (typeof v?.seconds === "number") return v.seconds * 1000;
   return 0;
 }
-
-/** "YYYY-MM-DD" for America/Chicago (stable grouping) */
 function dayKeyFromMs(ms: number): string {
   try {
     return new Date(ms).toLocaleDateString("en-CA", {
@@ -118,8 +109,6 @@ function formatTime(ms: number): string {
 function safeStr(v: unknown, fb = "") {
   return typeof v === "string" ? v : fb;
 }
-
-/** Parse "8:06 AM – 8:07 PM" or "8:06 AM-8:07 PM" */
 function splitTimeRange(s: string): { start?: string; end?: string } {
   const raw = (s || "").replace(/\s+/g, " ").trim();
   const parts = raw.split("–").map((x) => x.trim());
@@ -128,8 +117,6 @@ function splitTimeRange(s: string): { start?: string; end?: string } {
   if (parts2.length === 2) return { start: parts2[0], end: parts2[1] };
   return {};
 }
-
-/** Parse "8:06 AM" into {h24, m} */
 function parse12hTime(t: string): { h: number; m: number } | null {
   const s = (t || "").trim();
   const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
@@ -145,10 +132,6 @@ function parse12hTime(t: string): { h: number; m: number } | null {
   return { h: hh, m: mm };
 }
 
-/**
- * Build ms from date string "YYYY-MM-DD" and a time like "8:06 AM"
- * Uses local Date construction; grouping uses America/Chicago for consistent dots.
- */
 function msFromDateAndTime(dateStr: string, timeStr?: string): number {
   if (!dateStr) return 0;
   const base = dateStr.trim();
@@ -163,7 +146,6 @@ function msFromDateAndTime(dateStr: string, timeStr?: string): number {
   return d.getTime();
 }
 
-/* ---------------- Orbs ---------------- */
 const ORBS = [
   { size: 220, color: "rgba(59,130,246,0.18)", top: 12, left: 8, speed: 0.22 },
   {
@@ -196,8 +178,6 @@ const ORBS = [
   },
 ];
 
-/* ---------------- Feature Data ---------------- */
-/** ✅ ONLY CHANGED THIS SECTION */
 const FEATURES = [
   {
     title: "Our Mission",
@@ -217,7 +197,6 @@ const FEATURES = [
   },
 ];
 
-/* ---------------- Firestore Event Types ---------------- */
 type EventDoc = {
   title?: string;
   name?: string;
@@ -225,7 +204,7 @@ type EventDoc = {
   date?: string; // "YYYY-MM-DD"
   startTime?: string; // "8:06 AM"
   endTime?: string; // "8:07 PM"
-  time?: string; // "8:06 AM – 8:07 PM"
+  time?: string; 
 
   startAt?: Timestamp | any;
   endAt?: Timestamp | any;
@@ -256,30 +235,24 @@ type CalendarEvent = {
   endLabel: string;
 };
 
-/* ---------------- MAIN PAGE ---------------- */
 export default function Home() {
   const router = useRouter();
   const reduce = useReducedMotion();
-  const reduceBool = !!reduce; // ✅ force boolean
-
-  // Smooth scroll fallback (no Lenis)
+  const reduceBool = !!reduce; 
   useSmoothScrollFallback(!reduceBool);
 
   const year = new Date().getFullYear();
 
-  /* ---- Scroll ---- */
   const { scrollY, scrollYProgress } = useScroll();
   const scrollProgSmooth = useSpring(scrollYProgress, {
     stiffness: 120,
     damping: 30,
   });
 
-  // velocity reactive micro-tilt (subtle)
   const vel = useVelocity(scrollY);
   const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
   const tilt = useTransform(velSmooth, [-1800, 0, 1800], [-1.2, 0, 1.2]);
 
-  /* ---- Cursor ---- */
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -294,7 +267,6 @@ export default function Home() {
     return () => window.removeEventListener("mousemove", onMove);
   }, [mx, my]);
 
-  /* ---- Background palette transitions ---- */
   const bg = useTransform(
     scrollProgSmooth,
     [0, 0.35, 0.7, 1],
@@ -311,11 +283,9 @@ export default function Home() {
     ["rgba(15,23,42,0)", "rgba(15,23,42,0.14)"],
   );
 
-  /* ---- Cursor spotlight ---- */
   const glowX = useTransform(mx, (v) => `${v}px`);
   const glowY = useTransform(my, (v) => `${v}px`);
 
-  /* ---- Orbs ---- */
   const orbX: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
   const orbY: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
 
@@ -334,7 +304,6 @@ export default function Home() {
     });
   });
 
-  /* ---- Hero parallax ---- */
   const heroY = useTransform(scrollProgSmooth, [0, 0.4], [0, -120]);
   const heroScale = useTransform(scrollProgSmooth, [0, 0.4], [1, 1.04]);
   const heroTextY = useTransform(scrollProgSmooth, [0, 0.35], [0, -64]);
@@ -342,15 +311,11 @@ export default function Home() {
     "blur(0px)",
     "blur(1.5px)",
   ]);
-
-  /* ---- Intro overlay (0.5s) ---- */
   const [intro, setIntro] = useState(true);
   useEffect(() => {
     const t = window.setTimeout(() => setIntro(false), 500);
     return () => window.clearTimeout(t);
   }, []);
-
-  /* ---- Calendar ---- */
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -395,10 +360,6 @@ export default function Home() {
     ],
     [],
   );
-
-  /* ============================================================
-      FIRESTORE EVENTS
-     ============================================================ */
   const [dbEvents, setDbEvents] = useState<CalendarEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
@@ -521,11 +482,7 @@ export default function Home() {
     if (!selectedDayKey) return [];
     return eventsByDay.get(selectedDayKey) || [];
   }, [eventsByDay, selectedDayKey]);
-
-  /* ---- Scroll progress bar ---- */
   const progScaleX = useTransform(scrollProgSmooth, [0, 1], [0.06, 1]);
-
-  /* ---- Grain drift ---- */
   const grainX = useTransform(scrollY, [0, 1200], [0, -120]);
   const grainY = useTransform(scrollY, [0, 1200], [0, -90]);
 
@@ -537,13 +494,10 @@ export default function Home() {
       style={{ background: bg }}
       className="min-h-screen overflow-x-hidden text-slate-950 relative"
     >
-      {/* Progress bar */}
       <motion.div
         style={{ scaleX: progScaleX }}
         className="fixed left-0 top-0 h-1 w-full origin-left bg-gradient-to-r from-blue-900 via-blue-600 to-blue-300 z-[60]"
       />
-
-      {/* Cursor spotlight */}
       <motion.div
         aria-hidden
         style={{
@@ -554,7 +508,6 @@ export default function Home() {
         className="fixed inset-0 pointer-events-none -z-30"
       />
 
-      {/* Grain */}
       <motion.div
         aria-hidden
         style={{ x: grainX, y: grainY, opacity: reduceBool ? 0.06 : 0.09 }}
@@ -569,7 +522,6 @@ export default function Home() {
         />
       </motion.div>
 
-      {/* Floating orbs */}
       {ORBS.map((orb, i) => (
         <motion.div
           key={i}
@@ -586,7 +538,6 @@ export default function Home() {
         />
       ))}
 
-      {/* Overlays */}
       <motion.div
         style={{ backgroundColor: softGrey }}
         className="fixed inset-0 pointer-events-none -z-20"
@@ -596,7 +547,6 @@ export default function Home() {
         className="fixed inset-0 pointer-events-none -z-20"
       />
 
-      {/* Intro */}
       <AnimatePresence>
         {intro && !reduceBool && (
           <motion.div
@@ -661,8 +611,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* HERO */}
       <motion.header
         style={{
           y: heroY,
@@ -719,8 +667,6 @@ export default function Home() {
           </motion.span>
         </motion.div>
       </motion.header>
-
-      {/* Banner */}
       <CrossCreekBanner
         reduce={reduceBool}
         scrollProgSmooth={scrollProgSmooth}
@@ -728,7 +674,6 @@ export default function Home() {
         onEvents={() => router.push("/events")}
       />
 
-      {/* ✅ Calendar section now full width (QuickActions removed) */}
       <motion.main className="max-w-7xl mx-auto px-6 pb-28 mt-16">
         <motion.section
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
@@ -929,8 +874,6 @@ export default function Home() {
           </motion.div>
         </motion.section>
       </motion.main>
-
-      {/* Feature strip */}
       <motion.section className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
@@ -958,8 +901,6 @@ export default function Home() {
           </div>
         </motion.div>
       </motion.section>
-
-      {/* Content sections + curved dividers */}
       {FEATURES.map((f, i) => (
         <React.Fragment key={`${f.title}-${i}`}>
           <motion.section
@@ -1001,8 +942,6 @@ export default function Home() {
     </motion.div>
   );
 }
-
-/* ---------------- Banner ---------------- */
 
 function CrossCreekBanner({
   reduce,
@@ -1326,9 +1265,6 @@ function PulsePill({ text, reduce }: { text: string; reduce: boolean }) {
     </motion.span>
   );
 }
-
-/* ---------------- Subcomponents ---------------- */
-
 function FeatureStat({
   title,
   value,
@@ -1390,8 +1326,6 @@ function FlipFeatureRow({
           flipped={flipped}
           setFlipped={setFlipped}
         />
-
-        {/* ✅ ONLY CHANGED THIS IMAGE AREA */}
         <motion.div
           whileHover={reduce ? undefined : { y: -3 }}
           transition={{ type: "spring", stiffness: 220, damping: 20 }}
@@ -1442,7 +1376,6 @@ function FlipInfoCard({
           className="relative w-full"
           style={{ transformStyle: "preserve-3d" }}
         >
-          {/* FRONT */}
           <div
             className="rounded-3xl border border-blue-200 bg-white/70 backdrop-blur-xl shadow-lg overflow-hidden"
             style={{ backfaceVisibility: "hidden" }}
@@ -1450,8 +1383,6 @@ function FlipInfoCard({
             <div className="h-44 bg-gradient-to-br from-blue-200 to-blue-100 p-6">
               
             </div>
-
-            {/* ✅ ONLY CHANGED FRONT CONTENT */}
             <div className="p-6">
               <h3 className="text-lg font-semibold text-blue-900">{title}</h3>
               <p className="mt-2 text-sm text-blue-700">{shortDesc}</p>
@@ -1460,8 +1391,6 @@ function FlipInfoCard({
               </div>
             </div>
           </div>
-
-          {/* BACK */}
           <div
             className="absolute inset-0 rounded-3xl border border-blue-200 bg-blue-50 p-6"
             style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
