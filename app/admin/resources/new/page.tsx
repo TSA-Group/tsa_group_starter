@@ -541,7 +541,7 @@ export default function AddResourcePage() {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
-                  placeholder="Street address (recommended) or landmark"
+                  placeholder="Street address (recommended)"
                   className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 />
               </Field>
