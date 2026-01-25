@@ -203,6 +203,41 @@ export default function ReferencesPage() {
             })}
           </div>
         </section>
+
+        <section className="mb-16">
+          <h2 className="text-2xl font-semibold text-blue-900 mb-4">
+            Research Links (Inspiration)
+          </h2>
+
+          <div className="space-y-4">
+            <ResearchLink
+              title="Rivian"
+              desc="Inspired the clean, high-end spacing, big typography, and modern hero layout."
+              url="https://rivian.com/"
+            />
+            <ResearchLink
+              title="Abetka UA (English)"
+              desc="Inspired smooth motion, floating visuals, and bold-yet-minimal design direction."
+              url="https://abetkaua.com/en/"
+            />
+            <ResearchLink
+              title="Abetka (Main)"
+              desc="Extra reference for motion pacing and modern layout flow."
+              url="https://abetka.com/"
+            />
+            <ResearchLink
+              title="React Typescript Tutorial for Beginners"
+              desc="Tutorial by Dave Gray"
+              url="https://youtu.be/xTVQZ46wc28"
+            />
+            <ResearchLink
+              title="Animating vector paths in Framer (Animation Lesson 18)"
+              desc="Tutorial by Framer"
+              url="https://youtu.be/MOmvYoUFQWU"
+            />
+          </div>
+        </section>
+
         <section>
           <h2 className="text-2xl font-semibold text-blue-900 mb-4">
             Citations
@@ -212,16 +247,21 @@ export default function ReferencesPage() {
             <div className="border border-slate-200 rounded-lg bg-white p-4">
               <p className="font-semibold text-slate-800">Next.js</p>
               <p className="mt-2 text-sm text-slate-700">
-                Next.js is the main framework we use to build Gatherly. It gives us the project structure, including pages, routes, 
-                and layouts. It also offers fast development tools and improves production with features like bundling, code splitting, and server 
-                rendering options. We used it to set up navigation across the pages: Home, Map, Resources, Events, and References. 
-                It helps us manage client/server boundaries, such as using client components when needed. This setup allows us to deploy 
-                the site while keeping it fast and reliable as we add more features.
+                Next.js is the main framework we use to build Gatherly. It gives
+                us the project structure, including pages, routes, and layouts.
+                It also offers fast development tools and improves production
+                with features like bundling, code splitting, and server
+                rendering options. We used it to set up navigation across the
+                pages: Home, Map, Resources, Events, and References. It helps us
+                manage client/server boundaries, such as using client components
+                when needed. This setup allows us to deploy the site while
+                keeping it fast and reliable as we add more features.
               </p>
               <p className="mt-1 text-sm text-slate-600">
                 Source: Next.js Documentation (https://nextjs.org/docs)
               </p>
             </div>
+
             <div className="border border-slate-200 rounded-lg bg-white p-4">
               <p className="font-semibold text-slate-800">TypeScript</p>
               <p className="mt-2 text-sm text-slate-700">
@@ -239,6 +279,7 @@ export default function ReferencesPage() {
                 Source: TypeScript Handbook (https://www.typescriptlang.org/docs/)
               </p>
             </div>
+
             <CitationCard
               name="@vis.gl/react-google-maps"
               desc="React components for rendering and controlling Google Maps (markers, map view, interactions) inside the app."
@@ -341,7 +382,7 @@ export default function ReferencesPage() {
             />
             <CitationCard
               name="Geist Font"
-              desc="Different font sizes and styles"
+              desc="Different font sizes and styles."
               url="https://fonts.google.com/specimen/Geist"
             />
           </div>
@@ -365,6 +406,31 @@ function CitationCard({
       <p className="font-semibold text-slate-800">{name}</p>
       <p className="mt-2 text-sm text-slate-700">{desc}</p>
       <p className="mt-1 text-sm text-slate-600">Source: {url}</p>
+    </div>
+  );
+}
+
+function ResearchLink({
+  title,
+  desc,
+  url,
+}: {
+  title: string;
+  desc: string;
+  url: string;
+}) {
+  return (
+    <div className="border border-slate-200 rounded-lg bg-white p-4">
+      <p className="font-semibold text-slate-800">{title}</p>
+      <p className="mt-2 text-sm text-slate-700">{desc}</p>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-2 inline-block text-sm text-blue-700 font-semibold hover:underline break-all"
+      >
+        {url}
+      </a>
     </div>
   );
 }
