@@ -212,14 +212,11 @@ export default function ReferencesPage() {
             <div className="border border-slate-200 rounded-lg bg-white p-4">
               <p className="font-semibold text-slate-800">Next.js</p>
               <p className="mt-2 text-sm text-slate-700">
-                Next.js is the main framework used to build Gatherly. It provides
-                the project structure (pages/routes and layouts), fast
-                development tooling, and production optimizations like bundling,
-                code-splitting, and server rendering options. We used it to set
-                up navigation across pages (Home, Map, Resources, Events,
-                References), manage client/server boundaries (like client
-                components when needed), and deploy the site in a way that stays
-                fast and reliable as features grow.
+                Next.js is the main framework we use to build Gatherly. It gives usthe project structure, including pages, routes, 
+                and layouts. It also offers fast development tools and improves production with features like bundling, code splitting, and server 
+                rendering options. We used it to set up navigation across the pages: Home, Map, Resources, Events, and References. 
+                It helps us manage client/server boundaries, such as using client components when needed. This setup allows us to deploy 
+                the site while keeping it fast and reliable as we add more features.
               </p>
               <p className="mt-1 text-sm text-slate-600">
                 Source: Next.js Documentation (https://nextjs.org/docs)
