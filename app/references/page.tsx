@@ -93,33 +93,7 @@ const WORK_LOG: Record<
     ],
   },
 
-  BD: {
-    entries: [
-      { hours: 2, date: "7-Nov" },
-      { hours: 3, date: "8-Nov" },
-      { hours: 1, date: "19-Nov" },
-      { hours: 1, date: "20-Nov" },
-      { hours: 4, date: "21-Nov" },
-      { hours: 2.5, date: "2-Dec" },
-      { hours: 0.5, date: "3-Dec" },
-      { hours: 2, date: "4-Dec" },
-      { hours: 3, date: "7-Dec" },
-      { hours: 2, date: "16-Dec" },
-      { hours: 3, date: "17-Dec" },
-      { hours: 2, date: "18-Dec" },
-      { hours: 1, date: "19-Dec" },
-      { hours: 1, date: "21-Dec" },
-      { hours: 2.5, date: "1-Jan" },
-      { hours: 2, date: "3-Jan" },
-      { hours: 3, date: "4-Jan" },
-      { hours: 2, date: "5-Jan" },
-      { hours: 3, date: "7-Jan" },
-      { hours: 2.5, date: "8-Jan" },
-      { hours: 2, date: "15-Jan" },
-      { hours: 0.5, date: "16-Jan" },
-      { hours: 0.5, date: "18-Jan" },
-    ],
-  },
+  
 
   TW: {
     entries: [
