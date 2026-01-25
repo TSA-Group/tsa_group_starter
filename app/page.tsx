@@ -181,7 +181,7 @@ const ORBS = [
 const FEATURES = [
   {
     title: "Our Mission",
-    shortDesc: "A calm, local hub for Cross Creek residents.",
+    shortDesc: "Learn more about our commitment to you!",
     longDesc:
       "Gatherly was created to guide all residence around Cross Creek Ranch as easily as possible. We strive to create the best experience for you! Don't hesitate to visit our contact page to tell us what we can do better.",
     imageLabel: "Cross Creek Mission Preview",
@@ -189,7 +189,7 @@ const FEATURES = [
   },
   {
     title: "Our Future",
-    shortDesc: "Growing with the community — year after year.",
+    shortDesc: "Learn more about what the future has to bring!",
     longDesc:
       "We’re building Gatherly into a living community space with bigger events, more ways to interact with your community, and smarter ways to explore Cross Creek all in one accessible spot!",
     imageLabel: "Future Preview",
