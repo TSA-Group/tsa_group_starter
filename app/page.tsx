@@ -885,12 +885,12 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <FeatureStat
               title="Curated resources"
-              value="Local-first"
+              value="Local first"
               desc="Support services, food, fitness, and more."
             />
             <FeatureStat
               title="Community events"
-              value="Real-time"
+              value="Real time"
               desc="Find what’s happening near you."
             />
             <FeatureStat
@@ -1080,8 +1080,8 @@ function CrossCreekBanner({
                 </motion.h3>
 
                 <p className="mt-3 max-w-2xl text-blue-800/90">
-                  A community built for neighbors — parks, trails, events, and
-                  local resources all in one calm, easy place.
+                  A community built for you with parks, events, and
+                  local resources all in one easy place.
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -1125,10 +1125,10 @@ function CrossCreekBanner({
                       COMMUNITY FEEL
                     </div>
                     <div className="mt-2 text-xl font-extrabold text-blue-900">
-                      Calm, clear, local
+                      Calm, local
                     </div>
                     <div className="mt-2 text-sm text-blue-700">
-                      Designed to help you find what you need without the noise.
+                      Designed to help you find what you need without any obstacles.
                     </div>
                   </motion.div>
 
@@ -1199,7 +1199,7 @@ function CrossCreekBanner({
                       }}
                       style={{ opacity: 0.95 * badgeFloat }}
                     >
-                      Trails
+                      Community
                     </motion.div>
                     <motion.div
                       className="absolute left-[40%] top-2 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200 bg-white/70 text-blue-800"
