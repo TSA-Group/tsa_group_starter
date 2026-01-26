@@ -17,57 +17,58 @@ import {
 } from "framer-motion";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, orderBy, query, Timestamp } from "firebase/firestore";
+
+// basically just categories for the events
 type Category = { id: string; name: string };
 type Activity = { id: string; name: string };
 
+// all the stuff an event can have
 type EventDoc = {
   id: string;
-
   title?: string;
   community?: string;
-
   activities?: string[];
   types?: string[];
-
-  date?: string; // "2026-01-17"
-  startTime?: string; // "10:13"
-  endTime?: string; // "22:14"
-
+  date?: string; // like "2026-01-17"
+  startTime?: string; // like "10:13"
+  endTime?: string; // like "22:14"
   startAt?: Timestamp;
   endAt?: Timestamp;
-
   venue?: string;
   address?: string;
-
   attendees?: number;
   spots?: number;
   description?: string;
 };
+
+// little badge thing for activities
 const Chip = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
     {children}
   </span>
 );
 
-function mapsHref(ev: EventDoc) {
-  const q = `${ev.venue ?? ""}, ${ev.address ?? ""}`.trim();
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+// generates google maps link for an event
+function mapsHref(event: EventDoc) {
+  const searchQuery = `${event.venue ?? ""}, ${event.address ?? ""}`.trim();
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
 }
 
-function formatDateLabel(ev: EventDoc) {
-  if (ev.startAt) {
-    return ev.startAt.toDate().toLocaleDateString(undefined, {
+// formats the date to look nice
+function formatDateLabel(event: EventDoc) {
+  if (event.startAt) {
+    return event.startAt.toDate().toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
   }
 
-  if (ev.date) {
-    const d = new Date(`${ev.date}T00:00:00`);
-    return Number.isNaN(d.getTime())
-      ? ev.date
-      : d.toLocaleDateString(undefined, {
+  if (event.date) {
+    const parsedDate = new Date(`${event.date}T00:00:00`);
+    return Number.isNaN(parsedDate.getTime())
+      ? event.date
+      : parsedDate.toLocaleDateString(undefined, {
           year: "numeric",
           month: "short",
           day: "numeric",
@@ -77,96 +78,110 @@ function formatDateLabel(ev: EventDoc) {
   return "";
 }
 
-function formatTimeRange(ev: EventDoc) {
-  if (ev.startAt && ev.endAt) {
-    const s = ev.startAt
+// formats time range like "2:00 PM – 5:00 PM"
+function formatTimeRange(event: EventDoc) {
+  if (event.startAt && event.endAt) {
+    const startTimeFormatted = event.startAt
       .toDate()
       .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    const e = ev.endAt
+    const endTimeFormatted = event.endAt
       .toDate()
       .toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-    return `${s} – ${e}`;
+    return `${startTimeFormatted} – ${endTimeFormatted}`;
   }
 
-  if (ev.startTime && ev.endTime) {
-    const s = new Date(`1970-01-01T${ev.startTime}:00`).toLocaleTimeString([], {
+  if (event.startTime && event.endTime) {
+    const startTimeFormatted = new Date(`1970-01-01T${event.startTime}:00`).toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
     });
-    const e = new Date(`1970-01-01T${ev.endTime}:00`).toLocaleTimeString([], {
+    const endTimeFormatted = new Date(`1970-01-01T${event.endTime}:00`).toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
     });
-    return `${s} – ${e}`;
+    return `${startTimeFormatted} – ${endTimeFormatted}`;
   }
 
   return "";
 }
-const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const pageWrap: Variants = {
+// animation easing we use everywhere - makes stuff smooth
+const SMOOTH_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+// animation for the whole page - staggers children
+const pageAnimation: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
 };
 
-const headerUp: Variants = {
+// header slides up and fades in
+const headerSlideUp: Variants = {
   hidden: { opacity: 0, y: 14, filter: "blur(12px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.7, ease: EASE_OUT },
+    transition: { duration: 0.7, ease: SMOOTH_EASE },
   },
 };
 
-const panelUp: Variants = {
+// filter panel slides up
+const panelSlideUp: Variants = {
   hidden: { opacity: 0, y: 16, filter: "blur(12px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.65, ease: EASE_OUT },
+    transition: { duration: 0.65, ease: SMOOTH_EASE },
   },
 };
 
-const gridWrap: Variants = {
+// grid wrapper for staggering cards
+const gridAnimation: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const cardPop: Variants = {
+// each event card pops in with a slight scale
+const cardPopIn: Variants = {
   hidden: { opacity: 0, y: 16, scale: 0.985, filter: "blur(12px)" },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.55, ease: EASE_OUT },
+    transition: { duration: 0.55, ease: SMOOTH_EASE },
   },
   exit: { opacity: 0, y: 10, scale: 0.985, transition: { duration: 0.18 } },
 };
 
-const shimmerIn: Variants = {
+// subtle fade in effect
+const fadeInEffect: Variants = {
   hidden: { opacity: 0, y: 10, filter: "blur(10px)" },
   show: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.7, ease: EASE_OUT },
+    transition: { duration: 0.7, ease: SMOOTH_EASE },
   },
 };
 
 export default function EventsPage() {
-  const reduce = useReducedMotion();
-  const [events, setEvents] = useState<EventDoc[]>([]);
-  const [loading, setLoading] = useState(true);
+  // check if user has reduced motion enabled (accessibility)
+  const shouldReduceMotion = useReducedMotion();
+  
+  // main state for all events from firebase
+  const [allEvents, setAllEvents] = useState<EventDoc[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
-  const [queryText, setQueryText] = useState("");
-  const [sortBy, setSortBy] = useState<"upcoming" | "popular">("upcoming");
+  // filter states - what the user selected
+  const [currentCategory, setCurrentCategory] = useState<string>("all");
+  const [currentActivities, setCurrentActivities] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [sortMethod, setSortMethod] = useState<"upcoming" | "popular">("upcoming");
 
-  const categories: Category[] = [
+  // all the categories we support
+  const allCategories: Category[] = [
     { id: "all", name: "All" },
     { id: "Community", name: "Community" },
     { id: "Meetup", name: "Meetups" },
@@ -178,7 +193,8 @@ export default function EventsPage() {
     { id: "Other", name: "Other" },
   ];
 
-  const activities: Activity[] = [
+  // all the activity types
+  const allActivities: Activity[] = [
     { id: "Food", name: "Food" },
     { id: "Volunteering", name: "Volunteering" },
     { id: "Education", name: "Education" },
@@ -187,120 +203,138 @@ export default function EventsPage() {
     { id: "Family", name: "Family" },
   ];
 
+  // grab events from firebase when page loads
   useEffect(() => {
-    const qy = query(collection(db, "events"), orderBy("startAt", "asc"));
+    const eventsQuery = query(collection(db, "events"), orderBy("startAt", "asc"));
 
-    const unsub = onSnapshot(
-      qy,
-      (snap) => {
-        const list: EventDoc[] = snap.docs.map((d) => {
-          const data = d.data() as Omit<EventDoc, "id">;
-          return { id: d.id, ...data };
+    const unsubscribe = onSnapshot(
+      eventsQuery,
+      (snapshot) => {
+        const eventsList: EventDoc[] = snapshot.docs.map((doc) => {
+          const data = doc.data() as Omit<EventDoc, "id">;
+          return { id: doc.id, ...data };
         });
-        setEvents(list);
-        setLoading(false);
+        setAllEvents(eventsList);
+        setIsLoading(false);
       },
-      (err) => {
-        console.error("Firestore read error:", err);
-        setLoading(false);
+      (error) => {
+        console.error("Firestore read error:", error);
+        setIsLoading(false);
       },
     );
 
-    return () => unsub();
+    return () => unsubscribe();
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = queryText.trim().toLowerCase();
+  // filter and sort events based on what user selected
+  const filteredEvents = useMemo(() => {
+    const searchQuery = searchText.trim().toLowerCase();
 
-    let list =
-      selectedCategory === "all"
-        ? events
-        : events.filter((e) => (e.types || []).includes(selectedCategory));
+    // first filter by category
+    let results =
+      currentCategory === "all"
+        ? allEvents
+        : allEvents.filter((event) => (event.types || []).includes(currentCategory));
 
-    if (selectedActivities.length > 0) {
-      list = list.filter((e) =>
-        selectedActivities.every((a) => (e.activities || []).includes(a)),
+    // then filter by activities if any selected
+    if (currentActivities.length > 0) {
+      results = results.filter((event) =>
+        currentActivities.every((activity) => (event.activities || []).includes(activity)),
       );
     }
 
-    if (q) {
-      list = list.filter((e) =>
-        `${e.title ?? ""} ${e.description ?? ""} ${e.venue ?? ""} ${e.address ?? ""}`
+    // search filter - checks title, description, venue, address
+    if (searchQuery) {
+      results = results.filter((event) =>
+        `${event.title ?? ""} ${event.description ?? ""} ${event.venue ?? ""} ${event.address ?? ""}`
           .toLowerCase()
-          .includes(q),
+          .includes(searchQuery),
       );
     }
 
-    if (sortBy === "popular") {
-      list = [...list].sort((a, b) => (b.attendees ?? 0) - (a.attendees ?? 0));
+    // sort by popular (most attendees) or upcoming (soonest date)
+    if (sortMethod === "popular") {
+      results = [...results].sort((a, b) => (b.attendees ?? 0) - (a.attendees ?? 0));
     } else {
-      list = [...list].sort((a, b) => {
-        const ta = a.startAt?.toMillis?.() ?? new Date(a.date || "").getTime();
-        const tb = b.startAt?.toMillis?.() ?? new Date(b.date || "").getTime();
-        return ta - tb;
+      results = [...results].sort((a, b) => {
+        const timeA = a.startAt?.toMillis?.() ?? new Date(a.date || "").getTime();
+        const timeB = b.startAt?.toMillis?.() ?? new Date(b.date || "").getTime();
+        return timeA - timeB;
       });
     }
 
-    return list;
-  }, [events, selectedCategory, selectedActivities, queryText, sortBy]);
+    return results;
+  }, [allEvents, currentCategory, currentActivities, searchText, sortMethod]);
 
-  const toggleActivity = (id: string) =>
-    setSelectedActivities((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+  // toggle an activity filter on/off
+  const toggleActivity = (activityId: string) =>
+    setCurrentActivities((previous) =>
+      previous.includes(activityId) ? previous.filter((x) => x !== activityId) : [...previous, activityId],
     );
 
-  const clearFilters = () => {
-    setSelectedCategory("all");
-    setSelectedActivities([]);
-    setQueryText("");
-    setSortBy("upcoming");
+  // reset all filters back to default
+  const clearAllFilters = () => {
+    setCurrentCategory("all");
+    setCurrentActivities([]);
+    setSearchText("");
+    setSortMethod("upcoming");
   };
+
+  // scroll tracking for animations
   const { scrollY, scrollYProgress } = useScroll();
-  const scrollProgSmooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+  const smoothScrollProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
 
-  const vel = useVelocity(scrollY);
-  const velSmooth = useSpring(vel, { stiffness: 80, damping: 30 });
-  const tilt = useTransform(velSmooth, [-1600, 0, 1600], [-1.0, 0, 1.0]);
+  // velocity tracking for tilt effect
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, { stiffness: 80, damping: 30 });
+  const headerTilt = useTransform(smoothVelocity, [-1600, 0, 1600], [-1.0, 0, 1.0]);
 
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
+  // mouse position tracking for glow effect
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mx.set(e.clientX);
-      my.set(e.clientY);
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
     };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, [mx, my]);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
 
-  const glowX = useTransform(mx, (v) => `${v}px`);
-  const glowY = useTransform(my, (v) => `${v}px`);
+  const glowPositionX = useTransform(mouseX, (value) => `${value}px`);
+  const glowPositionY = useTransform(mouseY, (value) => `${value}px`);
 
-  const bg = useTransform(
-    scrollProgSmooth,
+  // background color changes as you scroll
+  const backgroundColor = useTransform(
+    smoothScrollProgress,
     [0, 0.35, 0.7, 1],
     ["#F6FAFF", "#F2F7FF", "#EEF5FF", "#EAF0FF"],
   );
 
-  const softGrey = useTransform(
-    scrollProgSmooth,
+  // subtle grey overlay appears mid-scroll
+  const greyOverlay = useTransform(
+    smoothScrollProgress,
     [0.25, 0.55],
     ["rgba(226,232,240,0)", "rgba(203,213,225,0.55)"],
   );
 
-  const navyWash = useTransform(
-    scrollProgSmooth,
+  // darker overlay appears near bottom
+  const darkOverlay = useTransform(
+    smoothScrollProgress,
     [0.62, 1],
     ["rgba(15,23,42,0)", "rgba(15,23,42,0.12)"],
   );
 
-  const progScaleX = useTransform(scrollProgSmooth, [0, 1], [0.06, 1]);
+  // progress bar at top scales with scroll
+  const progressBarScale = useTransform(smoothScrollProgress, [0, 1], [0.06, 1]);
 
-  const grainX = useTransform(scrollY, [0, 1200], [0, -110]);
-  const grainY = useTransform(scrollY, [0, 1200], [0, -80]);
+  // grain texture moves with scroll for depth
+  const grainOffsetX = useTransform(scrollY, [0, 1200], [0, -110]);
+  const grainOffsetY = useTransform(scrollY, [0, 1200], [0, -80]);
 
-  const ORBS = useMemo(
+  // floating orbs in background - each has different properties
+  const floatingOrbs = useMemo(
     () => [
       { size: 360, color: "rgba(59,130,246,0.16)", top: 12, left: 6, speed: 0.22 },
       { size: 520, color: "rgba(147,197,253,0.14)", top: 48, left: 76, speed: 0.33 },
@@ -311,59 +345,70 @@ export default function EventsPage() {
     [],
   );
 
-  const orbX: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
-  const orbY: MotionValue<number>[] = ORBS.map(() => useMotionValue(0));
+  // motion values for each orb's position
+  const orbXPositions: MotionValue<number>[] = floatingOrbs.map(() => useMotionValue(0));
+  const orbYPositions: MotionValue<number>[] = floatingOrbs.map(() => useMotionValue(0));
 
-  const mouseRef = useRef({ x: 0, y: 0 });
+  // track mouse separately for orb calculations
+  const mousePosition = useRef({ x: 0, y: 0 });
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePosition.current = { x: e.clientX, y: e.clientY };
     };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  useMotionValueEvent(scrollY, "change", (y) => {
-    const h = window.innerHeight || 1;
-    const w = window.innerWidth || 1;
-    const scrollRange = document.body.scrollHeight - h || 1;
+  // update orb positions based on scroll and mouse
+  useMotionValueEvent(scrollY, "change", (scrollPosition) => {
+    const viewportHeight = window.innerHeight || 1;
+    const viewportWidth = window.innerWidth || 1;
+    const totalScrollRange = document.body.scrollHeight - viewportHeight || 1;
 
-    const m = mouseRef.current;
+    const mouse = mousePosition.current;
 
-    ORBS.forEach((orb, i) => {
-      const mouseFx = (m.x / w - 0.5) * 180 * orb.speed;
-      const mouseFy = (m.y / h - 0.5) * 180 * orb.speed;
-      const scrollFy = -240 * orb.speed * (y / scrollRange);
+    floatingOrbs.forEach((orb, index) => {
+      // mouse influence on horizontal movement
+      const mouseInfluenceX = (mouse.x / viewportWidth - 0.5) * 180 * orb.speed;
+      // mouse influence on vertical movement
+      const mouseInfluenceY = (mouse.y / viewportHeight - 0.5) * 180 * orb.speed;
+      // scroll influence on vertical movement
+      const scrollInfluenceY = -240 * orb.speed * (scrollPosition / totalScrollRange);
 
-      orbX[i].set(mouseFx);
-      orbY[i].set(scrollFy + mouseFy);
+      orbXPositions[index].set(mouseInfluenceX);
+      orbYPositions[index].set(scrollInfluenceY + mouseInfluenceY);
     });
   });
 
   return (
     <motion.div
-      variants={pageWrap}
+      variants={pageAnimation}
       initial="hidden"
       animate="show"
-      style={{ background: bg }}
+      style={{ background: backgroundColor }}
       className="relative min-h-screen overflow-hidden text-slate-900 antialiased"
     >
+      {/* progress bar at the very top */}
       <motion.div
-        style={{ scaleX: progScaleX }}
+        style={{ scaleX: progressBarScale }}
         className="fixed left-0 top-0 h-1 w-full origin-left bg-gradient-to-r from-blue-900 via-blue-600 to-blue-300 z-[60]"
       />
+
+      {/* mouse-following glow effect */}
       <motion.div
         aria-hidden
         style={{
-          background: useTransform([glowX, glowY], ([x, y]) => {
+          background: useTransform([glowPositionX, glowPositionY], ([x, y]) => {
             return `radial-gradient(420px circle at ${x} ${y}, rgba(59,130,246,0.18), rgba(59,130,246,0.06) 35%, rgba(255,255,255,0) 70%)`;
           }),
         }}
         className="fixed inset-0 pointer-events-none -z-30"
       />
+
+      {/* grain texture overlay - moves with scroll */}
       <motion.div
         aria-hidden
-        style={{ x: grainX, y: grainY, opacity: reduce ? 0.05 : 0.085 }}
+        style={{ x: grainOffsetX, y: grainOffsetY, opacity: shouldReduceMotion ? 0.05 : 0.085 }}
         className="fixed inset-0 pointer-events-none -z-30"
       >
         <div
@@ -374,12 +419,14 @@ export default function EventsPage() {
           }}
         />
       </motion.div>
-      {ORBS.map((orb, i) => (
+
+      {/* floating orbs in background */}
+      {floatingOrbs.map((orb, index) => (
         <motion.div
-          key={i}
+          key={index}
           style={{
-            x: reduce ? 0 : orbX[i],
-            y: reduce ? 0 : orbY[i],
+            x: shouldReduceMotion ? 0 : orbXPositions[index],
+            y: shouldReduceMotion ? 0 : orbYPositions[index],
             width: orb.size,
             height: orb.size,
             top: `${orb.top}%`,
@@ -389,24 +436,33 @@ export default function EventsPage() {
           className="absolute rounded-full pointer-events-none -z-20 blur-3xl"
         />
       ))}
+
+      {/* subtle grey overlay layer */}
       <motion.div
-        style={{ backgroundColor: softGrey }}
+        style={{ backgroundColor: greyOverlay }}
         className="fixed inset-0 pointer-events-none -z-20"
       />
+
+      {/* darker overlay layer */}
       <motion.div
-        style={{ backgroundColor: navyWash }}
+        style={{ backgroundColor: darkOverlay }}
         className="fixed inset-0 pointer-events-none -z-20"
       />
+
+      {/* grid pattern overlay */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 opacity-[0.20] [background-image:linear-gradient(to_right,rgba(20,59,140,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(20,59,140,0.10)_1px,transparent_1px)] [background-size:48px_48px]" />
       </div>
 
+      {/* main content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
-        <motion.header variants={headerUp} style={{ rotate: reduce ? 0 : tilt }} className="mb-8">
+        {/* header section */}
+        <motion.header variants={headerSlideUp} style={{ rotate: shouldReduceMotion ? 0 : headerTilt }} className="mb-8">
           <motion.div
-            variants={shimmerIn}
+            variants={fadeInEffect}
             className="rounded-[28px] border border-blue-200 bg-white/65 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,0.10)] px-6 sm:px-10 py-8 relative overflow-hidden"
           >
+            {/* decorative blobs inside header */}
             <div className="pointer-events-none absolute -top-20 -left-16 w-[420px] h-[420px] rounded-full bg-blue-300/20 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 -right-16 w-[460px] h-[460px] rounded-full bg-blue-500/10 blur-3xl" />
 
@@ -420,6 +476,7 @@ export default function EventsPage() {
               Discover local volunteering opportunities and community events in Cross Creek.
             </p>
 
+            {/* scroll indicator with bounce animation */}
             <motion.div
               className="mt-5 text-blue-700/80 text-sm"
               initial={{ opacity: 0 }}
@@ -428,8 +485,8 @@ export default function EventsPage() {
             >
               <motion.span
                 className="inline-flex items-center gap-2"
-                animate={reduce ? undefined : { y: [0, 4, 0] }}
-                transition={reduce ? undefined : { duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
+                animate={shouldReduceMotion ? undefined : { y: [0, 4, 0] }}
+                transition={shouldReduceMotion ? undefined : { duration: 2.0, repeat: Infinity, ease: "easeInOut" }}
               >
                 <span className="font-semibold">Scroll</span>
                 <span className="opacity-80">to explore</span>
@@ -438,13 +495,17 @@ export default function EventsPage() {
             </motion.div>
           </motion.div>
         </motion.header>
+
+        {/* filter panel */}
         <motion.div
-          variants={panelUp}
+          variants={panelSlideUp}
           className="bg-white/70 backdrop-blur-xl border border-blue-200 rounded-3xl p-5 mb-10 shadow-[0_18px_60px_rgba(15,23,42,0.08)] relative overflow-hidden"
         >
+          {/* decorative blobs */}
           <div className="pointer-events-none absolute -top-16 -right-20 w-[360px] h-[360px] rounded-full bg-blue-300/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-24 w-[420px] h-[420px] rounded-full bg-sky-300/10 blur-3xl" />
 
+          {/* filter header with clear button */}
           <div className="flex items-center justify-between gap-4 mb-4">
             <div>
               <h2 className="text-lg font-semibold text-[#143B8C]">Filter</h2>
@@ -452,7 +513,7 @@ export default function EventsPage() {
             </div>
 
             <motion.button
-              onClick={clearFilters}
+              onClick={clearAllFilters}
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               className="px-4 py-2 rounded-xl text-sm border border-blue-200 bg-white/80 hover:bg-blue-50 transition shadow-sm"
@@ -460,62 +521,70 @@ export default function EventsPage() {
               Clear
             </motion.button>
           </div>
+
+          {/* category filter buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {categories.map((c) => (
+            {allCategories.map((category) => (
               <motion.button
-                key={c.id}
-                onClick={() => setSelectedCategory(c.id)}
+                key={category.id}
+                onClick={() => setCurrentCategory(category.id)}
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
-                  selectedCategory === c.id
+                  currentCategory === category.id
                     ? "bg-blue-600 text-white border border-blue-600"
                     : "bg-white/80 text-slate-700 border border-blue-200 hover:bg-blue-50"
                 }`}
               >
-                {c.name}
+                {category.name}
               </motion.button>
             ))}
           </div>
+
+          {/* activity filter buttons */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {activities.map((a) => (
+            {allActivities.map((activity) => (
               <motion.button
-                key={a.id}
-                onClick={() => toggleActivity(a.id)}
+                key={activity.id}
+                onClick={() => toggleActivity(activity.id)}
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 className={`px-4 py-2 rounded-full text-sm transition shadow-sm ${
-                  selectedActivities.includes(a.id)
+                  currentActivities.includes(activity.id)
                     ? "bg-blue-600 text-white border border-blue-600"
                     : "bg-white/80 text-slate-700 border border-blue-200 hover:bg-blue-50"
                 }`}
               >
-                {a.name}
+                {activity.name}
               </motion.button>
             ))}
           </div>
+
+          {/* search bar and sort toggle */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* search input */}
             <div className="relative flex-1">
               <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-blue-700/60">
                 🔎
               </div>
               <input
-                value={queryText}
-                onChange={(e) => setQueryText(e.target.value)}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Search events..."
                 className="w-full bg-white/85 placeholder:text-slate-400 text-slate-800 pl-10 pr-4 py-2.5 rounded-2xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm"
               />
             </div>
 
+            {/* sort toggle */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-slate-600">Sort:</span>
               <div className="inline-flex rounded-full bg-white/85 border border-blue-200 p-1 shadow-sm">
                 {["upcoming", "popular"].map((option) => (
                   <button
                     key={option}
-                    onClick={() => setSortBy(option as "upcoming" | "popular")}
+                    onClick={() => setSortMethod(option as "upcoming" | "popular")}
                     className={`px-4 py-1 text-sm rounded-full transition ${
-                      sortBy === option ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-blue-50"
+                      sortMethod === option ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-blue-50"
                     }`}
                   >
                     {option === "upcoming" ? "Upcoming" : "Popular"}
@@ -525,9 +594,11 @@ export default function EventsPage() {
             </div>
           </div>
         </motion.div>
-        <motion.div variants={gridWrap} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* events grid */}
+        <motion.div variants={gridAnimation} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AnimatePresence mode="popLayout">
-            {loading ? (
+            {isLoading ? (
               <motion.div
                 layout
                 initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
@@ -536,7 +607,7 @@ export default function EventsPage() {
               >
                 Loading events...
               </motion.div>
-            ) : filtered.length === 0 ? (
+            ) : filteredEvents.length === 0 ? (
               <motion.div
                 layout
                 initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
@@ -546,20 +617,21 @@ export default function EventsPage() {
                 No events found.
               </motion.div>
             ) : (
-              filtered.map((ev) => {
-                const attendees = ev.attendees ?? 0;
-                const spots = ev.spots ?? 0;
-                const percent = spots > 0 ? Math.round((attendees / spots) * 100) : 0;
-                const spotsLeft = Math.max(0, spots - attendees);
+              filteredEvents.map((event) => {
+                // calculate how full the event is
+                const currentAttendees = event.attendees ?? 0;
+                const totalSpots = event.spots ?? 0;
+                const percentFull = totalSpots > 0 ? Math.round((currentAttendees / totalSpots) * 100) : 0;
+                const spotsRemaining = Math.max(0, totalSpots - currentAttendees);
 
-                const dateLabel = formatDateLabel(ev);
-                const timeLabel = formatTimeRange(ev);
+                const eventDate = formatDateLabel(event);
+                const eventTime = formatTimeRange(event);
 
                 return (
                   <motion.article
-                    key={ev.id}
+                    key={event.id}
                     layout
-                    variants={cardPop}
+                    variants={cardPopIn}
                     initial="hidden"
                     animate="show"
                     exit="exit"
@@ -567,60 +639,70 @@ export default function EventsPage() {
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
                     className="bg-white/75 backdrop-blur-xl border border-blue-200 rounded-3xl p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] hover:shadow-[0_24px_80px_rgba(15,23,42,0.12)] hover:border-blue-300 relative overflow-hidden"
                   >
+                    {/* decorative blobs for each card */}
                     <div className="pointer-events-none absolute -top-16 -left-16 w-[240px] h-[240px] rounded-full bg-blue-300/15 blur-3xl" />
                     <div className="pointer-events-none absolute -bottom-20 -right-16 w-[280px] h-[280px] rounded-full bg-sky-300/10 blur-3xl" />
 
                     <div className="relative">
+                      {/* event title */}
                       <h3 className="text-xl font-semibold mb-1 text-slate-900">
-                        {ev.title ?? "Untitled Event"}
+                        {event.title ?? "Untitled Event"}
                       </h3>
 
-                      <p className="text-slate-700 text-sm font-medium">{ev.venue ?? ""}</p>
+                      {/* venue name */}
+                      <p className="text-slate-700 text-sm font-medium">{event.venue ?? ""}</p>
 
-                      {ev.address ? <p className="text-slate-600 text-sm">{ev.address}</p> : null}
+                      {/* address */}
+                      {event.address ? <p className="text-slate-600 text-sm">{event.address}</p> : null}
 
-                      {(dateLabel || timeLabel) && (
+                      {/* date and time */}
+                      {(eventDate || eventTime) && (
                         <p className="text-slate-700 text-sm mt-1">
-                          {dateLabel}
-                          {timeLabel ? ` • ${timeLabel}` : ""}
+                          {eventDate}
+                          {eventTime ? ` • ${eventTime}` : ""}
                         </p>
                       )}
 
-                      {ev.description ? <p className="text-slate-700 text-sm mt-3">{ev.description}</p> : null}
+                      {/* description */}
+                      {event.description ? <p className="text-slate-700 text-sm mt-3">{event.description}</p> : null}
 
+                      {/* activity chips */}
                       <div className="flex flex-wrap gap-2 mt-3">
-                        {(ev.activities || []).map((a) => (
-                          <Chip key={a}>{a}</Chip>
+                        {(event.activities || []).map((activity) => (
+                          <Chip key={activity}>{activity}</Chip>
                         ))}
                       </div>
 
+                      {/* progress bar showing how full event is */}
                       <div className="mt-4">
                         <div className="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
-                            transition={{ duration: 0.7, ease: EASE_OUT }}
+                            animate={{ width: `${Math.min(100, Math.max(0, percentFull))}%` }}
+                            transition={{ duration: 0.7, ease: SMOOTH_EASE }}
                             className="h-full bg-gradient-to-r from-blue-600 to-sky-500"
                           />
                         </div>
                         <div className="flex justify-between text-xs text-slate-600 mt-1">
-                          <span>{percent}% filled</span>
-                          <span>{spotsLeft} spots left</span>
+                          <span>{percentFull}% filled</span>
+                          <span>{spotsRemaining} spots left</span>
                         </div>
                       </div>
 
+                      {/* register button */}
                       <div className="grid grid-cols-2 gap-2 mt-5">
                         <Link
-                          href={`/events/register?id=${ev.id}`}
+                          href={`/events/register?id=${event.id}`}
                           className="col-span-2 w-full text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition active:scale-[0.99] shadow-sm"
                         >
                           Register
                         </Link>
                       </div>
 
-                      {(ev.venue || ev.address) && (
+                      {/* view on maps link */}
+                      {(event.venue || event.address) && (
                         <a
-                          href={mapsHref(ev)}
+                          href={mapsHref(event)}
                           target="_blank"
                           rel="noreferrer"
                           className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 transition"
