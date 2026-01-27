@@ -31,9 +31,6 @@ export default function ReferencesPage() {
             <div className="border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm">
               <div className="px-5 py-4 border-b border-slate-200">
                 <p className="text-xl font-semibold text-slate-900">Work Log</p>
-                <p className="text-sm text-slate-600 mt-1">
-                  Full team work log (dates + hours + short description).
-                </p>
                 <a
                   href="/pdfs/work-log.pdf"
                   target="_blank"
@@ -58,9 +55,6 @@ export default function ReferencesPage() {
               <div className="px-5 py-4 border-b border-slate-200">
                 <p className="text-xl font-semibold text-slate-900">
                   Copyright Checklist
-                </p>
-                <p className="text-sm text-slate-600 mt-1">
-                  Student Copyright Checklist (required for TSA).
                 </p>
                 <a
                   href="/pdfs/copyright-checklist.pdf"
