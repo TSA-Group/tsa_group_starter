@@ -36,7 +36,7 @@ const HISTORY = [
     year: "2008",
     title: "First residents arrive",
     blurb:
-      "The earliest families move in and the community begins to take shape — new streets, neighbors, and shared spaces.",
+      "The earliest families move in and the community begins to take shape new streets, neighbors, and shared spaces.",
     tags: ["First Homes", "Neighbors", "Growth"],
   },
   {
@@ -50,21 +50,21 @@ const HISTORY = [
     year: "2016",
     title: "A stronger sense of belonging",
     blurb:
-      "Events and neighborhood traditions become more common — bringing residents together and strengthening community identity.",
+      "Events and neighborhood traditions become more common bringing residents together and strengthening community identity.",
     tags: ["Events", "Traditions", "Connection"],
   },
   {
     year: "2020",
     title: "Community supports each other",
     blurb:
-      "Neighbors find new ways to stay connected and help one another — proving community is more than just a place.",
+      "Neighbors find new ways to stay connected and help one another proving community is more than just a place.",
     tags: ["Support", "Resilience", "Care"],
   },
   {
     year: "2024",
     title: "Cross Creek Ranch today",
     blurb:
-      "A growing, vibrant community — with more resources, activities, and resident life than ever before.",
+      "A growing, vibrant community with more resources, activities, and resident life than ever before.",
     tags: ["Today", "Active", "Vibrant"],
   },
   {
