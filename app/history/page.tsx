@@ -108,8 +108,7 @@ export default function HistoryPage() {
             Our Story
           </h1>
           <p className="mt-3 max-w-2xl text-blue-800/90">
-            A simple timeline of key moments in Cross Creek Ranch — built to match the
-            Gatherly style.
+            A simple timeline of key moments in Cross Creek Ranch: built to match the time
           </p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
