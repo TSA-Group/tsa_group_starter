@@ -29,7 +29,7 @@ const HISTORY = [
     year: "2006",
     title: "A new community is planned",
     blurb:
-      "Cross Creek Ranch is established in the Fulshear area, designed around parks, trails, and a neighborhood-first lifestyle.",
+      "Cross Creek Ranch is established in the Fulshear area, designed around parks, trails, and a neighborhood first lifestyle.",
     tags: ["Planning", "Vision", "Fulshear"],
   },
   {
@@ -43,7 +43,7 @@ const HISTORY = [
     year: "2012",
     title: "Amenities expand",
     blurb:
-      "More shared spaces and community features grow, supporting an active, connected, family-friendly environment.",
+      "More shared spaces and community features grow, supporting an active, connected, family friendly environment.",
     tags: ["Amenities", "Trails", "Community"],
   },
   {
